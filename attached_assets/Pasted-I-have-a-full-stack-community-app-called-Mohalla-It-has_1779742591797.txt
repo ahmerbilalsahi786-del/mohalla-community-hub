@@ -1,0 +1,396 @@
+I have a full-stack community app called Mohalla. 
+It has a React frontend (Vite + TypeScript + Tailwind + 
+Wouter routing) and an Express backend API server. 
+I've identified the following bugs and issues across 
+the entire codebase. Fix all of them in one complete 
+pass without changing any UI styling or colors.
+
+---
+
+## CRITICAL BUG 1: No Authentication System
+
+The entire app has zero authentication. Every API 
+route defaults userId to hardcoded "ahmed" when no 
+userId is provided:
+
+userId = "ahmed" // appears in feed.ts, admin.ts, 
+marketplace.ts, safety.ts, events.ts, polls.ts, 
+profile.ts, notifications.ts
+
+This means:
+- Any user can post as anyone
+- Admin routes have zero protection
+- Any visitor can delete posts, approve members, 
+  pin announcements
+
+Fix:
+- Add JWT-based auth middleware in 
+  api-server/src/middleware/auth.ts
+- Protect all POST, PATCH, PUT, DELETE routes 
+  with this middleware
+- Extract real userId from JWT token instead of 
+  defaulting to "ahmed"
+- Add /api/auth/register and /api/auth/login 
+  endpoints that return JWT tokens
+- On the frontend, store token in localStorage 
+  and send as Authorization: Bearer header on 
+  every API call
+- Add a login page at /login and register page 
+  at /register in the React app
+- Redirect unauthenticated users to /login
+
+---
+
+## CRITICAL BUG 2: Like Toggle Logic is Broken
+
+In api-server/src/routes/feed.ts, the like toggle 
+has this broken logic:
+
+const isLiking = currentLikes === 0 || true; 
+// "|| true" makes this always true — it never 
+// actually toggles
+
+Fix:
+- Track likes in a separate post_likes table with 
+  columns: id, post_id, user_id, created_at
+- On like: check if row exists for this user+post
+  - If exists: delete it (unlike), decrement count
+  - If not exists: insert it (like), increment count
+- Return { liked: boolean, likesCount: number } 
+  in the response
+- Update frontend like button to reflect 
+  liked/unliked state correctly
+
+---
+
+## CRITICAL BUG 3: Object Storage Crashes Outside Replit
+
+In api-server/src/lib/objectStorage.ts, the storage 
+client connects to:
+http://127.0.0.1:1106 (Replit sidecar endpoint)
+
+And throws errors if these env vars are missing:
+- PUBLIC_OBJECT_SEARCH_PATHS
+- PRIVATE_OBJECT_DIR
+
+This means image uploads crash immediately on any 
+non-Replit environment.
+
+Fix:
+- Add Cloudinary as the image upload provider
+- Install cloudinary npm package
+- Create api-server/src/lib/cloudinary.ts with:
+  - uploadImage(buffer, folder) function
+  - deleteImage(publicId) function
+  - Uses CLOUDINARY_CLOUD_NAME, CLOUDINARY_API_KEY, 
+    CLOUDINARY_API_SECRET env vars
+- Replace all objectStorage references in 
+  storage.ts route with Cloudinary calls
+- Add graceful fallback: if Cloudinary env vars 
+  not set, return placeholder image URL instead 
+  of crashing
+- Update the storage route in 
+  api-server/src/routes/storage.ts to use 
+  Cloudinary for upload URL generation
+
+---
+
+## CRITICAL BUG 4: notifyAll Uses Hardcoded Demo Users
+
+In api-server/src/helpers/notify.ts, notifyAll 
+broadcasts to a hardcoded list of fake users:
+
+const targets = ["ahmed", "tariq", "ayesha", 
+"hassan", "zainab", "bilal", "sara", "fatima", 
+"omar", "raza"];
+
+This means real registered users never receive 
+community notifications.
+
+Fix:
+- Remove the hardcoded targets array entirely
+- notifyAll should only query real users from 
+  userProfilesTable
+- If no profiles exist, send to empty array — 
+  never fake users
+- Add communityId filter so notifications only 
+  go to members of the correct community
+
+---
+
+## CRITICAL BUG 5: No Input Validation or Sanitization
+
+Across all routes, user input goes directly into 
+the database with zero sanitization:
+
+Examples:
+- post body can be 50,000 characters
+- listing price can be negative
+- poll options array can be empty
+- alert severity accepts any string value
+- No XSS protection on any text field
+
+Fix using Zod validation on all routes:
+
+Install zod in api-server package.json
+
+feed.ts POST validation:
+- title: string, min 3 chars, max 200 chars
+- body: string, min 10 chars, max 5000 chars
+- type: enum of allowed post types only
+- imageUrls: max 4 items
+
+marketplace.ts POST validation:
+- title: min 3, max 150 chars
+- description: min 10, max 2000 chars
+- pricePkr: number, min 0, max 99999999
+- whatsappNumber: Pakistani format 03XXXXXXXXX
+
+safety.ts POST validation:
+- severity: enum ["low", "medium", "high"] only
+- title: min 5, max 200 chars
+- type: enum of allowed alert types only
+
+polls.ts POST validation:
+- options: array, min 2 items, max 6 items
+- each option: string, max 100 chars
+- endsAt: must be future date
+
+Return 400 with specific field error messages 
+on validation failure.
+
+---
+
+## CRITICAL BUG 6: Admin Routes Have No Role Check
+
+In api-server/src/routes/admin.ts, all admin 
+operations (approve members, delete posts, pin 
+announcements, send community blasts) have zero 
+role verification.
+
+Any logged-in user can:
+- Approve or reject member applications
+- Delete any post
+- Send announcements to entire community
+- Change any member's role
+
+Fix:
+- Add requireAdmin middleware that checks if the 
+  authenticated user has role "admin" or 
+  "moderator" in the membersTable for their 
+  communityId
+- Apply requireAdmin to all /admin/* routes
+- Return 403 Forbidden if role check fails
+- Add requireModerator for pin/delete operations 
+  (moderators can moderate but not manage members)
+
+---
+
+## CRITICAL BUG 7: PORT env var Crashes Server if Missing
+
+In api-server/src/index.ts:
+if (!rawPort) {
+  throw new Error("PORT environment variable is 
+  required but was not provided.");
+}
+
+This crashes the entire server on startup if PORT 
+is not set, which happens often in development.
+
+Fix:
+- Default PORT to 3001 if not provided:
+  const port = Number(process.env.PORT || "3001");
+- Remove the hard throw for missing PORT
+- Keep the NaN check
+
+---
+
+## CRITICAL BUG 8: Missing CORS Configuration
+
+In api-server/src/app.ts:
+app.use(cors()); // allows ALL origins
+
+This allows any website on the internet to call 
+your API.
+
+Fix:
+- Configure CORS with specific allowed origins:
+app.use(cors({
+  origin: process.env.ALLOWED_ORIGINS?.split(",") 
+    || ["http://localhost:5173", 
+        "http://localhost:3000"],
+  credentials: true,
+  methods: ["GET", "POST", "PUT", "PATCH", 
+            "DELETE", "OPTIONS"],
+}));
+- Add ALLOWED_ORIGINS to env vars list
+
+---
+
+## CRITICAL BUG 9: Frontend Has No API Error Handling
+
+The React frontend makes API calls but has no 
+global error handling. When the API is down or 
+returns errors, the app silently breaks or shows 
+blank screens.
+
+Fix:
+- Create src/lib/api.ts with a base fetch wrapper 
+  that:
+  - Automatically adds Authorization header from 
+    localStorage token
+  - On 401 response: clears token and redirects 
+    to /login
+  - On 500 response: shows a toast notification 
+    with "Something went wrong. Please try again."
+  - On network failure: shows "Cannot connect 
+    to server. Check your connection."
+- Replace all raw fetch() calls in the frontend 
+  with this wrapper
+
+---
+
+## CRITICAL BUG 10: App.tsx Has No Auth Guard
+
+In artifacts/mohalla/src/App.tsx, the Router 
+renders all pages including admin pages with 
+zero authentication check:
+
+<Route path="/admin" component={AdminMembers} />
+<Route path="/admin/posts" component={AdminPosts} />
+
+Anyone who knows the URL can access admin pages.
+
+Fix:
+- Create src/components/ProtectedRoute.tsx that:
+  - Checks for valid JWT token in localStorage
+  - If no token: redirects to /login
+  - If token expired: clears it and redirects 
+    to /login
+- Create src/components/AdminRoute.tsx that:
+  - Extends ProtectedRoute
+  - Also checks user role is admin or moderator
+  - If not admin: redirects to /feed with 
+    "Access denied" toast
+- Wrap all routes in App.tsx with ProtectedRoute
+- Wrap all /admin/* routes with AdminRoute
+- Leave only /login and /register unprotected
+
+---
+
+## BUG 11: Duplicate Hook File
+
+The frontend has two identical files:
+- src/hooks/use-mobile.ts
+- src/hooks/use-mobile.tsx
+
+This causes TypeScript import conflicts.
+
+Fix:
+- Delete src/hooks/use-mobile.ts
+- Keep only src/hooks/use-mobile.tsx
+- Update all imports to point to the .tsx version
+
+---
+
+## BUG 12: Missing Environment Variables Documentation
+
+The project has no .env.example file so developers 
+don't know what environment variables are needed.
+
+Fix — create .env.example in the root with:
+
+# API Server
+PORT=3001
+DATABASE_URL=postgresql://user:password@host/db
+JWT_SECRET=your-super-secret-jwt-key-min-32-chars
+ALLOWED_ORIGINS=http://localhost:5173
+
+# Cloudinary (for image uploads)
+CLOUDINARY_CLOUD_NAME=
+CLOUDINARY_API_KEY=
+CLOUDINARY_API_SECRET=
+
+# WhatsApp (Meta Cloud API)
+WHATSAPP_TOKEN=
+WHATSAPP_PHONE_ID=
+
+# Frontend
+VITE_API_BASE_URL=http://localhost:3001
+
+Also create a README.md with setup instructions:
+1. Copy .env.example to .env
+2. Fill in all values
+3. npm install
+4. npm run dev
+
+---
+
+## BUG 13: Events Date Comparison Bug
+
+In api-server/src/routes/events.ts:
+
+const today = new Date().toISOString().slice(0, 10);
+// comparing string "YYYY-MM-DD" against a Date 
+// column using gte() — this works in PostgreSQL 
+// but breaks in SQLite and causes timezone bugs
+
+Fix:
+- Use proper Date objects for all date comparisons:
+const today = new Date();
+today.setHours(0, 0, 0, 0);
+- Pass today as a Date object to gte() and lt()
+
+---
+
+## BUG 14: Poll Vote Allows Voting on Own Poll
+
+In polls.ts, a user can vote on their own poll 
+which inflates results.
+
+Fix:
+- In POST /api/polls/:id/vote, check if 
+  userId === poll[0].userId
+- If true: return 400 with error 
+  "You cannot vote on your own poll"
+
+---
+
+## BUG 15: Marketplace WhatsApp Link Format
+
+In the marketplace, WhatsApp links open with 
+the stored number directly. Pakistani numbers 
+stored as 03XX format won't work in 
+wa.me links which need 92XX format.
+
+Fix in the frontend MarketplaceListing page:
+- Convert any number starting with 03 to 
+  international format before building wa.me URL:
+const waNumber = num.startsWith("0") 
+  ? "92" + num.slice(1) 
+  : num;
+const waLink = `https://wa.me/${waNumber}`;
+
+---
+
+## AFTER ALL FIXES — ADD THESE ENV VARS IN REPLIT
+
+Add to Replit Secrets:
+PORT = 3001
+JWT_SECRET = [generate a random 32+ char string]
+CLOUDINARY_CLOUD_NAME = [from cloudinary.com]
+CLOUDINARY_API_KEY = [from cloudinary.com]
+CLOUDINARY_API_SECRET = [from cloudinary.com]
+ALLOWED_ORIGINS = https://your-replit-preview-url
+VITE_API_BASE_URL = https://your-api-replit-url
+
+---
+
+## RULES FOR ALL FIXES
+- Do not change any UI colors, fonts, or layouts
+- Do not remove any existing features
+- Do not change any page designs
+- Only fix the bugs listed above
+- After fixing, run TypeScript typecheck on both 
+  packages and fix any remaining type errors
+- Install any missing npm packages needed

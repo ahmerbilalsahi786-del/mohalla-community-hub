@@ -1,0 +1,84 @@
+I have a full-stack community app called Mohalla. 
+It has a React frontend (Vite + TypeScript + Tailwind + 
+Wouter routing) and an Express backend API server. 
+I've identified the following bugs and issues across 
+the entire codebase. Fix all of them in one complete 
+pass without changing any UI styling or colors.
+
+---
+
+## CRITICAL BUG 1: No Authentication System
+
+The entire app has zero authentication. Every API 
+route defaults userId to hardcoded "ahmed" when no 
+userId is provided:
+
+userId = "ahmed" // appears in feed.ts, admin.ts, 
+marketplace.ts, safety.ts, events.ts, polls.ts, 
+profile.ts, notifications.ts
+
+This means:
+- Any user can post as anyone
+- Admin routes have zero protection
+- Any visitor can delete posts, approve members, 
+  pin announcements
+
+Fix:
+- Add JWT-based auth middleware in 
+  api-server/src/middleware/auth.ts
+- Protect all POST, PATCH, PUT, DELETE routes 
+  with this middleware
+- Extract real userId from JWT token instead of 
+  defaulting to "ahmed"
+- Add /api/auth/register and /api/auth/login 
+  endpoints that return JWT tokens
+- On the frontend, store token in localStorage 
+  and send as Authorization: Bearer header on 
+  every API call
+- Add a login page at /login and register page 
+  at /register in the React app
+- Redirect unauthenticated users to /login
+
+---
+
+## CRITICAL BUG 2: Like Toggle Logic is Broken
+
+In api-server/src/routes/feed.ts, the like toggle 
+has this broken logic:
+
+const isLiking = currentLikes === 0 || true; 
+// "|| true" makes this always true — it never 
+// actually toggles
+
+Fix:
+- Track likes in a separate post_likes table with 
+  columns: id, post_id, user_id, created_at
+- On like: check if row exists for this user+post
+  - If exists: delete it (unlike), decrement count
+  - If not exists: insert it (like), increment count
+- Return { liked: boolean, likesCount: number } 
+  in the response
+- Update frontend like button to reflect 
+  liked/unliked state correctly
+
+---
+
+## CRITICAL BUG 3: Object Storage Crashes Outside Replit
+
+In api-server/src/lib/objectStorage.ts, the storage 
+client connects to:
+http://127.0.0.1:1106 (Replit sidecar endpoint)
+
+And throws errors if these env vars are missing:
+- PUBLIC_OBJECT_SEARCH_PATHS
+- PRIVATE_OBJECT_DIR
+
+This means image uploads crash immediately on any 
+non-Replit environment.
+
+Fix:
+- Add Cloudinary as the image upload provider
+- Install cloudinary npm package
+- Create api-server/src/lib/cloudinary.ts with:
+  - uploadImage(buffer, folder) function
+  - deleteImage(publicId) function

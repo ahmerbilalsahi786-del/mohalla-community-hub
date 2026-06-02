@@ -1,0 +1,341 @@
+import { useState } from 'react'
+import { Link } from 'wouter'
+import { useGetListing, useUpdateListingStatus, getListListingsQueryKey } from '@workspace/api-client-react'
+import { useQueryClient } from '@tanstack/react-query'
+import { Sidebar } from '@/components/dashboard/sidebar'
+import { TopNavbar } from '@/components/dashboard/top-navbar'
+import {
+  ArrowLeft, MessageCircle, CheckCircle2, Clock, Package,
+  ChevronLeft, ChevronRight, User, MapPin, Share2
+} from 'lucide-react'
+import { Button } from '@/components/ui/button'
+import { cn } from '@/lib/utils'
+
+const CONDITION_BADGE: Record<string, { label: string; bg: string; text: string }> = {
+  new: { label: 'New', bg: 'bg-emerald-500/10', text: 'text-emerald-700' },
+  good: { label: 'Good', bg: 'bg-blue-500/10', text: 'text-blue-600' },
+  fair: { label: 'Fair', bg: 'bg-amber-500/10', text: 'text-amber-700' },
+}
+
+const STATUS_CONFIG: Record<string, { label: string; icon: React.ElementType; bg: string; text: string }> = {
+  available: { label: 'Available', icon: CheckCircle2, bg: 'bg-emerald-500/10', text: 'text-emerald-700' },
+  reserved: { label: 'Reserved', icon: Clock, bg: 'bg-amber-500/10', text: 'text-amber-700' },
+  sold: { label: 'Sold', icon: CheckCircle2, bg: 'bg-muted', text: 'text-muted-foreground' },
+}
+
+const CATEGORY_LABELS: Record<string, string> = {
+  furniture: 'Furniture', electronics: 'Electronics', clothes: 'Clothes',
+  vehicles: 'Vehicles', services: 'Services', free: 'Free', other: 'Other',
+}
+
+function formatPrice(pkr: number | null | undefined) {
+  if (pkr === null || pkr === undefined) return 'Free'
+  return `Rs ${pkr.toLocaleString()}`
+}
+
+function timeAgo(dateStr: string) {
+  const diff = Math.floor((Date.now() - new Date(dateStr).getTime()) / 1000)
+  if (diff < 60) return `${diff}s ago`
+  if (diff < 3600) return `${Math.floor(diff / 60)}m ago`
+  if (diff < 86400) return `${Math.floor(diff / 3600)}h ago`
+  return `${Math.floor(diff / 86400)}d ago`
+}
+
+function buildWhatsAppUrl(number: string, title: string) {
+  const cleaned = number.replace(/\D/g, '')
+  const full = cleaned.startsWith('92') ? cleaned : `92${cleaned.replace(/^0/, '')}`
+  const text = encodeURIComponent(`Hi, I saw your listing on Mohalla for ${title}. Is it still available?`)
+  return `https://wa.me/${full}?text=${text}`
+}
+
+interface Props {
+  params: { id: string }
+}
+
+export default function MarketplaceListing({ params }: Props) {
+  const listingId = parseInt(params.id, 10)
+  const queryClient = useQueryClient()
+  const [activeImg, setActiveImg] = useState(0)
+  const [statusLoading, setStatusLoading] = useState(false)
+
+  const { data: listing, isLoading, error } = useGetListing(listingId)
+
+  const updateStatus = useUpdateListingStatus({
+    mutation: {
+      onSuccess: () => {
+        queryClient.invalidateQueries({ queryKey: getListListingsQueryKey() })
+        setStatusLoading(false)
+      },
+      onError: () => setStatusLoading(false),
+    },
+  })
+
+  if (isLoading) {
+    return (
+      <div className="flex min-h-screen bg-background">
+        <Sidebar />
+        <div className="flex flex-1 flex-col">
+          <TopNavbar />
+          <main className="flex-1 p-6">
+            <div className="max-w-3xl mx-auto space-y-4 animate-pulse">
+              <div className="aspect-video bg-muted rounded-2xl" />
+              <div className="h-8 bg-muted rounded w-2/3" />
+              <div className="h-6 bg-muted rounded w-1/4" />
+              <div className="h-24 bg-muted rounded" />
+            </div>
+          </main>
+        </div>
+      </div>
+    )
+  }
+
+  if (error || !listing) {
+    return (
+      <div className="flex min-h-screen bg-background">
+        <Sidebar />
+        <div className="flex flex-1 flex-col">
+          <TopNavbar />
+          <main className="flex-1 flex items-center justify-center">
+            <div className="text-center">
+              <Package size={48} className="text-muted-foreground/30 mx-auto mb-3" />
+              <h2 className="font-semibold text-foreground">Listing not found</h2>
+              <Link href="/marketplace">
+                <Button className="mt-4 rounded-xl">Back to Marketplace</Button>
+              </Link>
+            </div>
+          </main>
+        </div>
+      </div>
+    )
+  }
+
+  const images = listing.imageUrls ?? []
+  const cond = CONDITION_BADGE[listing.condition] || CONDITION_BADGE.good
+  const statusCfg = STATUS_CONFIG[listing.status] || STATUS_CONFIG.available
+  const StatusIcon = statusCfg.icon
+  const isCurrentUser = listing.userId === 'ahmed'
+  const isSold = listing.status === 'sold'
+
+  const handleMarkSold = () => {
+    setStatusLoading(true)
+    updateStatus.mutate({ listingId: listing.id, data: { status: 'sold' } })
+  }
+  const handleMarkReserved = () => {
+    setStatusLoading(true)
+    updateStatus.mutate({ listingId: listing.id, data: { status: 'reserved' } })
+  }
+  const handleMarkAvailable = () => {
+    setStatusLoading(true)
+    updateStatus.mutate({ listingId: listing.id, data: { status: 'available' } })
+  }
+
+  return (
+    <div className="flex min-h-screen bg-background">
+      <div className="pointer-events-none fixed inset-0 overflow-hidden">
+        <div className="absolute -left-32 top-1/3 h-96 w-96 rounded-full bg-primary/5 blur-3xl" />
+      </div>
+
+      <Sidebar />
+
+      <div className="relative flex flex-1 flex-col overflow-hidden">
+        <TopNavbar />
+
+        <main className="flex-1 overflow-y-auto p-6 pb-24">
+          <div className="max-w-3xl mx-auto">
+            {/* Back */}
+            <Link href="/marketplace">
+              <button className="mb-4 flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors">
+                <ArrowLeft size={16} />
+                Back to Marketplace
+              </button>
+            </Link>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+              {/* Left: images */}
+              <div className="space-y-3">
+                {/* Main image */}
+                <div className="relative aspect-square bg-muted/50 rounded-2xl overflow-hidden border border-border">
+                  {images.length > 0 ? (
+                    <>
+                      <img
+                        src={images[activeImg]}
+                        alt={listing.title}
+                        className="w-full h-full object-cover"
+                      />
+                      {images.length > 1 && (
+                        <>
+                          <button
+                            onClick={() => setActiveImg((i) => (i - 1 + images.length) % images.length)}
+                            className="absolute left-2 top-1/2 -translate-y-1/2 flex h-8 w-8 items-center justify-center rounded-full bg-black/40 text-white hover:bg-black/60 transition-colors"
+                          >
+                            <ChevronLeft size={18} />
+                          </button>
+                          <button
+                            onClick={() => setActiveImg((i) => (i + 1) % images.length)}
+                            className="absolute right-2 top-1/2 -translate-y-1/2 flex h-8 w-8 items-center justify-center rounded-full bg-black/40 text-white hover:bg-black/60 transition-colors"
+                          >
+                            <ChevronRight size={18} />
+                          </button>
+                          <div className="absolute bottom-2 left-1/2 -translate-x-1/2 flex gap-1">
+                            {images.map((_, i) => (
+                              <button
+                                key={i}
+                                onClick={() => setActiveImg(i)}
+                                className={cn(
+                                  'h-1.5 rounded-full transition-all',
+                                  i === activeImg ? 'w-4 bg-white' : 'w-1.5 bg-white/50'
+                                )}
+                              />
+                            ))}
+                          </div>
+                        </>
+                      )}
+                    </>
+                  ) : (
+                    <div className="w-full h-full flex items-center justify-center">
+                      <Package size={64} className="text-muted-foreground/20" />
+                    </div>
+                  )}
+
+                  {isSold && (
+                    <div className="absolute inset-0 bg-black/50 flex items-center justify-center">
+                      <span className="rounded-xl bg-black/70 px-4 py-2 text-lg font-bold text-white">SOLD</span>
+                    </div>
+                  )}
+                </div>
+
+                {/* Thumbnail strip */}
+                {images.length > 1 && (
+                  <div className="flex gap-2 overflow-x-auto no-scrollbar">
+                    {images.map((url, i) => (
+                      <button
+                        key={i}
+                        onClick={() => setActiveImg(i)}
+                        className={cn(
+                          'h-16 w-16 shrink-0 rounded-lg overflow-hidden border-2 transition-colors',
+                          i === activeImg ? 'border-primary' : 'border-border hover:border-primary/50'
+                        )}
+                      >
+                        <img src={url} alt="" className="h-full w-full object-cover" />
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
+
+              {/* Right: details */}
+              <div className="space-y-4">
+                {/* Title + status */}
+                <div>
+                  <div className="flex items-start gap-2 flex-wrap mb-2">
+                    <span className={cn('flex items-center gap-1 rounded-full px-2.5 py-1 text-xs font-semibold', statusCfg.bg, statusCfg.text)}>
+                      <StatusIcon size={12} />
+                      {statusCfg.label}
+                    </span>
+                    <span className={cn('rounded-full px-2.5 py-1 text-xs font-semibold', cond.bg, cond.text)}>
+                      {cond.label}
+                    </span>
+                    <span className="rounded-full px-2.5 py-1 text-xs font-semibold bg-muted text-muted-foreground">
+                      {CATEGORY_LABELS[listing.category] || listing.category}
+                    </span>
+                  </div>
+                  <h1 className="text-2xl font-bold text-foreground leading-tight">{listing.title}</h1>
+                </div>
+
+                {/* Price */}
+                <p className="text-3xl font-bold text-primary">
+                  {formatPrice(listing.pricePkr)}
+                </p>
+
+                {/* Description */}
+                <div>
+                  <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-2">Description</h3>
+                  <p className="text-sm text-muted-foreground leading-relaxed">{listing.description}</p>
+                </div>
+
+                {/* Seller info */}
+                <div className="rounded-2xl border border-border bg-muted/30 p-4 space-y-2">
+                  <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">Seller</h3>
+                  <div className="flex items-center gap-3">
+                    <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-br from-primary/60 to-accent/60 font-bold text-white text-sm shrink-0">
+                      {listing.userName.split(' ').map((n) => n[0]).join('').slice(0, 2).toUpperCase()}
+                    </div>
+                    <div>
+                      <p className="font-semibold text-sm text-foreground">{listing.userName}</p>
+                      <div className="flex items-center gap-1 text-xs text-muted-foreground">
+                        <MapPin size={11} />
+                        <span>{listing.unitNumber}</span>
+                      </div>
+                    </div>
+                  </div>
+                  <p className="text-xs text-muted-foreground">Listed {timeAgo(listing.createdAt)}</p>
+                </div>
+
+                {/* CTA buttons */}
+                <div className="space-y-2">
+                  {!isSold && (
+                    <a
+                      href={buildWhatsAppUrl(listing.whatsappNumber, listing.title)}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex w-full items-center justify-center gap-2 rounded-xl bg-[#25D366] py-3 text-sm font-semibold text-white hover:bg-[#1ebe5d] transition-colors"
+                    >
+                      <MessageCircle size={18} />
+                      Contact on WhatsApp
+                    </a>
+                  )}
+
+                  {/* Share via WhatsApp */}
+                  <a
+                    href={`https://wa.me/?text=${encodeURIComponent(`Check out this listing on Mohalla: "${listing.title}" – ${listing.pricePkr ? `Rs ${listing.pricePkr.toLocaleString()}` : 'Free'} (${listing.unitNumber}). Open the Mohalla app for details.`)}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex w-full items-center justify-center gap-2 rounded-xl border border-border bg-muted/40 py-2.5 text-sm font-medium text-foreground hover:bg-muted transition-colors"
+                  >
+                    <Share2 size={15} />
+                    Share via WhatsApp
+                  </a>
+                
+
+                  {isCurrentUser && !isSold && (
+                    <div className="flex gap-2">
+                      {listing.status !== 'reserved' && (
+                        <button
+                          onClick={handleMarkReserved}
+                          disabled={statusLoading}
+                          className="flex-1 flex items-center justify-center gap-1.5 rounded-xl border border-amber-300 bg-amber-500/10 py-2.5 text-sm font-medium text-amber-700 hover:bg-amber-500/20 transition-colors disabled:opacity-50"
+                        >
+                          <Clock size={15} />
+                          Mark Reserved
+                        </button>
+                      )}
+                      <button
+                        onClick={handleMarkSold}
+                        disabled={statusLoading}
+                        className="flex-1 flex items-center justify-center gap-1.5 rounded-xl border border-border bg-muted py-2.5 text-sm font-medium text-muted-foreground hover:bg-muted/80 transition-colors disabled:opacity-50"
+                      >
+                        <CheckCircle2 size={15} />
+                        Mark Sold
+                      </button>
+                    </div>
+                  )}
+
+                  {isCurrentUser && listing.status !== 'available' && (
+                    <button
+                      onClick={handleMarkAvailable}
+                      disabled={statusLoading}
+                      className="w-full flex items-center justify-center gap-1.5 rounded-xl border border-emerald-300 bg-emerald-500/10 py-2.5 text-sm font-medium text-emerald-700 hover:bg-emerald-500/20 transition-colors disabled:opacity-50"
+                    >
+                      <CheckCircle2 size={15} />
+                      Mark Available Again
+                    </button>
+                  )}
+                </div>
+              </div>
+            </div>
+          </div>
+        </main>
+      </div>
+    </div>
+  )
+}
