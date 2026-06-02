@@ -2,18 +2,6 @@
   "extends": "./tsconfig.base.json",
   "compileOnSave": false,
   "files": [],
-  "references": [
-    {
-      "path": "./lib/db"
-    },
-    {
-      "path": "./lib/api-client-react"
-    },
-    {
-      "path": "./lib/api-zod"
-    },
-    {
-      "path": "./lib/object-storage-web"
-    }
-  ]
+  "include": ["src/**/*"],
+  "exclude": ["artifacts", "lib", "scripts", ".migration-backup", "node_modules"]
 }
