@@ -1,0 +1,17 @@
+Fix quick actions menu and dashboard new post button
+
+quick-actions.tsx: all 6 buttons were static with no onClick handlers.
+Added useLocation from wouter to navigate each to its destination:
+- Create Post → /feed?compose=1
+- New Event → /events
+- Announcement → /feed?compose=1&type=announcement
+- List Item → /marketplace
+- Find People → /community
+- Add Place → /places
+
+Feed.tsx:
+- Added useSearch() hook to detect ?compose=1 query param on mount
+- Auto-opens CreatePostModal when navigated from Quick Actions
+- Passes ?type= param so Announcement pre-selects the right type
+- Cleans URL after reading params (replaceState, no navigation)
+- CreatePostModal now accepts initialType prop
