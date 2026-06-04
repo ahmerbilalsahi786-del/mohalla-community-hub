@@ -90,18 +90,25 @@ router.post("/safety", requireAuth, async (req, res) => {
   }
 });
 
-// PATCH /api/safety/:id/resolve
+// PATCH /api/safety/:id/resolve — owner or admin/moderator only
 router.patch("/safety/:id/resolve", requireAuth, async (req, res) => {
   try {
-    const [alert] = await db
-      .update(alertsTable)
-      .set({ isResolved: true })
-      .where(eq(alertsTable.id, parseInt(req.params.id as string, 10)))
-      .returning();
-    if (!alert) {
+    const id = parseInt(req.params.id as string, 10);
+    const existing = await db.select().from(alertsTable).where(eq(alertsTable.id, id)).limit(1);
+    if (!existing[0]) {
       void res.status(404).json({ error: "Alert not found" });
       return;
     }
+    const { userId, role } = req.user!;
+    if (existing[0].userId !== userId && role !== "admin" && role !== "moderator") {
+      void res.status(403).json({ error: "Forbidden" });
+      return;
+    }
+    const [alert] = await db
+      .update(alertsTable)
+      .set({ isResolved: true })
+      .where(eq(alertsTable.id, id))
+      .returning();
     void res.json(serializeAlert(alert));
   } catch (err) {
     void res.status(500).json({ error: "Failed" });

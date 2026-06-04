@@ -2,6 +2,7 @@ import { Router } from "express";
 import { db } from "@workspace/db";
 import { userProfilesTable, postsTable, listingsTable } from "@workspace/db";
 import { eq, desc } from "drizzle-orm";
+import { requireAuth } from "../middleware/auth";
 
 const router = Router();
 
@@ -48,8 +49,12 @@ router.get("/profile/:userId", async (req, res) => {
   }
 });
 
-// PUT /api/profile/:userId
-router.put("/profile/:userId", async (req, res) => {
+// PUT /api/profile/:userId — must be self
+router.put("/profile/:userId", requireAuth, async (req, res) => {
+  if (req.params.userId !== req.user!.userId) {
+    void res.status(403).json({ error: "Forbidden" });
+    return;
+  }
   try {
     const { userId } = req.params;
     const { displayName, unitNumber, avatarUrl, whatsappNumber } = req.body;
@@ -86,10 +91,10 @@ router.put("/profile/:userId", async (req, res) => {
   }
 });
 
-// GET /api/settings/notifications?userId=ahmed
-router.get("/settings/notifications", async (req, res) => {
+// GET /api/settings/notifications — current user only
+router.get("/settings/notifications", requireAuth, async (req, res) => {
   try {
-    const userId = (req.query.userId as string) || "ahmed";
+    const userId = req.user!.userId;
     const profile = await getOrCreateProfile(userId);
     res.json({
       notifyComments:      profile.notifyComments,
@@ -104,10 +109,10 @@ router.get("/settings/notifications", async (req, res) => {
   }
 });
 
-// PUT /api/settings/notifications?userId=ahmed
-router.put("/settings/notifications", async (req, res) => {
+// PUT /api/settings/notifications — current user only
+router.put("/settings/notifications", requireAuth, async (req, res) => {
   try {
-    const userId = (req.body.userId as string) || "ahmed";
+    const userId = req.user!.userId;
     const { notifyComments, notifyLikes, notifySafety, notifyAnnouncements, notifyMarketplace, notifyApprovals } = req.body;
 
     const existing = await db.select().from(userProfilesTable).where(eq(userProfilesTable.userId, userId)).limit(1);

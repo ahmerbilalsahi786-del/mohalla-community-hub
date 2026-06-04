@@ -17,11 +17,10 @@ declare global {
   }
 }
 
-const FALLBACK_SECRET = "mohalla-dev-secret-change-in-production";
-if (!process.env.JWT_SECRET && process.env.NODE_ENV === "production") {
-  throw new Error("JWT_SECRET environment variable must be set in production");
+if (!process.env.JWT_SECRET) {
+  throw new Error("JWT_SECRET environment variable must be set");
 }
-const JWT_SECRET = process.env.JWT_SECRET || FALLBACK_SECRET;
+const JWT_SECRET: string = process.env.JWT_SECRET;
 
 export function signToken(payload: AuthUser): string {
   return jwt.sign(payload, JWT_SECRET, { expiresIn: "30d" });
