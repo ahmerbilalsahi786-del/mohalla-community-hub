@@ -124,7 +124,7 @@ router.get("/marketplace/:id", async (req, res) => {
   }
 });
 
-// PATCH /api/marketplace/:id/status
+// PATCH /api/marketplace/:id/status — owner or admin only
 router.patch("/marketplace/:id/status", requireAuth, async (req, res) => {
   try {
     const id = parseInt(req.params.id as string, 10);
@@ -135,16 +135,21 @@ router.patch("/marketplace/:id/status", requireAuth, async (req, res) => {
       return;
     }
 
+    const [listing] = await db.select().from(listingsTable).where(eq(listingsTable.id, id)).limit(1);
+    if (!listing) {
+      void res.status(404).json({ error: "Listing not found" });
+      return;
+    }
+    if (listing.userId !== req.user!.userId && req.user!.role !== "admin") {
+      void res.status(403).json({ error: "Forbidden" });
+      return;
+    }
+
     const [updated] = await db
       .update(listingsTable)
       .set({ status })
       .where(eq(listingsTable.id, id))
       .returning();
-
-    if (!updated) {
-      void res.status(404).json({ error: "Listing not found" });
-      return;
-    }
 
     void res.json(serialize(updated));
   } catch (err) {

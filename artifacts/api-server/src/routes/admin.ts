@@ -17,8 +17,8 @@ const serialize = (row: Record<string, unknown>) => {
 
 // ─── MEMBERS ────────────────────────────────────────────────────────────────
 
-// GET /api/admin/members (public — used by Community page)
-router.get("/admin/members", async (req, res) => {
+// GET /api/admin/members — auth required
+router.get("/admin/members", requireAuth, async (req, res) => {
   try {
     const communityId = (req.query.communityId as string) || "default";
     const status = req.query.status as string | undefined;
@@ -36,18 +36,19 @@ router.get("/admin/members", async (req, res) => {
   }
 });
 
-// POST /api/admin/members — join request (public)
-router.post("/admin/members", async (req, res) => {
+// POST /api/admin/members — join request (auth required, status hardcoded to pending)
+router.post("/admin/members", requireAuth, async (req, res) => {
   try {
-    const { communityId = "default", userId, name, unitNumber, phone = "", role = "resident" } = req.body;
-    if (!userId || !name || !unitNumber) {
-      void res.status(400).json({ error: "userId, name, unitNumber required" });
+    const { communityId = "default", name, unitNumber, phone = "" } = req.body;
+    const userId = req.user!.userId;
+    if (!name || !unitNumber) {
+      void res.status(400).json({ error: "name, unitNumber required" });
       return;
     }
-    const status = req.body.status ?? "pending";
+    // Hard-coded — never trust client-supplied status/role for join requests
     const [row] = await db
       .insert(membersTable)
-      .values({ communityId, userId, name, unitNumber, phone, role, status, isVerified: false })
+      .values({ communityId, userId, name, unitNumber, phone, role: "resident", status: "pending", isVerified: false })
       .returning();
     void res.status(201).json(serialize(row));
   } catch (err) {
@@ -130,7 +131,7 @@ router.delete("/admin/members/:id", requireAuth, requireAdmin, async (req, res) 
 // ─── POSTS ──────────────────────────────────────────────────────────────────
 
 // GET /api/admin/posts
-router.get("/admin/posts", async (req, res) => {
+router.get("/admin/posts", requireAuth, requireAdmin, async (req, res) => {
   try {
     const communityId = (req.query.communityId as string) || "default";
     const rows = await db
@@ -170,7 +171,7 @@ router.patch("/admin/posts/:id/pin", requireAuth, requireAdmin, async (req, res)
 // ─── COMMUNITY SETTINGS ──────────────────────────────────────────────────────
 
 // GET /api/admin/community
-router.get("/admin/community", async (req, res) => {
+router.get("/admin/community", requireAuth, async (req, res) => {
   try {
     const communityId = (req.query.communityId as string) || "default";
     let rows = await db.select().from(communitySettingsTable).where(eq(communitySettingsTable.communityId, communityId)).limit(1);
@@ -210,7 +211,7 @@ router.put("/admin/community", requireAuth, requireAdmin, async (req, res) => {
 // ─── STATS ───────────────────────────────────────────────────────────────────
 
 // GET /api/admin/stats
-router.get("/admin/stats", async (req, res) => {
+router.get("/admin/stats", requireAuth, requireAdmin, async (req, res) => {
   try {
     const communityId = (req.query.communityId as string) || "default";
     const startOfMonth = new Date();
