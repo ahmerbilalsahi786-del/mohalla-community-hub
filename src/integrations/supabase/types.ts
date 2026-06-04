@@ -465,7 +465,10 @@ export type Database = {
           bio: string | null
           created_at: string | null
           display_name: string | null
+          full_name: string | null
           id: string
+          is_verified: boolean
+          unit_number: string | null
           updated_at: string | null
         }
         Insert: {
@@ -473,7 +476,10 @@ export type Database = {
           bio?: string | null
           created_at?: string | null
           display_name?: string | null
+          full_name?: string | null
           id: string
+          is_verified?: boolean
+          unit_number?: string | null
           updated_at?: string | null
         }
         Update: {
@@ -481,7 +487,10 @@ export type Database = {
           bio?: string | null
           created_at?: string | null
           display_name?: string | null
+          full_name?: string | null
           id?: string
+          is_verified?: boolean
+          unit_number?: string | null
           updated_at?: string | null
         }
         Relationships: []
