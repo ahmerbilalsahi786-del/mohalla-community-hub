@@ -1,0 +1,4 @@
+- [Express route return pattern](express-return-pattern.md) — use `void res.json(); return;` not `return res.json()` to avoid TS7030.
+- [Zod enum in api-server](zod-enum-pattern.md) — api-server uses Zod v3 compat; use inline array literals for z.enum, not `as const` + params object with `error`.
+- [DB dist rebuild](db-dist-rebuild.md) — after editing lib/db/src/schema, run `npx tsc -p lib/db/tsconfig.json` to update dist (no build script in package.json).
+- [Express 5 params typing](express5-params.md) — req.params values typed as `string | string[]` in @types/express v5; always cast: `req.params.id as string`.
