@@ -14,16 +14,550 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      alert_comments: {
+        Row: {
+          alert_id: string
+          body: string
+          created_at: string | null
+          id: string
+          user_id: string
+        }
+        Insert: {
+          alert_id: string
+          body: string
+          created_at?: string | null
+          id?: string
+          user_id: string
+        }
+        Update: {
+          alert_id?: string
+          body?: string
+          created_at?: string | null
+          id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "alert_comments_alert_id_fkey"
+            columns: ["alert_id"]
+            isOneToOne: false
+            referencedRelation: "safety_alerts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      comments: {
+        Row: {
+          body: string
+          created_at: string | null
+          id: string
+          post_id: string
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          body: string
+          created_at?: string | null
+          id?: string
+          post_id: string
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          body?: string
+          created_at?: string | null
+          id?: string
+          post_id?: string
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "comments_post_id_fkey"
+            columns: ["post_id"]
+            isOneToOne: false
+            referencedRelation: "posts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      community_settings: {
+        Row: {
+          description: string | null
+          id: string
+          name: string
+          rules: string | null
+          updated_at: string | null
+          welcome_message: string | null
+        }
+        Insert: {
+          description?: string | null
+          id?: string
+          name?: string
+          rules?: string | null
+          updated_at?: string | null
+          welcome_message?: string | null
+        }
+        Update: {
+          description?: string | null
+          id?: string
+          name?: string
+          rules?: string | null
+          updated_at?: string | null
+          welcome_message?: string | null
+        }
+        Relationships: []
+      }
+      event_rsvps: {
+        Row: {
+          created_at: string | null
+          event_id: string
+          id: string
+          status: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          event_id: string
+          id?: string
+          status?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          event_id?: string
+          id?: string
+          status?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "event_rsvps_event_id_fkey"
+            columns: ["event_id"]
+            isOneToOne: false
+            referencedRelation: "events"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      events: {
+        Row: {
+          created_at: string | null
+          description: string
+          event_date: string
+          event_time: string | null
+          id: string
+          image_url: string | null
+          location: string | null
+          max_attendees: number | null
+          rsvp_count: number | null
+          title: string
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          description: string
+          event_date: string
+          event_time?: string | null
+          id?: string
+          image_url?: string | null
+          location?: string | null
+          max_attendees?: number | null
+          rsvp_count?: number | null
+          title: string
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          description?: string
+          event_date?: string
+          event_time?: string | null
+          id?: string
+          image_url?: string | null
+          location?: string | null
+          max_attendees?: number | null
+          rsvp_count?: number | null
+          title?: string
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
+      listings: {
+        Row: {
+          created_at: string | null
+          description: string
+          id: string
+          image_urls: string[] | null
+          price_pkr: number
+          status: string
+          title: string
+          updated_at: string | null
+          user_id: string
+          whatsapp_number: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          description: string
+          id?: string
+          image_urls?: string[] | null
+          price_pkr: number
+          status?: string
+          title: string
+          updated_at?: string | null
+          user_id: string
+          whatsapp_number?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          description?: string
+          id?: string
+          image_urls?: string[] | null
+          price_pkr?: number
+          status?: string
+          title?: string
+          updated_at?: string | null
+          user_id?: string
+          whatsapp_number?: string | null
+        }
+        Relationships: []
+      }
+      notifications: {
+        Row: {
+          body: string
+          created_at: string | null
+          data: Json | null
+          id: string
+          is_read: boolean | null
+          title: string
+          type: string
+          user_id: string
+        }
+        Insert: {
+          body: string
+          created_at?: string | null
+          data?: Json | null
+          id?: string
+          is_read?: boolean | null
+          title: string
+          type: string
+          user_id: string
+        }
+        Update: {
+          body?: string
+          created_at?: string | null
+          data?: Json | null
+          id?: string
+          is_read?: boolean | null
+          title?: string
+          type?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      poll_options: {
+        Row: {
+          created_at: string | null
+          id: string
+          option_text: string
+          poll_id: string
+          votes_count: number | null
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          option_text: string
+          poll_id: string
+          votes_count?: number | null
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          option_text?: string
+          poll_id?: string
+          votes_count?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "poll_options_poll_id_fkey"
+            columns: ["poll_id"]
+            isOneToOne: false
+            referencedRelation: "polls"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      poll_votes: {
+        Row: {
+          created_at: string | null
+          id: string
+          option_id: string
+          poll_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          option_id: string
+          poll_id: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          option_id?: string
+          poll_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "poll_votes_option_id_fkey"
+            columns: ["option_id"]
+            isOneToOne: false
+            referencedRelation: "poll_options"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "poll_votes_poll_id_fkey"
+            columns: ["poll_id"]
+            isOneToOne: false
+            referencedRelation: "polls"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      polls: {
+        Row: {
+          created_at: string | null
+          description: string | null
+          ends_at: string | null
+          id: string
+          is_active: boolean | null
+          question: string
+          total_votes: number | null
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          description?: string | null
+          ends_at?: string | null
+          id?: string
+          is_active?: boolean | null
+          question: string
+          total_votes?: number | null
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          description?: string | null
+          ends_at?: string | null
+          id?: string
+          is_active?: boolean | null
+          question?: string
+          total_votes?: number | null
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
+      post_likes: {
+        Row: {
+          created_at: string | null
+          id: string
+          post_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          post_id: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          post_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "post_likes_post_id_fkey"
+            columns: ["post_id"]
+            isOneToOne: false
+            referencedRelation: "posts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      posts: {
+        Row: {
+          body: string
+          comments_count: number | null
+          created_at: string | null
+          id: string
+          image_urls: string[] | null
+          is_pinned: boolean | null
+          likes_count: number | null
+          title: string
+          type: string
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          body: string
+          comments_count?: number | null
+          created_at?: string | null
+          id?: string
+          image_urls?: string[] | null
+          is_pinned?: boolean | null
+          likes_count?: number | null
+          title: string
+          type?: string
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          body?: string
+          comments_count?: number | null
+          created_at?: string | null
+          id?: string
+          image_urls?: string[] | null
+          is_pinned?: boolean | null
+          likes_count?: number | null
+          title?: string
+          type?: string
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
+      private_profiles: {
+        Row: {
+          address: string | null
+          id: string
+          phone: string | null
+          updated_at: string
+          whatsapp_number: string | null
+        }
+        Insert: {
+          address?: string | null
+          id: string
+          phone?: string | null
+          updated_at?: string
+          whatsapp_number?: string | null
+        }
+        Update: {
+          address?: string | null
+          id?: string
+          phone?: string | null
+          updated_at?: string
+          whatsapp_number?: string | null
+        }
+        Relationships: []
+      }
+      profiles: {
+        Row: {
+          avatar_url: string | null
+          bio: string | null
+          created_at: string | null
+          display_name: string | null
+          id: string
+          updated_at: string | null
+        }
+        Insert: {
+          avatar_url?: string | null
+          bio?: string | null
+          created_at?: string | null
+          display_name?: string | null
+          id: string
+          updated_at?: string | null
+        }
+        Update: {
+          avatar_url?: string | null
+          bio?: string | null
+          created_at?: string | null
+          display_name?: string | null
+          id?: string
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      safety_alerts: {
+        Row: {
+          alert_type: string
+          created_at: string | null
+          description: string
+          id: string
+          is_resolved: boolean | null
+          location: string | null
+          severity: string
+          title: string
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          alert_type?: string
+          created_at?: string | null
+          description: string
+          id?: string
+          is_resolved?: boolean | null
+          location?: string | null
+          severity?: string
+          title: string
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          alert_type?: string
+          created_at?: string | null
+          description?: string
+          id?: string
+          is_resolved?: boolean | null
+          location?: string | null
+          severity?: string
+          title?: string
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
+      user_roles: {
+        Row: {
+          id: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Insert: {
+          id?: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Update: {
+          id?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      has_role: {
+        Args: {
+          _role: Database["public"]["Enums"]["app_role"]
+          _user_id: string
+        }
+        Returns: boolean
+      }
     }
     Enums: {
-      [_ in never]: never
+      app_role: "admin" | "moderator" | "user"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -150,6 +684,8 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      app_role: ["admin", "moderator", "user"],
+    },
   },
 } as const
