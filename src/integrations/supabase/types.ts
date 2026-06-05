@@ -187,11 +187,13 @@ export type Database = {
       }
       listings: {
         Row: {
+          category: string
+          condition: string
           created_at: string | null
           description: string
           id: string
           image_urls: string[] | null
-          price_pkr: number
+          price_pkr: number | null
           status: string
           title: string
           updated_at: string | null
@@ -199,11 +201,13 @@ export type Database = {
           whatsapp_number: string | null
         }
         Insert: {
+          category?: string
+          condition?: string
           created_at?: string | null
           description: string
           id?: string
           image_urls?: string[] | null
-          price_pkr: number
+          price_pkr?: number | null
           status?: string
           title: string
           updated_at?: string | null
@@ -211,11 +215,13 @@ export type Database = {
           whatsapp_number?: string | null
         }
         Update: {
+          category?: string
+          condition?: string
           created_at?: string | null
           description?: string
           id?: string
           image_urls?: string[] | null
-          price_pkr?: number
+          price_pkr?: number | null
           status?: string
           title?: string
           updated_at?: string | null

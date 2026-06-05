@@ -423,7 +423,12 @@ export default function Feed() {
               <LogOut className="mr-2 h-4 w-4" /> Sign out
             </Button>
           </div>
+          <nav className="mx-auto max-w-2xl flex items-center gap-1 px-6 pb-3 text-sm">
+            <a href="/" className="rounded-lg px-3 py-1.5 bg-muted font-medium">Feed</a>
+            <a href="/marketplace" className="rounded-lg px-3 py-1.5 text-muted-foreground hover:bg-muted">Marketplace</a>
+          </nav>
         </header>
+
 
         <div className="sticky top-0 z-30 bg-background/90 backdrop-blur-md border-b border-border px-6 py-3">
           <div className="mx-auto max-w-2xl flex items-center gap-2 overflow-x-auto">
