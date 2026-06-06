@@ -401,103 +401,72 @@ export default function Feed() {
   }, [navigate, qc, toast]);
 
   return (
-    <div className="relative flex min-h-screen bg-background">
-      <div className="pointer-events-none fixed inset-0 overflow-hidden">
-        <div className="absolute -left-32 top-1/4 h-96 w-96 rounded-full bg-primary/5 blur-3xl" />
-        <div className="absolute -right-32 top-1/2 h-96 w-96 rounded-full bg-accent/5 blur-3xl" />
+    <div className="relative">
+      <div className="sticky top-16 z-30 -mx-4 sm:-mx-6 bg-background/90 backdrop-blur-md border-b border-border px-4 sm:px-6 py-3 mb-4">
+        <div className="mx-auto max-w-2xl flex items-center gap-2 overflow-x-auto">
+          {CATEGORIES.map((cat) => {
+            const Icon = cat.icon;
+            const active = activeCategory === cat.value;
+            return (
+              <button
+                key={cat.value}
+                onClick={() => setActiveCategory(cat.value)}
+                className={cn(
+                  "flex items-center gap-1.5 whitespace-nowrap rounded-full px-4 py-1.5 text-sm font-medium transition-all shrink-0",
+                  active
+                    ? "bg-primary text-primary-foreground shadow-sm"
+                    : "bg-muted/60 text-muted-foreground hover:bg-muted hover:text-foreground",
+                )}
+              >
+                <Icon size={14} className={active ? "" : cat.color} />
+                {cat.label}
+              </button>
+            );
+          })}
+        </div>
       </div>
 
-      <div className="relative flex flex-1 flex-col">
-        <header className="border-b border-border bg-card/80 backdrop-blur-md">
-          <div className="mx-auto flex max-w-2xl items-center justify-between px-6 py-3">
-            <div className="flex items-center gap-3">
-              <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-primary">
-                <span className="font-bold text-primary-foreground">م</span>
+      <div className="max-w-2xl mx-auto space-y-4">
+        {isLoading ? (
+          <div className="space-y-4">
+            {[1, 2, 3].map((i) => (
+              <div key={i} className="rounded-2xl border border-border bg-card p-4 animate-pulse">
+                <div className="flex gap-3">
+                  <div className="h-10 w-10 rounded-full bg-muted" />
+                  <div className="flex-1 space-y-2">
+                    <div className="h-4 w-32 bg-muted rounded" />
+                    <div className="h-3 w-24 bg-muted rounded" />
+                  </div>
+                </div>
+                <div className="mt-3 space-y-2">
+                  <div className="h-4 w-3/4 bg-muted rounded" />
+                  <div className="h-3 w-full bg-muted rounded" />
+                </div>
               </div>
-              <div>
-                <p className="text-xs font-semibold uppercase tracking-wider text-primary">Mohalla</p>
-                <h1 className="text-sm font-semibold leading-tight">Community Feed</h1>
-              </div>
+            ))}
+          </div>
+        ) : posts.length === 0 ? (
+          <div className="flex flex-col items-center justify-center py-20 text-center">
+            <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-muted/50 mb-4">
+              <MessageSquare size={32} className="text-muted-foreground/50" />
             </div>
-            <Button variant="outline" size="sm" onClick={handleSignOut} className="rounded-xl">
-              <LogOut className="mr-2 h-4 w-4" /> Sign out
+            <h3 className="font-semibold text-foreground">No posts yet.</h3>
+            <p className="text-sm text-muted-foreground mt-1">Be the first to post something!</p>
+            <Button onClick={() => setShowCreate(true)} className="mt-4 rounded-xl">
+              <Plus size={16} className="mr-2" /> Create Post
             </Button>
           </div>
-          <nav className="mx-auto max-w-2xl flex items-center gap-1 px-6 pb-3 text-sm">
-            <a href="/" className="rounded-lg px-3 py-1.5 bg-muted font-medium">Feed</a>
-            <a href="/marketplace" className="rounded-lg px-3 py-1.5 text-muted-foreground hover:bg-muted">Marketplace</a>
-          </nav>
-        </header>
-
-
-        <div className="sticky top-0 z-30 bg-background/90 backdrop-blur-md border-b border-border px-6 py-3">
-          <div className="mx-auto max-w-2xl flex items-center gap-2 overflow-x-auto">
-            {CATEGORIES.map((cat) => {
-              const Icon = cat.icon;
-              const active = activeCategory === cat.value;
-              return (
-                <button
-                  key={cat.value}
-                  onClick={() => setActiveCategory(cat.value)}
-                  className={cn(
-                    "flex items-center gap-1.5 whitespace-nowrap rounded-full px-4 py-1.5 text-sm font-medium transition-all shrink-0",
-                    active
-                      ? "bg-primary text-primary-foreground shadow-sm"
-                      : "bg-muted/60 text-muted-foreground hover:bg-muted hover:text-foreground",
-                  )}
-                >
-                  <Icon size={14} className={active ? "" : cat.color} />
-                  {cat.label}
-                </button>
-              );
-            })}
-          </div>
-        </div>
-
-        <main className="flex-1">
-          <div className="p-6 max-w-2xl mx-auto space-y-4 pb-24">
-            {isLoading ? (
-              <div className="space-y-4">
-                {[1, 2, 3].map((i) => (
-                  <div key={i} className="rounded-2xl border border-border bg-card p-4 animate-pulse">
-                    <div className="flex gap-3">
-                      <div className="h-10 w-10 rounded-full bg-muted" />
-                      <div className="flex-1 space-y-2">
-                        <div className="h-4 w-32 bg-muted rounded" />
-                        <div className="h-3 w-24 bg-muted rounded" />
-                      </div>
-                    </div>
-                    <div className="mt-3 space-y-2">
-                      <div className="h-4 w-3/4 bg-muted rounded" />
-                      <div className="h-3 w-full bg-muted rounded" />
-                    </div>
-                  </div>
-                ))}
-              </div>
-            ) : posts.length === 0 ? (
-              <div className="flex flex-col items-center justify-center py-20 text-center">
-                <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-muted/50 mb-4">
-                  <MessageSquare size={32} className="text-muted-foreground/50" />
-                </div>
-                <h3 className="font-semibold text-foreground">No posts yet.</h3>
-                <p className="text-sm text-muted-foreground mt-1">Be the first to post something!</p>
-                <Button onClick={() => setShowCreate(true)} className="mt-4 rounded-xl">
-                  <Plus size={16} className="mr-2" /> Create Post
-                </Button>
-              </div>
-            ) : (
-              posts.map((post) => (
-                <PostCard key={post.id} post={post} me={me} likedByMe={myLikes.has(post.id)} />
-              ))
-            )}
-          </div>
-        </main>
+        ) : (
+          posts.map((post) => (
+            <PostCard key={post.id} post={post} me={me} likedByMe={myLikes.has(post.id)} />
+          ))
+        )}
       </div>
 
       <button
         onClick={() => setShowCreate(true)}
         aria-label="Create post"
-        className="fixed bottom-8 right-8 flex h-14 w-14 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-lg shadow-primary/30 hover:bg-primary/90 hover:scale-105 transition-all z-40"
+        className="fixed bottom-24 md:bottom-8 right-6 md:right-8 flex h-14 w-14 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-lg shadow-primary/30 hover:bg-primary/90 hover:scale-105 transition-all z-40"
       >
         <Plus size={24} />
       </button>
