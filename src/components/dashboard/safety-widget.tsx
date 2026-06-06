@@ -33,7 +33,7 @@ export function SafetyWidget() {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("safety_alerts")
-        .select("id, title, type, severity, location_detail, is_resolved, created_at")
+        .select("id, title, alert_type, severity, location, is_resolved, created_at")
         .eq("is_resolved", false)
         .order("created_at", { ascending: false })
         .limit(5);
@@ -73,14 +73,14 @@ export function SafetyWidget() {
               <span className="text-sm font-medium text-foreground">active alert{count !== 1 ? "s" : ""}</span>
             </div>
             {latest && (() => {
-              const TypeIcon = TYPE_ICON[latest.type] || HelpCircle;
+              const TypeIcon = TYPE_ICON[latest.alert_type] || HelpCircle;
               const sev = SEVERITY[latest.severity] || SEVERITY.medium;
               return (
                 <div className={cn("flex items-start gap-2 rounded-xl p-2.5", sev.bg)}>
                   <div className={cn("mt-0.5 h-2 w-2 shrink-0 rounded-full", sev.dot)} />
                   <div className="flex-1 min-w-0">
                     <p className={cn("text-xs font-semibold truncate", sev.text)}>{latest.title}</p>
-                    {latest.location_detail && <p className="text-xs text-muted-foreground truncate mt-0.5">{latest.location_detail}</p>}
+                    {latest.location && <p className="text-xs text-muted-foreground truncate mt-0.5">{latest.location}</p>}
                     <p className="text-xs text-muted-foreground mt-0.5">{timeAgo(latest.created_at)}</p>
                   </div>
                   <TypeIcon size={14} className={cn("shrink-0 mt-0.5", sev.text)} />
