@@ -81,7 +81,7 @@ export function SafetyWidget() {
                   <div className="flex-1 min-w-0">
                     <p className={cn("text-xs font-semibold truncate", sev.text)}>{latest.title}</p>
                     {latest.location && <p className="text-xs text-muted-foreground truncate mt-0.5">{latest.location}</p>}
-                    <p className="text-xs text-muted-foreground mt-0.5">{timeAgo(latest.created_at)}</p>
+                    <p className="text-xs text-muted-foreground mt-0.5">{timeAgo(latest.created_at ?? new Date().toISOString())}</p>
                   </div>
                   <TypeIcon size={14} className={cn("shrink-0 mt-0.5", sev.text)} />
                 </div>
