@@ -1,9 +1,8 @@
-import { useState, useCallback } from "react";
+import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { useNavigate } from "@tanstack/react-router";
 import {
   Pin, Heart, MessageSquare, Plus, X, ChevronDown, ChevronUp,
-  Megaphone, Shield, Search, ShoppingBag, Calendar, Users, Send, LogOut,
+  Megaphone, Shield, Search, ShoppingBag, Calendar, Users, Send,
 } from "lucide-react";
 import type { User } from "@supabase/supabase-js";
 import { supabase } from "@/integrations/supabase/client";
@@ -346,9 +345,6 @@ function CreatePostModal({ onClose, me }: { onClose: () => void; me: { user: Use
 
 export default function Feed() {
   const { user } = AuthLayout.useRouteContext();
-  const navigate = useNavigate();
-  const qc = useQueryClient();
-  const { toast } = useToast();
   const [activeCategory, setActiveCategory] = useState<string>("all");
   const [showCreate, setShowCreate] = useState(false);
 
@@ -391,14 +387,6 @@ export default function Feed() {
   });
 
   const me = { user, profile: myProfile ?? null };
-
-  const handleSignOut = useCallback(async () => {
-    await qc.cancelQueries();
-    qc.clear();
-    await supabase.auth.signOut();
-    toast({ title: "Signed out" });
-    navigate({ to: "/auth", replace: true });
-  }, [navigate, qc, toast]);
 
   return (
     <div className="relative">
