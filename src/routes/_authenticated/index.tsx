@@ -47,7 +47,7 @@ function Dashboard() {
       const [members, events, posts, alerts] = await Promise.all([
         supabase.from("profiles").select("id", { count: "exact", head: true }),
         supabase.from("events").select("id", { count: "exact", head: true })
-          .gte("starts_at", new Date().toISOString()),
+          .gte("event_date", new Date().toISOString().slice(0, 10)),
         supabase.from("posts").select("id", { count: "exact", head: true })
           .gte("created_at", new Date(Date.now() - 7 * 86400_000).toISOString()),
         supabase.from("safety_alerts").select("id", { count: "exact", head: true })
@@ -86,24 +86,21 @@ function Dashboard() {
     queryFn: async (): Promise<DashboardEvent[]> => {
       const { data } = await supabase
         .from("events")
-        .select("id, title, description, starts_at, location, rsvp_count, category, max_attendees")
-        .gte("starts_at", new Date().toISOString())
-        .order("starts_at", { ascending: true })
+        .select("id, title, description, event_date, event_time, location, rsvp_count, max_attendees")
+        .gte("event_date", new Date().toISOString().slice(0, 10))
+        .order("event_date", { ascending: true })
         .limit(5);
-      return ((data ?? []) as any[]).map((e) => {
-        const dt = new Date(e.starts_at);
-        return {
-          id: e.id,
-          title: e.title,
-          description: e.description ?? "",
-          date: dt.toISOString().slice(0, 10),
-          time: dt.toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit" }),
-          location: e.location ?? "TBA",
-          attendees: e.rsvp_count ?? 0,
-          maxAttendees: e.max_attendees ?? undefined,
-          category: e.category ?? "Community",
-        };
-      });
+      return ((data ?? []) as any[]).map((e) => ({
+        id: e.id,
+        title: e.title,
+        description: e.description ?? "",
+        date: e.event_date,
+        time: e.event_time ?? "",
+        location: e.location ?? "TBA",
+        attendees: e.rsvp_count ?? 0,
+        maxAttendees: e.max_attendees ?? undefined,
+        category: "Community",
+      }));
     },
   });
 
