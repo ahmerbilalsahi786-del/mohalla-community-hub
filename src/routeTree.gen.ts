@@ -13,6 +13,7 @@ import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as AuthenticatedIndexRouteImport } from './routes/_authenticated/index'
 import { Route as AuthenticatedMarketplaceRouteImport } from './routes/_authenticated/marketplace'
+import { Route as AuthenticatedFeedRouteImport } from './routes/_authenticated/feed'
 import { Route as AuthenticatedMarketplaceIdRouteImport } from './routes/_authenticated/marketplace.$id'
 
 const AuthRoute = AuthRouteImport.update({
@@ -35,6 +36,11 @@ const AuthenticatedMarketplaceRoute =
     path: '/marketplace',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedFeedRoute = AuthenticatedFeedRouteImport.update({
+  id: '/feed',
+  path: '/feed',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 const AuthenticatedMarketplaceIdRoute =
   AuthenticatedMarketplaceIdRouteImport.update({
     id: '/$id',
@@ -45,11 +51,13 @@ const AuthenticatedMarketplaceIdRoute =
 export interface FileRoutesByFullPath {
   '/': typeof AuthenticatedIndexRoute
   '/auth': typeof AuthRoute
+  '/feed': typeof AuthenticatedFeedRoute
   '/marketplace': typeof AuthenticatedMarketplaceRouteWithChildren
   '/marketplace/$id': typeof AuthenticatedMarketplaceIdRoute
 }
 export interface FileRoutesByTo {
   '/auth': typeof AuthRoute
+  '/feed': typeof AuthenticatedFeedRoute
   '/marketplace': typeof AuthenticatedMarketplaceRouteWithChildren
   '/': typeof AuthenticatedIndexRoute
   '/marketplace/$id': typeof AuthenticatedMarketplaceIdRoute
@@ -58,19 +66,21 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
   '/auth': typeof AuthRoute
+  '/_authenticated/feed': typeof AuthenticatedFeedRoute
   '/_authenticated/marketplace': typeof AuthenticatedMarketplaceRouteWithChildren
   '/_authenticated/': typeof AuthenticatedIndexRoute
   '/_authenticated/marketplace/$id': typeof AuthenticatedMarketplaceIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/auth' | '/marketplace' | '/marketplace/$id'
+  fullPaths: '/' | '/auth' | '/feed' | '/marketplace' | '/marketplace/$id'
   fileRoutesByTo: FileRoutesByTo
-  to: '/auth' | '/marketplace' | '/' | '/marketplace/$id'
+  to: '/auth' | '/feed' | '/marketplace' | '/' | '/marketplace/$id'
   id:
     | '__root__'
     | '/_authenticated'
     | '/auth'
+    | '/_authenticated/feed'
     | '/_authenticated/marketplace'
     | '/_authenticated/'
     | '/_authenticated/marketplace/$id'
@@ -111,6 +121,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedMarketplaceRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/feed': {
+      id: '/_authenticated/feed'
+      path: '/feed'
+      fullPath: '/feed'
+      preLoaderRoute: typeof AuthenticatedFeedRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/marketplace/$id': {
       id: '/_authenticated/marketplace/$id'
       path: '/$id'
@@ -136,11 +153,13 @@ const AuthenticatedMarketplaceRouteWithChildren =
   )
 
 interface AuthenticatedRouteRouteChildren {
+  AuthenticatedFeedRoute: typeof AuthenticatedFeedRoute
   AuthenticatedMarketplaceRoute: typeof AuthenticatedMarketplaceRouteWithChildren
   AuthenticatedIndexRoute: typeof AuthenticatedIndexRoute
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
+  AuthenticatedFeedRoute: AuthenticatedFeedRoute,
   AuthenticatedMarketplaceRoute: AuthenticatedMarketplaceRouteWithChildren,
   AuthenticatedIndexRoute: AuthenticatedIndexRoute,
 }
