@@ -6,25 +6,28 @@
 // You can pass additional config via defineConfig({ vite: { ... }, etc... }) if needed.
 import { defineConfig } from "@lovable.dev/vite-tanstack-config";
 
+const nitroOutputConfig = {
+  preset: "cloudflare-module",
+  output: {
+    dir: "dist",
+    publicDir: "dist/client",
+    serverDir: "dist/server",
+  },
+  cloudflare: {
+    nodeCompat: true,
+    deployConfig: true,
+  },
+};
+
 export default defineConfig({
   vite: {
     base: "/",
     build: {
       outDir: "dist",
     },
+    nitro: nitroOutputConfig,
   },
-  nitro: {
-    preset: "cloudflare-module",
-    output: {
-      dir: "dist",
-      publicDir: "dist/client",
-      serverDir: "dist/server",
-    },
-    cloudflare: {
-      nodeCompat: true,
-      deployConfig: true,
-    },
-  },
+  nitro: true,
   tanstackStart: {
     // Redirect TanStack Start's bundled server entry to src/server.ts (our SSR error wrapper).
     // nitro/vite builds from this
