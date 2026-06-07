@@ -5,8 +5,32 @@
 //     error logger plugins, and sandbox detection (port/host/strictPort).
 // You can pass additional config via defineConfig({ vite: { ... }, etc... }) if needed.
 import { defineConfig } from "@lovable.dev/vite-tanstack-config";
+import type { UserConfig } from "vite";
+
+const nitroOutputConfig = {
+  preset: "cloudflare-module",
+  output: {
+    dir: "dist",
+    publicDir: "dist/client",
+    serverDir: "dist/server",
+  },
+  cloudflare: {
+    nodeCompat: true,
+    deployConfig: true,
+  },
+};
+
+const viteConfig = {
+  base: "/",
+  build: {
+    outDir: "dist",
+  },
+  nitro: nitroOutputConfig,
+} as UserConfig & { nitro: typeof nitroOutputConfig };
 
 export default defineConfig({
+  vite: viteConfig,
+  nitro: true,
   tanstackStart: {
     // Redirect TanStack Start's bundled server entry to src/server.ts (our SSR error wrapper).
     // nitro/vite builds from this

@@ -1,0 +1,1 @@
+import{e as o}from"./router-6cLspo9A.js";function n({title:s,description:t,variant:u}){const r=s??"",e=t?{description:t}:void 0;return u==="destructive"?o.error(r,e):o(r,e)}function c(){return{toast:n}}export{c as u};
