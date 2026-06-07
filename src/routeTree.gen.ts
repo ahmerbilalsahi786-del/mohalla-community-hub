@@ -12,6 +12,8 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as AuthenticatedIndexRouteImport } from './routes/_authenticated/index'
+import { Route as AuthenticatedVolunteerRouteImport } from './routes/_authenticated/volunteer'
+import { Route as AuthenticatedSettingsRouteImport } from './routes/_authenticated/settings'
 import { Route as AuthenticatedSafetyRouteImport } from './routes/_authenticated/safety'
 import { Route as AuthenticatedPollsRouteImport } from './routes/_authenticated/polls'
 import { Route as AuthenticatedPlacesRouteImport } from './routes/_authenticated/places'
@@ -20,6 +22,7 @@ import { Route as AuthenticatedFeedRouteImport } from './routes/_authenticated/f
 import { Route as AuthenticatedEventsRouteImport } from './routes/_authenticated/events'
 import { Route as AuthenticatedCommunityRouteImport } from './routes/_authenticated/community'
 import { Route as AuthenticatedAnnouncementsRouteImport } from './routes/_authenticated/announcements'
+import { Route as AuthenticatedAdminRouteImport } from './routes/_authenticated/admin'
 import { Route as AuthenticatedMarketplaceIdRouteImport } from './routes/_authenticated/marketplace.$id'
 
 const AuthRoute = AuthRouteImport.update({
@@ -34,6 +37,16 @@ const AuthenticatedRouteRoute = AuthenticatedRouteRouteImport.update({
 const AuthenticatedIndexRoute = AuthenticatedIndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedVolunteerRoute = AuthenticatedVolunteerRouteImport.update({
+  id: '/volunteer',
+  path: '/volunteer',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedSettingsRoute = AuthenticatedSettingsRouteImport.update({
+  id: '/settings',
+  path: '/settings',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
 const AuthenticatedSafetyRoute = AuthenticatedSafetyRouteImport.update({
@@ -78,6 +91,11 @@ const AuthenticatedAnnouncementsRoute =
     path: '/announcements',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedAdminRoute = AuthenticatedAdminRouteImport.update({
+  id: '/admin',
+  path: '/admin',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 const AuthenticatedMarketplaceIdRoute =
   AuthenticatedMarketplaceIdRouteImport.update({
     id: '/$id',
@@ -88,6 +106,7 @@ const AuthenticatedMarketplaceIdRoute =
 export interface FileRoutesByFullPath {
   '/': typeof AuthenticatedIndexRoute
   '/auth': typeof AuthRoute
+  '/admin': typeof AuthenticatedAdminRoute
   '/announcements': typeof AuthenticatedAnnouncementsRoute
   '/community': typeof AuthenticatedCommunityRoute
   '/events': typeof AuthenticatedEventsRoute
@@ -96,10 +115,13 @@ export interface FileRoutesByFullPath {
   '/places': typeof AuthenticatedPlacesRoute
   '/polls': typeof AuthenticatedPollsRoute
   '/safety': typeof AuthenticatedSafetyRoute
+  '/settings': typeof AuthenticatedSettingsRoute
+  '/volunteer': typeof AuthenticatedVolunteerRoute
   '/marketplace/$id': typeof AuthenticatedMarketplaceIdRoute
 }
 export interface FileRoutesByTo {
   '/auth': typeof AuthRoute
+  '/admin': typeof AuthenticatedAdminRoute
   '/announcements': typeof AuthenticatedAnnouncementsRoute
   '/community': typeof AuthenticatedCommunityRoute
   '/events': typeof AuthenticatedEventsRoute
@@ -108,6 +130,8 @@ export interface FileRoutesByTo {
   '/places': typeof AuthenticatedPlacesRoute
   '/polls': typeof AuthenticatedPollsRoute
   '/safety': typeof AuthenticatedSafetyRoute
+  '/settings': typeof AuthenticatedSettingsRoute
+  '/volunteer': typeof AuthenticatedVolunteerRoute
   '/': typeof AuthenticatedIndexRoute
   '/marketplace/$id': typeof AuthenticatedMarketplaceIdRoute
 }
@@ -115,6 +139,7 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
   '/auth': typeof AuthRoute
+  '/_authenticated/admin': typeof AuthenticatedAdminRoute
   '/_authenticated/announcements': typeof AuthenticatedAnnouncementsRoute
   '/_authenticated/community': typeof AuthenticatedCommunityRoute
   '/_authenticated/events': typeof AuthenticatedEventsRoute
@@ -123,6 +148,8 @@ export interface FileRoutesById {
   '/_authenticated/places': typeof AuthenticatedPlacesRoute
   '/_authenticated/polls': typeof AuthenticatedPollsRoute
   '/_authenticated/safety': typeof AuthenticatedSafetyRoute
+  '/_authenticated/settings': typeof AuthenticatedSettingsRoute
+  '/_authenticated/volunteer': typeof AuthenticatedVolunteerRoute
   '/_authenticated/': typeof AuthenticatedIndexRoute
   '/_authenticated/marketplace/$id': typeof AuthenticatedMarketplaceIdRoute
 }
@@ -131,6 +158,7 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/auth'
+    | '/admin'
     | '/announcements'
     | '/community'
     | '/events'
@@ -139,10 +167,13 @@ export interface FileRouteTypes {
     | '/places'
     | '/polls'
     | '/safety'
+    | '/settings'
+    | '/volunteer'
     | '/marketplace/$id'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/auth'
+    | '/admin'
     | '/announcements'
     | '/community'
     | '/events'
@@ -151,12 +182,15 @@ export interface FileRouteTypes {
     | '/places'
     | '/polls'
     | '/safety'
+    | '/settings'
+    | '/volunteer'
     | '/'
     | '/marketplace/$id'
   id:
     | '__root__'
     | '/_authenticated'
     | '/auth'
+    | '/_authenticated/admin'
     | '/_authenticated/announcements'
     | '/_authenticated/community'
     | '/_authenticated/events'
@@ -165,6 +199,8 @@ export interface FileRouteTypes {
     | '/_authenticated/places'
     | '/_authenticated/polls'
     | '/_authenticated/safety'
+    | '/_authenticated/settings'
+    | '/_authenticated/volunteer'
     | '/_authenticated/'
     | '/_authenticated/marketplace/$id'
   fileRoutesById: FileRoutesById
@@ -195,6 +231,20 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof AuthenticatedIndexRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/volunteer': {
+      id: '/_authenticated/volunteer'
+      path: '/volunteer'
+      fullPath: '/volunteer'
+      preLoaderRoute: typeof AuthenticatedVolunteerRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/settings': {
+      id: '/_authenticated/settings'
+      path: '/settings'
+      fullPath: '/settings'
+      preLoaderRoute: typeof AuthenticatedSettingsRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/safety': {
@@ -253,6 +303,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAnnouncementsRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/admin': {
+      id: '/_authenticated/admin'
+      path: '/admin'
+      fullPath: '/admin'
+      preLoaderRoute: typeof AuthenticatedAdminRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/marketplace/$id': {
       id: '/_authenticated/marketplace/$id'
       path: '/$id'
@@ -278,6 +335,7 @@ const AuthenticatedMarketplaceRouteWithChildren =
   )
 
 interface AuthenticatedRouteRouteChildren {
+  AuthenticatedAdminRoute: typeof AuthenticatedAdminRoute
   AuthenticatedAnnouncementsRoute: typeof AuthenticatedAnnouncementsRoute
   AuthenticatedCommunityRoute: typeof AuthenticatedCommunityRoute
   AuthenticatedEventsRoute: typeof AuthenticatedEventsRoute
@@ -286,10 +344,13 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedPlacesRoute: typeof AuthenticatedPlacesRoute
   AuthenticatedPollsRoute: typeof AuthenticatedPollsRoute
   AuthenticatedSafetyRoute: typeof AuthenticatedSafetyRoute
+  AuthenticatedSettingsRoute: typeof AuthenticatedSettingsRoute
+  AuthenticatedVolunteerRoute: typeof AuthenticatedVolunteerRoute
   AuthenticatedIndexRoute: typeof AuthenticatedIndexRoute
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
+  AuthenticatedAdminRoute: AuthenticatedAdminRoute,
   AuthenticatedAnnouncementsRoute: AuthenticatedAnnouncementsRoute,
   AuthenticatedCommunityRoute: AuthenticatedCommunityRoute,
   AuthenticatedEventsRoute: AuthenticatedEventsRoute,
@@ -298,6 +359,8 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedPlacesRoute: AuthenticatedPlacesRoute,
   AuthenticatedPollsRoute: AuthenticatedPollsRoute,
   AuthenticatedSafetyRoute: AuthenticatedSafetyRoute,
+  AuthenticatedSettingsRoute: AuthenticatedSettingsRoute,
+  AuthenticatedVolunteerRoute: AuthenticatedVolunteerRoute,
   AuthenticatedIndexRoute: AuthenticatedIndexRoute,
 }
 
