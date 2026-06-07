@@ -46,7 +46,7 @@ export function SafetyWidget() {
   const count = alerts.length;
 
   return (
-    <Link to="/safety">
+    <Link to={"/safety" as string as any}>
       <div className="group cursor-pointer rounded-2xl border border-border bg-card p-4 shadow-sm hover:shadow-md transition-shadow">
         <div className="flex items-center justify-between mb-3">
           <div className="flex items-center gap-2">
