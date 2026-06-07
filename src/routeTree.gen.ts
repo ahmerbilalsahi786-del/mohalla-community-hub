@@ -18,6 +18,7 @@ import { Route as AuthenticatedSafetyRouteImport } from './routes/_authenticated
 import { Route as AuthenticatedPollsRouteImport } from './routes/_authenticated/polls'
 import { Route as AuthenticatedPlacesRouteImport } from './routes/_authenticated/places'
 import { Route as AuthenticatedMarketplaceRouteImport } from './routes/_authenticated/marketplace'
+import { Route as AuthenticatedHelpRouteImport } from './routes/_authenticated/help'
 import { Route as AuthenticatedFeedRouteImport } from './routes/_authenticated/feed'
 import { Route as AuthenticatedEventsRouteImport } from './routes/_authenticated/events'
 import { Route as AuthenticatedCommunityRouteImport } from './routes/_authenticated/community'
@@ -70,6 +71,11 @@ const AuthenticatedMarketplaceRoute =
     path: '/marketplace',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedHelpRoute = AuthenticatedHelpRouteImport.update({
+  id: '/help',
+  path: '/help',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 const AuthenticatedFeedRoute = AuthenticatedFeedRouteImport.update({
   id: '/feed',
   path: '/feed',
@@ -111,6 +117,7 @@ export interface FileRoutesByFullPath {
   '/community': typeof AuthenticatedCommunityRoute
   '/events': typeof AuthenticatedEventsRoute
   '/feed': typeof AuthenticatedFeedRoute
+  '/help': typeof AuthenticatedHelpRoute
   '/marketplace': typeof AuthenticatedMarketplaceRouteWithChildren
   '/places': typeof AuthenticatedPlacesRoute
   '/polls': typeof AuthenticatedPollsRoute
@@ -126,6 +133,7 @@ export interface FileRoutesByTo {
   '/community': typeof AuthenticatedCommunityRoute
   '/events': typeof AuthenticatedEventsRoute
   '/feed': typeof AuthenticatedFeedRoute
+  '/help': typeof AuthenticatedHelpRoute
   '/marketplace': typeof AuthenticatedMarketplaceRouteWithChildren
   '/places': typeof AuthenticatedPlacesRoute
   '/polls': typeof AuthenticatedPollsRoute
@@ -144,6 +152,7 @@ export interface FileRoutesById {
   '/_authenticated/community': typeof AuthenticatedCommunityRoute
   '/_authenticated/events': typeof AuthenticatedEventsRoute
   '/_authenticated/feed': typeof AuthenticatedFeedRoute
+  '/_authenticated/help': typeof AuthenticatedHelpRoute
   '/_authenticated/marketplace': typeof AuthenticatedMarketplaceRouteWithChildren
   '/_authenticated/places': typeof AuthenticatedPlacesRoute
   '/_authenticated/polls': typeof AuthenticatedPollsRoute
@@ -163,6 +172,7 @@ export interface FileRouteTypes {
     | '/community'
     | '/events'
     | '/feed'
+    | '/help'
     | '/marketplace'
     | '/places'
     | '/polls'
@@ -178,6 +188,7 @@ export interface FileRouteTypes {
     | '/community'
     | '/events'
     | '/feed'
+    | '/help'
     | '/marketplace'
     | '/places'
     | '/polls'
@@ -195,6 +206,7 @@ export interface FileRouteTypes {
     | '/_authenticated/community'
     | '/_authenticated/events'
     | '/_authenticated/feed'
+    | '/_authenticated/help'
     | '/_authenticated/marketplace'
     | '/_authenticated/places'
     | '/_authenticated/polls'
@@ -275,6 +287,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedMarketplaceRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/help': {
+      id: '/_authenticated/help'
+      path: '/help'
+      fullPath: '/help'
+      preLoaderRoute: typeof AuthenticatedHelpRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/feed': {
       id: '/_authenticated/feed'
       path: '/feed'
@@ -340,6 +359,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedCommunityRoute: typeof AuthenticatedCommunityRoute
   AuthenticatedEventsRoute: typeof AuthenticatedEventsRoute
   AuthenticatedFeedRoute: typeof AuthenticatedFeedRoute
+  AuthenticatedHelpRoute: typeof AuthenticatedHelpRoute
   AuthenticatedMarketplaceRoute: typeof AuthenticatedMarketplaceRouteWithChildren
   AuthenticatedPlacesRoute: typeof AuthenticatedPlacesRoute
   AuthenticatedPollsRoute: typeof AuthenticatedPollsRoute
@@ -355,6 +375,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedCommunityRoute: AuthenticatedCommunityRoute,
   AuthenticatedEventsRoute: AuthenticatedEventsRoute,
   AuthenticatedFeedRoute: AuthenticatedFeedRoute,
+  AuthenticatedHelpRoute: AuthenticatedHelpRoute,
   AuthenticatedMarketplaceRoute: AuthenticatedMarketplaceRouteWithChildren,
   AuthenticatedPlacesRoute: AuthenticatedPlacesRoute,
   AuthenticatedPollsRoute: AuthenticatedPollsRoute,
