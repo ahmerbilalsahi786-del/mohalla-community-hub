@@ -3,7 +3,7 @@ import { AdminLayout } from './AdminLayout'
 import {
   useAdminGetCommunity, useAdminUpdateCommunity, useAdminGetStats,
   getAdminGetCommunityQueryKey,
-} from '@workspace/api-client-react'
+} from '@/lib/generated/api'
 import { useQueryClient } from '@tanstack/react-query'
 import { useUpload } from '@workspace/object-storage-web'
 import { Building2, Users, FileText, ShoppingBag, ImagePlus, Save, Loader2 } from 'lucide-react'

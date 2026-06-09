@@ -3,7 +3,7 @@ import { AdminLayout } from './AdminLayout'
 import {
   useAdminCreateAnnouncement, useAdminListPosts,
   getAdminListPostsQueryKey,
-} from '@workspace/api-client-react'
+} from '@/lib/generated/api'
 import { useQueryClient } from '@tanstack/react-query'
 import { Megaphone, Pin, Share2, Copy, CheckCheck, Loader2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'

@@ -1,6 +1,6 @@
 import { useState, useRef } from 'react'
 import { Link } from 'wouter'
-import { useListListings, useCreateListing, getListListingsQueryKey } from '@workspace/api-client-react'
+import { useListListings, useCreateListing, getListListingsQueryKey } from '@/lib/generated/api'
 import { useUpload } from '@workspace/object-storage-web'
 import { useQueryClient } from '@tanstack/react-query'
 import { Sidebar } from '@/components/dashboard/sidebar'

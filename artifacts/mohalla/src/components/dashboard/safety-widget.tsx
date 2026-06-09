@@ -1,5 +1,5 @@
 import { Link } from 'wouter'
-import { useListAlerts } from '@workspace/api-client-react'
+import { useListAlerts } from '@/lib/generated/api'
 import { AlertTriangle, Flame, ShieldAlert, Zap, Droplets, HelpCircle, CheckCircle2, ChevronRight } from 'lucide-react'
 import { cn } from '@/lib/utils'
 

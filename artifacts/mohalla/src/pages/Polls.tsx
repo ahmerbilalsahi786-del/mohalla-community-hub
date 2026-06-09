@@ -2,7 +2,7 @@ import { useState } from 'react'
 import {
   useListPolls, useCreatePoll, useVotePoll,
   getListPollsQueryKey,
-} from '@workspace/api-client-react'
+} from '@/lib/generated/api'
 import { useQueryClient } from '@tanstack/react-query'
 import { Sidebar } from '@/components/dashboard/sidebar'
 import { TopNavbar } from '@/components/dashboard/top-navbar'

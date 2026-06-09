@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { Link } from 'wouter'
-import { useGetListing, useUpdateListingStatus, getListListingsQueryKey } from '@workspace/api-client-react'
+import { useGetListing, useUpdateListingStatus, getListListingsQueryKey } from '@/lib/generated/api'
 import { useQueryClient } from '@tanstack/react-query'
 import { Sidebar } from '@/components/dashboard/sidebar'
 import { TopNavbar } from '@/components/dashboard/top-navbar'

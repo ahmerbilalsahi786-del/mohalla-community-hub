@@ -3,7 +3,7 @@ import { Sidebar } from '@/components/dashboard/sidebar'
 import { TopNavbar } from '@/components/dashboard/top-navbar'
 import { Users, FileText, Building2, Megaphone, ShieldCheck } from 'lucide-react'
 import { cn } from '@/lib/utils'
-import { useAdminListMembers } from '@workspace/api-client-react'
+import { useAdminListMembers } from '@/lib/generated/api'
 
 const TABS = [
   { label: 'Members',       href: '/admin/members',       icon: Users },
