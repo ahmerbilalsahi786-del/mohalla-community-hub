@@ -1,6 +1,7 @@
 {
   "buildCommand": "cd artifacts/mohalla && npm install && npm run build",
   "outputDirectory": "artifacts/mohalla/dist",
+  "installCommand": "echo 'skip root install'",
   "framework": null,
   "rewrites": [
     {
