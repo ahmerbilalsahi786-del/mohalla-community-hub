@@ -6,11 +6,18 @@ export default defineConfig({
   plugins: [react()],
   resolve: {
     alias: {
-      "@": path.resolve(__dirname, "./src"),
+      "@": path.resolve(
+        __dirname, 
+        "./artifacts/mohalla/src"
+      ),
     },
   },
   build: {
-    outDir: "dist",
+    outDir: "artifacts/mohalla/dist",
+    rollupOptions: {
+      input: "./artifacts/mohalla/index.html"
+    }
   },
   base: "/",
+  root: "./artifacts/mohalla",
 })
