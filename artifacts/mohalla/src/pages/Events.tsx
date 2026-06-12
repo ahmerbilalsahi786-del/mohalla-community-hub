@@ -12,7 +12,7 @@ import {
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
-import { useUpload } from '@workspace/object-storage-web'
+import { useUpload } from '@/lib/useUpload'
 
 type EventItem = {
   id: number; title: string; description: string; date: string; time: string;

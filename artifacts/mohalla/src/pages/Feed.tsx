@@ -2,7 +2,7 @@ import { useState, useCallback, useRef, useEffect } from 'react'
 import { useListPosts, useCreatePost, useToggleLike, useListComments, useCreateComment, useListEvents, useListPolls } from '@/lib/generated/api'
 import { useQueryClient } from '@tanstack/react-query'
 import { getListPostsQueryKey, getListCommentsQueryKey } from '@/lib/generated/api'
-import { useUpload } from '@workspace/object-storage-web'
+
 import { Sidebar } from '@/components/dashboard/sidebar'
 import { TopNavbar } from '@/components/dashboard/top-navbar'
 import {
@@ -356,10 +356,27 @@ function CreatePostModal({ onClose, initialType = 'general' }: { onClose: () => 
   const fileInputRef = useRef<HTMLInputElement>(null)
   const queryClient = useQueryClient()
 
-  const { uploadFile, isUploading } = useUpload({
-    basePath: '/api/storage',
-    onError: (err) => setUploadError(err.message),
-  })
+const [isUploading, setIsUploading] = useState(false)
+
+const uploadFile = async (file: File) => {
+  setIsUploading(true)
+  try {
+    const formData = new FormData()
+    formData.append('file', file)
+    formData.append('upload_preset', 'mohalla_uploads')
+    const res = await fetch(
+      `https://api.cloudinary.com/v1_1/${import.meta.env.VITE_CLOUDINARY_CLOUD_NAME}/image/upload`,
+      { method: 'POST', body: formData }
+    )
+    const data = await res.json()
+    setIsUploading(false)
+    return { objectPath: data.secure_url }
+  } catch (err: any) {
+    setUploadError(err.message)
+    setIsUploading(false)
+    return null
+  }
+}
 
   const createPost = useCreatePost({
     mutation: {
@@ -381,7 +398,7 @@ function CreatePostModal({ onClose, initialType = 'general' }: { onClose: () => 
     for (const file of toUpload) {
       const result = await uploadFile(file)
       if (result) {
-        const servingUrl = `/api/storage${result.objectPath}`
+        const servingUrl = result.objectPath
         setImageUrls((prev) => [...prev, servingUrl])
       }
     }

@@ -1,7 +1,7 @@
 import { useState, useRef } from 'react'
 import { Link } from 'wouter'
 import { useListListings, useCreateListing, getListListingsQueryKey } from '@/lib/generated/api'
-import { useUpload } from '@workspace/object-storage-web'
+import { useUpload } from '@/lib/useUpload'
 import { useQueryClient } from '@tanstack/react-query'
 import { Sidebar } from '@/components/dashboard/sidebar'
 import { TopNavbar } from '@/components/dashboard/top-navbar'

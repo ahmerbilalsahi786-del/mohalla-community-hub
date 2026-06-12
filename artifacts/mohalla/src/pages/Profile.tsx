@@ -8,7 +8,7 @@ import {
   User, Edit2, MapPin, Calendar, Phone, MessageSquare, ShoppingBag,
   Heart, Pin, X, Check, Upload, Loader2, ExternalLink,
 } from 'lucide-react'
-import { useUpload } from '@workspace/object-storage-web'
+import { useUpload } from '@/lib/useUpload'
 
 const ME = 'ahmed'
 

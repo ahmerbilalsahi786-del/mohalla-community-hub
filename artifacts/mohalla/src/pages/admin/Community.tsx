@@ -5,7 +5,7 @@ import {
   getAdminGetCommunityQueryKey,
 } from '@/lib/generated/api'
 import { useQueryClient } from '@tanstack/react-query'
-import { useUpload } from '@workspace/object-storage-web'
+import { useUpload } from '@/lib/useUpload'
 import { Building2, Users, FileText, ShoppingBag, ImagePlus, Save, Loader2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
