@@ -1,7 +1,7 @@
 {
-  "buildCommand": "npm run build",
-  "outputDirectory": "dist",
-  "framework": "vite",
+  "buildCommand": "cd artifacts/mohalla && npm install && npm run build",
+  "outputDirectory": "artifacts/mohalla/dist",
+  "framework": null,
   "rewrites": [
     {
       "source": "/(.*)",
