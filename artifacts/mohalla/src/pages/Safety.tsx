@@ -3,7 +3,7 @@ import {
   useListAlerts, useCreateAlert, useResolveAlert,
   useListAlertComments, useCreateAlertComment,
   getListAlertsQueryKey, getListAlertCommentsQueryKey
-} from '@workspace/api-client-react'
+} from '@/lib/generated/api'
 import { useQueryClient } from '@tanstack/react-query'
 import { Sidebar } from '@/components/dashboard/sidebar'
 import { TopNavbar } from '@/components/dashboard/top-navbar'

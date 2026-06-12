@@ -2,7 +2,7 @@ import { AdminLayout } from './AdminLayout'
 import {
   useAdminListPosts, useAdminDeletePost, useAdminTogglePin,
   getAdminListPostsQueryKey,
-} from '@workspace/api-client-react'
+} from '@/lib/generated/api'
 import { useQueryClient } from '@tanstack/react-query'
 import { Pin, PinOff, Trash2, FileText } from 'lucide-react'
 import { cn } from '@/lib/utils'

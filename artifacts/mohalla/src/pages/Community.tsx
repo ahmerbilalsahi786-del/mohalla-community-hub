@@ -1,6 +1,6 @@
 import { Sidebar } from '@/components/dashboard/sidebar'
 import { TopNavbar } from '@/components/dashboard/top-navbar'
-import { useAdminListMembers } from '@workspace/api-client-react'
+import { useAdminListMembers } from '@/lib/generated/api'
 import { Users, MapPin, Phone } from 'lucide-react'
 import { Link } from 'wouter'
 import { cn } from '@/lib/utils'

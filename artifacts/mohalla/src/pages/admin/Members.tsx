@@ -4,7 +4,7 @@ import {
   useAdminListMembers, useAdminApproveMember, useAdminRejectMember,
   useAdminDeleteMember, useAdminVerifyMember, useAdminSetMemberRole,
   getAdminListMembersQueryKey,
-} from '@workspace/api-client-react'
+} from '@/lib/generated/api'
 import { useQueryClient } from '@tanstack/react-query'
 import {
   CheckCircle2, XCircle, Trash2, BadgeCheck, ChevronDown, UserCheck, Clock, Users
