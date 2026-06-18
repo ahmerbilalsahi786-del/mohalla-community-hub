@@ -143,8 +143,8 @@ function CreatePollModal({ onClose }: { onClose: () => void }) {
   const updateOption = (i: number, v: string) => setOptions(p => p.map((o, j) => j === i ? v : o))
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm">
-      <div className="w-full max-w-lg bg-card rounded-2xl shadow-2xl border border-border overflow-hidden max-h-[90vh] flex flex-col">
+    <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/40 p-3 backdrop-blur-sm sm:items-center sm:p-4">
+      <div className="flex max-h-[calc(100dvh-1.5rem)] w-full max-w-lg flex-col overflow-hidden rounded-2xl border border-border bg-card shadow-2xl">
         <div className="flex items-center justify-between px-5 py-4 border-b border-border shrink-0">
           <h2 className="text-lg font-bold text-foreground">Create Poll</h2>
           <button onClick={onClose} className="flex h-8 w-8 items-center justify-center rounded-lg hover:bg-muted text-muted-foreground">
@@ -152,7 +152,7 @@ function CreatePollModal({ onClose }: { onClose: () => void }) {
           </button>
         </div>
 
-        <div className="overflow-y-auto flex-1 p-5 space-y-4">
+        <div className="flex-1 space-y-4 overflow-y-auto p-4 sm:p-5">
           <div>
             <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-1.5 block">Question *</label>
             <textarea value={question} onChange={e => setQuestion(e.target.value)} rows={2}
@@ -200,7 +200,7 @@ function CreatePollModal({ onClose }: { onClose: () => void }) {
           </div>
         </div>
 
-        <div className="flex items-center justify-end gap-2 px-5 py-4 border-t border-border bg-muted/20 shrink-0">
+        <div className="flex shrink-0 items-center justify-end gap-2 border-t border-border bg-muted/20 px-4 py-3 sm:px-5 sm:py-4">
           <Button variant="ghost" onClick={onClose} className="rounded-xl">Cancel</Button>
           <Button
             onClick={() => {
@@ -233,16 +233,16 @@ export default function Polls() {
         <div className="absolute -right-32 bottom-1/4 h-96 w-96 rounded-full bg-accent/5 blur-3xl" />
       </div>
       <Sidebar />
-      <div className="relative flex flex-1 flex-col overflow-hidden">
+      <div className="relative flex min-w-0 flex-1 flex-col overflow-hidden">
         <TopNavbar />
-        <main className="flex-1 overflow-y-auto p-6 pb-24">
+        <main className="flex-1 overflow-y-auto p-3 pb-24 sm:p-6">
           <div className="max-w-2xl mx-auto">
-            <div className="mb-6 flex items-center justify-between">
+            <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
               <div>
                 <h2 className="text-xl font-bold text-foreground">Polls</h2>
                 <p className="text-sm text-muted-foreground mt-0.5">{active.length} active poll{active.length !== 1 ? 's' : ''}</p>
               </div>
-              <Button onClick={() => setShowCreate(true)} className="gap-2 rounded-xl">
+              <Button onClick={() => setShowCreate(true)} className="w-full gap-2 rounded-xl sm:w-auto">
                 <Plus size={16} /> Create Poll
               </Button>
             </div>
@@ -289,7 +289,7 @@ export default function Polls() {
 
       <button
         onClick={() => setShowCreate(true)}
-        className="fixed bottom-8 right-8 flex h-14 w-14 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-lg shadow-primary/30 hover:bg-primary/90 hover:scale-105 transition-all z-40"
+        className="fixed bottom-[calc(5.25rem+env(safe-area-inset-bottom))] right-4 z-40 flex h-14 w-14 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-lg shadow-primary/30 transition-all hover:scale-105 hover:bg-primary/90 md:bottom-8 md:right-8"
       >
         <Plus size={24} />
       </button>

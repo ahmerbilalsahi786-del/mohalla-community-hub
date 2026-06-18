@@ -425,8 +425,8 @@ const uploadFile = async (file: File) => {
   ]
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm">
-      <div className="w-full max-w-lg bg-card rounded-2xl shadow-2xl border border-border overflow-hidden">
+    <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/40 p-3 backdrop-blur-sm sm:items-center sm:p-4">
+      <div className="flex max-h-[calc(100dvh-1.5rem)] w-full max-w-lg flex-col overflow-hidden rounded-2xl border border-border bg-card shadow-2xl">
         {/* Header */}
         <div className="flex items-center justify-between px-5 py-4 border-b border-border">
           <h2 className="text-lg font-bold text-foreground">Create Post</h2>
@@ -435,7 +435,7 @@ const uploadFile = async (file: File) => {
           </button>
         </div>
 
-        <div className="p-5 space-y-4">
+        <div className="flex-1 space-y-4 overflow-y-auto p-4 sm:p-5">
           {/* Author row */}
           <div className="flex items-center gap-3">
             <AvatarInitials name="Ahmed Khan" />
@@ -448,7 +448,7 @@ const uploadFile = async (file: File) => {
           {/* Category select */}
           <div>
             <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-1.5 block">Category</label>
-            <div className="grid grid-cols-3 gap-2">
+            <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
               {typeOptions.map((opt) => (
                 <button
                   key={opt.value}
@@ -555,7 +555,7 @@ const uploadFile = async (file: File) => {
         </div>
 
         {/* Footer */}
-        <div className="flex items-center justify-end gap-2 px-5 py-4 border-t border-border bg-muted/20">
+        <div className="flex shrink-0 items-center justify-end gap-2 border-t border-border bg-muted/20 px-4 py-3 sm:px-5 sm:py-4">
           <Button variant="ghost" onClick={onClose} className="rounded-xl">Cancel</Button>
           <Button
             onClick={handleSubmit}
@@ -624,13 +624,13 @@ export default function Feed() {
 
       <Sidebar />
 
-      <div className="relative flex flex-1 flex-col overflow-hidden">
+      <div className="relative flex min-w-0 flex-1 flex-col overflow-hidden">
         <TopNavbar />
 
         <main className="flex-1 overflow-y-auto">
           {/* Category filter */}
-          <div className="sticky top-0 z-30 bg-background/90 backdrop-blur-md border-b border-border px-6 py-3">
-            <div className="flex items-center gap-2 overflow-x-auto no-scrollbar">
+          <div className="sticky top-0 z-30 border-b border-border bg-background/90 px-3 py-3 backdrop-blur-md sm:px-6">
+            <div className="no-scrollbar flex items-center gap-2 overflow-x-auto pb-1">
               {CATEGORIES.map((cat) => {
                 const Icon = cat.icon
                 return (
@@ -652,7 +652,7 @@ export default function Feed() {
             </div>
           </div>
 
-          <div className="p-6 max-w-2xl mx-auto space-y-4 pb-24">
+          <div className="mx-auto max-w-2xl space-y-4 p-3 pb-24 sm:p-6">
             <EventWidget />
             <PollWidget />
 
@@ -711,7 +711,7 @@ export default function Feed() {
       {/* Floating create button */}
       <button
         onClick={() => setShowCreate(true)}
-        className="fixed bottom-8 right-8 flex h-14 w-14 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-lg shadow-primary/30 hover:bg-primary/90 hover:scale-105 transition-all z-40"
+        className="fixed bottom-[calc(5.25rem+env(safe-area-inset-bottom))] right-4 z-40 flex h-14 w-14 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-lg shadow-primary/30 transition-all hover:scale-105 hover:bg-primary/90 md:bottom-8 md:right-8"
       >
         <Plus size={24} />
       </button>

@@ -1,9 +1,9 @@
 import { useState } from 'react'
 import { Link, useLocation } from 'wouter'
-import { Eye, EyeOff, Home, LogIn } from 'lucide-react'
+import { Eye, EyeOff, LogIn, PlayCircle } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import { setToken } from '@/lib/auth'
+import { setDemoToken, setToken } from '@/lib/auth'
 import { useToast } from '@/hooks/use-toast'
 import { supabase } from '@/integrations/supabase/client'
 
@@ -15,13 +15,18 @@ export default function Login() {
   const [showPw, setShowPw] = useState(false)
   const [loading, setLoading] = useState(false)
 
-  const fillDemo = () => {
-    setEmail('ahmed@mohalla.app')
-    setPassword('demo1234')
+  const enterDemo = () => {
+    setDemoToken()
+    navigate('/')
   }
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault()
+    if (email.trim().toLowerCase() === 'demo@mohalla.app' || email.trim().toLowerCase() === 'ahmed@mohalla.app') {
+      enterDemo()
+      return
+    }
+
     setLoading(true)
     try {
       const { data, error } = await supabase.auth.signInWithPassword({
@@ -63,12 +68,15 @@ export default function Login() {
         {/* Demo credentials banner */}
         <button
           type="button"
-          onClick={fillDemo}
+          onClick={enterDemo}
           className="mb-5 w-full rounded-xl border border-primary/20 bg-primary/5 px-4 py-3 text-left hover:bg-primary/10 transition-colors"
         >
-          <p className="text-xs font-semibold text-primary uppercase tracking-wide mb-0.5">Demo Account</p>
-          <p className="text-sm text-foreground font-medium">ahmed@mohalla.app</p>
-          <p className="text-xs text-muted-foreground">Password: demo1234 · Click to auto-fill</p>
+          <p className="text-xs font-semibold text-primary uppercase tracking-wide mb-0.5">Demo Mode</p>
+          <p className="flex items-center gap-2 text-sm font-medium text-foreground">
+            <PlayCircle size={16} className="text-primary" />
+            Continue as Ahmed Khan
+          </p>
+          <p className="text-xs text-muted-foreground">No signup or password needed for previewing the app.</p>
         </button>
 
         <form onSubmit={submit} className="space-y-4">

@@ -25,7 +25,7 @@ export function AdminLayout({ children }: { children: React.ReactNode }) {
 
       <Sidebar />
 
-      <div className="relative flex flex-1 flex-col overflow-hidden">
+      <div className="relative flex min-w-0 flex-1 flex-col overflow-hidden">
         <TopNavbar />
 
         {/* Admin sub-nav */}
@@ -63,7 +63,7 @@ export function AdminLayout({ children }: { children: React.ReactNode }) {
           </div>
         </div>
 
-        <main className="flex-1 overflow-y-auto p-6">
+        <main className="flex-1 overflow-y-auto p-3 pb-24 sm:p-6 md:pb-6">
           {children}
         </main>
       </div>

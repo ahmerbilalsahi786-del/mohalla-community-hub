@@ -50,6 +50,7 @@ export function Sidebar() {
     <aside
       className={cn(
         'relative flex h-screen shrink-0 flex-col bg-sidebar text-sidebar-foreground transition-all duration-300 ease-in-out sticky top-0 self-start overflow-hidden',
+        'hidden md:flex',
         collapsed ? 'w-20' : 'w-64'
       )}
     >

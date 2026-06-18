@@ -274,8 +274,8 @@ function ReportAlertModal({ onClose }: { onClose: () => void }) {
   ]
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm">
-      <div className="w-full max-w-lg bg-card rounded-2xl shadow-2xl border border-border overflow-hidden max-h-[90vh] flex flex-col">
+    <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/40 p-3 backdrop-blur-sm sm:items-center sm:p-4">
+      <div className="flex max-h-[calc(100dvh-1.5rem)] w-full max-w-lg flex-col overflow-hidden rounded-2xl border border-border bg-card shadow-2xl">
         <div className="flex items-center justify-between px-5 py-4 border-b border-border shrink-0">
           <h2 className="text-lg font-bold text-foreground">Report Safety Alert</h2>
           <button onClick={onClose} className="flex h-8 w-8 items-center justify-center rounded-lg hover:bg-muted text-muted-foreground">
@@ -283,7 +283,7 @@ function ReportAlertModal({ onClose }: { onClose: () => void }) {
           </button>
         </div>
 
-        <div className="overflow-y-auto flex-1 p-5 space-y-4">
+        <div className="flex-1 space-y-4 overflow-y-auto p-4 sm:p-5">
           {/* Severity */}
           <div>
             <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-1.5 block">Severity</label>
@@ -309,7 +309,7 @@ function ReportAlertModal({ onClose }: { onClose: () => void }) {
           {/* Type */}
           <div>
             <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-1.5 block">Type</label>
-            <div className="grid grid-cols-3 gap-2">
+            <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
               {typeOptions.map((opt) => (
                 <button
                   key={opt.value}
@@ -367,7 +367,7 @@ function ReportAlertModal({ onClose }: { onClose: () => void }) {
           </div>
         </div>
 
-        <div className="flex items-center justify-end gap-2 px-5 py-4 border-t border-border bg-muted/20 shrink-0">
+        <div className="flex shrink-0 items-center justify-end gap-2 border-t border-border bg-muted/20 px-4 py-3 sm:px-5 sm:py-4">
           <Button variant="ghost" onClick={onClose} className="rounded-xl">Cancel</Button>
           <Button
             onClick={() => createAlert.mutate({ data: { type, title: title.trim(), description: description.trim(), locationDetail: location.trim(), severity } })}
@@ -410,13 +410,13 @@ export default function Safety() {
 
       <Sidebar />
 
-      <div className="relative flex flex-1 flex-col overflow-hidden">
+      <div className="relative flex min-w-0 flex-1 flex-col overflow-hidden">
         <TopNavbar />
 
-        <main className="flex-1 overflow-y-auto p-6 pb-24 max-w-2xl mx-auto w-full">
+        <main className="mx-auto w-full max-w-2xl flex-1 overflow-y-auto p-3 pb-24 sm:p-6">
 
           {/* Header row */}
-          <div className="mb-6 flex items-center justify-between">
+          <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <div>
               <h2 className="text-xl font-bold text-foreground">Safety & Alerts</h2>
               <p className="text-sm text-muted-foreground mt-0.5">
@@ -425,7 +425,7 @@ export default function Safety() {
             </div>
             <Button
               onClick={() => setShowReport(true)}
-              className="gap-2 rounded-xl bg-red-600 text-white hover:bg-red-700 shadow-md shadow-red-600/20"
+              className="w-full gap-2 rounded-xl bg-red-600 text-white shadow-md shadow-red-600/20 hover:bg-red-700 sm:w-auto"
             >
               <Plus size={16} />
               Report Alert
@@ -486,7 +486,7 @@ export default function Safety() {
       {/* FAB */}
       <button
         onClick={() => setShowReport(true)}
-        className="fixed bottom-8 right-8 flex h-14 w-14 items-center justify-center rounded-full bg-red-600 text-white shadow-lg shadow-red-600/30 hover:bg-red-700 hover:scale-105 transition-all z-40"
+        className="fixed bottom-[calc(5.25rem+env(safe-area-inset-bottom))] right-4 z-40 flex h-14 w-14 items-center justify-center rounded-full bg-red-600 text-white shadow-lg shadow-red-600/30 transition-all hover:scale-105 hover:bg-red-700 md:bottom-8 md:right-8"
       >
         <Plus size={24} />
       </button>

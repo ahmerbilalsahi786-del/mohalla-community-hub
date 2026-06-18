@@ -114,7 +114,7 @@ export default function ProfilePage() {
     return (
       <div className="flex min-h-screen bg-background">
         <Sidebar />
-        <div className="flex flex-1 flex-col overflow-hidden">
+        <div className="flex min-w-0 flex-1 flex-col overflow-hidden">
           <TopNavbar />
           <main className="flex-1 flex items-center justify-center">
             <Loader2 size={32} className="animate-spin text-primary" />
@@ -128,7 +128,7 @@ export default function ProfilePage() {
     return (
       <div className="flex min-h-screen bg-background">
         <Sidebar />
-        <div className="flex flex-1 flex-col overflow-hidden">
+        <div className="flex min-w-0 flex-1 flex-col overflow-hidden">
           <TopNavbar />
           <main className="flex-1 flex flex-col items-center justify-center gap-3">
             <User size={40} className="text-muted-foreground/40" />
@@ -145,9 +145,9 @@ export default function ProfilePage() {
   return (
     <div className="flex min-h-screen bg-background">
       <Sidebar />
-      <div className="flex flex-1 flex-col overflow-hidden">
+      <div className="flex min-w-0 flex-1 flex-col overflow-hidden">
         <TopNavbar />
-        <main className="flex-1 overflow-y-auto p-6 pb-24">
+        <main className="flex-1 overflow-y-auto p-3 pb-24 sm:p-6">
           <div className="max-w-3xl mx-auto space-y-6">
 
             {/* Profile Card */}

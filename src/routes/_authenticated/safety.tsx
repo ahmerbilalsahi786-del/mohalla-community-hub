@@ -66,13 +66,13 @@ function CreateAlertModal({ onClose, userId }: { onClose: () => void; userId: st
   });
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm p-4">
-      <div className="w-full max-w-lg rounded-2xl border border-border bg-card shadow-2xl overflow-hidden">
-        <div className="flex items-center justify-between border-b border-border px-5 py-4">
+    <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/40 p-3 backdrop-blur-sm sm:items-center sm:p-4">
+      <div className="flex max-h-[calc(100dvh-1.5rem)] w-full max-w-lg flex-col overflow-hidden rounded-2xl border border-border bg-card shadow-2xl">
+        <div className="flex shrink-0 items-center justify-between border-b border-border px-5 py-4">
           <h2 className="font-bold">Report Safety Alert</h2>
           <button onClick={onClose} className="rounded-lg p-1 hover:bg-muted"><X size={18} /></button>
         </div>
-        <div className="p-5 space-y-4">
+        <div className="flex-1 space-y-4 overflow-y-auto p-4 sm:p-5">
           <div>
             <label className="text-xs font-semibold uppercase text-muted-foreground mb-1.5 block">Type</label>
             <select value={alertType} onChange={(e) => setAlertType(e.target.value as AlertType)}
@@ -112,7 +112,7 @@ function CreateAlertModal({ onClose, userId }: { onClose: () => void; userId: st
               className="w-full rounded-xl border border-border bg-muted/30 px-3 py-2 text-sm" />
           </div>
         </div>
-        <div className="flex justify-end gap-2 border-t border-border bg-muted/20 px-5 py-4">
+        <div className="flex shrink-0 justify-end gap-2 border-t border-border bg-muted/20 px-4 py-3 sm:px-5 sm:py-4">
           <Button variant="ghost" onClick={onClose}>Cancel</Button>
           <Button onClick={() => create.mutate()}
             disabled={title.trim().length < 3 || description.trim().length < 5 || create.isPending}>
@@ -151,8 +151,8 @@ function SafetyPage() {
 
   return (
     <div className="max-w-3xl mx-auto">
-      <div className="mb-6 flex items-center justify-between">
-        <div className="flex items-center gap-3">
+      <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <div className="flex min-w-0 items-center gap-3">
           <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-red-500/10 text-red-600">
             <ShieldAlert className="h-6 w-6" />
           </div>
@@ -161,7 +161,7 @@ function SafetyPage() {
             <p className="text-sm text-muted-foreground">Report incidents and keep neighbors informed.</p>
           </div>
         </div>
-        <Button onClick={() => setShowCreate(true)}><Plus size={16} className="mr-1.5" />Report</Button>
+        <Button onClick={() => setShowCreate(true)} className="w-full sm:w-auto"><Plus size={16} className="mr-1.5" />Report</Button>
       </div>
 
       {isLoading ? (
@@ -178,7 +178,7 @@ function SafetyPage() {
         <div className="space-y-3">
           {alerts.map((a) => (
             <div key={a.id} className={cn("rounded-2xl border border-border bg-card p-4", a.is_resolved && "opacity-60")}>
-              <div className="flex items-start justify-between gap-3">
+              <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2 flex-wrap mb-1.5">
                     <span className={cn("rounded-full px-2 py-0.5 text-xs font-semibold", SEV[a.severity].cls)}>{SEV[a.severity].label}</span>
@@ -192,7 +192,7 @@ function SafetyPage() {
                   </p>
                 </div>
                 {!a.is_resolved && a.user_id === user.id && (
-                  <Button size="sm" variant="outline" onClick={() => resolve.mutate(a.id)} disabled={resolve.isPending}>
+                  <Button size="sm" variant="outline" className="w-full sm:w-auto" onClick={() => resolve.mutate(a.id)} disabled={resolve.isPending}>
                     Resolve
                   </Button>
                 )}

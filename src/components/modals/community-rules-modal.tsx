@@ -34,10 +34,10 @@ export function CommunityRulesModal() {
   if (!show) return null
 
   return (
-    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
-      <div className="w-full max-w-md rounded-2xl border border-border bg-card shadow-2xl overflow-hidden">
+    <div className="fixed inset-0 z-[100] flex items-end justify-center bg-black/50 p-3 backdrop-blur-sm sm:items-center sm:p-4">
+      <div className="flex max-h-[calc(100dvh-1.5rem)] w-full max-w-md flex-col overflow-hidden rounded-2xl border border-border bg-card shadow-2xl">
         {/* Header */}
-        <div className="bg-gradient-to-r from-primary/20 to-accent/10 px-6 py-5 text-center border-b border-border">
+        <div className="shrink-0 border-b border-border bg-gradient-to-r from-primary/20 to-accent/10 px-5 py-4 text-center sm:px-6 sm:py-5">
           <div className="mx-auto mb-3 flex h-14 w-14 items-center justify-center rounded-2xl bg-primary/10">
             <Shield size={26} className="text-primary" />
           </div>
@@ -46,7 +46,7 @@ export function CommunityRulesModal() {
         </div>
 
         {/* Rules list */}
-        <div className="px-6 py-4 space-y-3">
+        <div className="flex-1 space-y-3 overflow-y-auto px-5 py-4 sm:px-6">
           {RULES.map((r) => (
             <div key={r.n} className="flex items-start gap-3">
               <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-primary/10 text-xs font-bold text-primary mt-0.5">
@@ -58,7 +58,7 @@ export function CommunityRulesModal() {
         </div>
 
         {/* Agreement row */}
-        <div className="px-6 pb-4">
+        <div className="shrink-0 px-5 pb-4 sm:px-6">
           <button
             onClick={() => setAgreed(!agreed)}
             className="flex items-center gap-2.5 w-full rounded-xl border border-border bg-muted/30 px-4 py-3 text-left hover:bg-muted/50 transition-colors"
@@ -76,7 +76,7 @@ export function CommunityRulesModal() {
         </div>
 
         {/* CTA */}
-        <div className="px-6 pb-6">
+        <div className="shrink-0 px-5 pb-5 sm:px-6 sm:pb-6">
           <Button
             onClick={accept}
             disabled={!agreed}

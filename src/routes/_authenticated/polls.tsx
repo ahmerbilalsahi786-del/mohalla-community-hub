@@ -48,13 +48,13 @@ function CreatePollModal({ onClose, userId }: { onClose: () => void; userId: str
   });
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm p-4">
-      <div className="w-full max-w-lg rounded-2xl border border-border bg-card shadow-2xl overflow-hidden">
-        <div className="flex items-center justify-between border-b border-border px-5 py-4">
+    <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/40 p-3 backdrop-blur-sm sm:items-center sm:p-4">
+      <div className="flex max-h-[calc(100dvh-1.5rem)] w-full max-w-lg flex-col overflow-hidden rounded-2xl border border-border bg-card shadow-2xl">
+        <div className="flex shrink-0 items-center justify-between border-b border-border px-5 py-4">
           <h2 className="font-bold">Create Poll</h2>
           <button onClick={onClose} className="rounded-lg p-1 hover:bg-muted"><X size={18} /></button>
         </div>
-        <div className="p-5 space-y-4">
+        <div className="flex-1 space-y-4 overflow-y-auto p-4 sm:p-5">
           <input value={question} onChange={(e) => setQuestion(e.target.value)} placeholder="Question"
             className="w-full rounded-xl border border-border bg-muted/30 px-3 py-2 text-sm" />
           <textarea value={description} onChange={(e) => setDescription(e.target.value)} rows={2} placeholder="Description (optional)"
@@ -77,7 +77,7 @@ function CreatePollModal({ onClose, userId }: { onClose: () => void; userId: str
             )}
           </div>
         </div>
-        <div className="flex justify-end gap-2 border-t border-border bg-muted/20 px-5 py-4">
+        <div className="flex shrink-0 justify-end gap-2 border-t border-border bg-muted/20 px-4 py-3 sm:px-5 sm:py-4">
           <Button variant="ghost" onClick={onClose}>Cancel</Button>
           <Button onClick={() => create.mutate()}
             disabled={question.trim().length < 3 || options.filter((o) => o.trim()).length < 2 || create.isPending}>
@@ -131,8 +131,8 @@ function PollsPage() {
 
   return (
     <div className="max-w-3xl mx-auto">
-      <div className="mb-6 flex items-center justify-between">
-        <div className="flex items-center gap-3">
+      <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <div className="flex min-w-0 items-center gap-3">
           <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-primary/10 text-primary">
             <BarChart3 className="h-6 w-6" />
           </div>
@@ -141,7 +141,7 @@ function PollsPage() {
             <p className="text-sm text-muted-foreground">Vote on community decisions.</p>
           </div>
         </div>
-        <Button onClick={() => setShowCreate(true)}><Plus size={16} className="mr-1.5" />New Poll</Button>
+        <Button onClick={() => setShowCreate(true)} className="w-full sm:w-auto"><Plus size={16} className="mr-1.5" />New Poll</Button>
       </div>
 
       {isLoading ? (
@@ -182,8 +182,8 @@ function PollsPage() {
                           <div className={cn("absolute inset-y-0 left-0", isMyChoice ? "bg-primary/15" : "bg-muted")}
                             style={{ width: `${pct}%` }} />
                         )}
-                        <div className="relative flex items-center justify-between">
-                          <span className={cn("font-medium", isMyChoice && "text-primary")}>{opt.option_text}</span>
+                        <div className="relative flex items-center justify-between gap-3">
+                          <span className={cn("min-w-0 break-words font-medium", isMyChoice && "text-primary")}>{opt.option_text}</span>
                           {voted && <span className="text-xs text-muted-foreground">{pct}% · {votes}</span>}
                         </div>
                       </button>

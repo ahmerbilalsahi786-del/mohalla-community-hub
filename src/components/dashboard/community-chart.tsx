@@ -2,6 +2,7 @@
 import {
   AreaChart,
   Area,
+  Line,
   XAxis,
   YAxis,
   CartesianGrid,
@@ -10,12 +11,12 @@ import {
 } from 'recharts'
 
 const data = [
-  { month: 'Jan', members: 120, events: 8, posts: 45 },
-  { month: 'Feb', members: 145, events: 12, posts: 62 },
-  { month: 'Mar', members: 180, events: 15, posts: 78 },
-  { month: 'Apr', members: 220, events: 18, posts: 95 },
-  { month: 'May', members: 280, events: 22, posts: 120 },
-  { month: 'Jun', members: 350, events: 28, posts: 150 },
+  { month: 'Jan', members: 120, events: 8, posts: 45, complaints: 18 },
+  { month: 'Feb', members: 145, events: 12, posts: 62, complaints: 15 },
+  { month: 'Mar', members: 180, events: 15, posts: 78, complaints: 21 },
+  { month: 'Apr', members: 220, events: 18, posts: 95, complaints: 12 },
+  { month: 'May', members: 280, events: 22, posts: 120, complaints: 9 },
+  { month: 'Jun', members: 350, events: 28, posts: 150, complaints: 14 },
 ]
 
 export function CommunityChart() {
@@ -31,7 +32,7 @@ export function CommunityChart() {
           <h3 className="text-lg font-bold text-card-foreground">Community Growth</h3>
           <p className="text-sm text-muted-foreground">Member activity over time</p>
         </div>
-        <div className="flex gap-4">
+        <div className="flex flex-wrap gap-4">
           <div className="flex items-center gap-2">
             <div className="h-3 w-3 rounded-full bg-primary" />
             <span className="text-xs text-muted-foreground">Members</span>
@@ -39,6 +40,10 @@ export function CommunityChart() {
           <div className="flex items-center gap-2">
             <div className="h-3 w-3 rounded-full bg-accent" />
             <span className="text-xs text-muted-foreground">Posts</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <div className="h-3 w-3 rounded-full bg-red-500" />
+            <span className="text-xs text-muted-foreground">Complaints</span>
           </div>
         </div>
       </div>
@@ -102,6 +107,14 @@ export function CommunityChart() {
               strokeWidth={2}
               fillOpacity={1}
               fill="url(#colorPosts)"
+            />
+            <Line
+              type="monotone"
+              dataKey="complaints"
+              stroke="#EF4444"
+              strokeWidth={3}
+              dot={{ r: 3, fill: '#EF4444', strokeWidth: 0 }}
+              activeDot={{ r: 5, fill: '#EF4444', stroke: '#FFFFFF', strokeWidth: 2 }}
             />
           </AreaChart>
         </ResponsiveContainer>

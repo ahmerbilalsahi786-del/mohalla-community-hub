@@ -2,7 +2,6 @@
 import { useState } from 'react'
 import { Search, Sun, Moon, Plus, ChevronDown } from 'lucide-react'
 import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
 import { useLocation, Link } from 'wouter'
 import { NotificationBell } from './notification-bell'
 
@@ -43,11 +42,11 @@ export function TopNavbar() {
   }
 
   return (
-    <header className="sticky top-0 z-40 flex h-16 items-center justify-between border-b border-border bg-background/80 px-6 backdrop-blur-md">
+    <header className="sticky top-0 z-40 flex h-16 items-center justify-between gap-3 border-b border-border bg-background/90 px-3 backdrop-blur-md sm:px-6">
       {/* Left Section - Page Title */}
-      <div className="flex flex-col">
-        <h1 className="text-xl font-bold text-foreground">{meta.title}</h1>
-        <p className="text-sm text-muted-foreground">{meta.subtitle}</p>
+      <div className="flex min-w-0 flex-col">
+        <h1 className="truncate text-lg font-bold text-foreground sm:text-xl">{meta.title}</h1>
+        <p className="hidden truncate text-sm text-muted-foreground sm:block">{meta.subtitle}</p>
       </div>
 
       {/* Center Section - Search (click opens Cmd+K palette) */}
@@ -68,7 +67,18 @@ export function TopNavbar() {
       </div>
 
       {/* Right Section - Actions */}
-      <div className="flex items-center gap-2">
+      <div className="flex shrink-0 items-center gap-1.5 sm:gap-2">
+        <button
+          onClick={() => {
+            const e = new KeyboardEvent('keydown', { key: 'k', metaKey: true, bubbles: true })
+            document.dispatchEvent(e)
+          }}
+          aria-label="Search"
+          className="flex h-10 w-10 items-center justify-center rounded-xl bg-muted/50 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground md:hidden"
+        >
+          <Search size={20} />
+        </button>
+
         {/* Quick Action */}
         <Button
           className="hidden gap-2 rounded-xl bg-primary text-primary-foreground shadow-md shadow-primary/20 hover:bg-primary/90 sm:flex"
@@ -89,7 +99,7 @@ export function TopNavbar() {
         </button>
 
         {/* User Menu → profile link */}
-        <Link href="/profile/ahmed">
+        <Link href="/profile/ahmed" className="hidden sm:block">
           <button className="flex items-center gap-2 rounded-xl bg-muted/50 py-1.5 pl-1.5 pr-3 transition-colors hover:bg-muted">
             <div className="h-8 w-8 rounded-lg bg-gradient-to-br from-primary to-accent" />
             <div className="hidden text-left md:block">

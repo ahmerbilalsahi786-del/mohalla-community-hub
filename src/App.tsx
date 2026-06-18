@@ -1,4 +1,4 @@
-import { Route, Router as WouterRouter, Switch } from "wouter";
+import { Route, Router as WouterRouter, Switch, useLocation } from "wouter";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -104,16 +104,31 @@ function Router() {
   );
 }
 
+function AppChrome() {
+  const [location] = useLocation();
+  const isPublicAuth = location === "/login" || location === "/register";
+
+  return (
+    <>
+      <Router />
+      {!isPublicAuth && (
+        <>
+          <MobileNav />
+          <CommunityRulesModal />
+          <OnboardingModal />
+        </>
+      )}
+    </>
+  );
+}
+
 function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>
         <WouterRouter base={import.meta.env.BASE_URL.replace(/\/$/, "")}>
-          <Router />
-          <MobileNav />
+          <AppChrome />
         </WouterRouter>
-        <CommunityRulesModal />
-        <OnboardingModal />
         <CommandSearch />
         <Toaster />
       </TooltipProvider>

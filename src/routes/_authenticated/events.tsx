@@ -47,20 +47,20 @@ function CreateEventModal({ onClose, userId }: { onClose: () => void; userId: st
   });
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm p-4">
-      <div className="w-full max-w-lg rounded-2xl border border-border bg-card shadow-2xl overflow-hidden">
-        <div className="flex items-center justify-between border-b border-border px-5 py-4">
+    <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/40 p-3 backdrop-blur-sm sm:items-center sm:p-4">
+      <div className="flex max-h-[calc(100dvh-1.5rem)] w-full max-w-lg flex-col overflow-hidden rounded-2xl border border-border bg-card shadow-2xl">
+        <div className="flex shrink-0 items-center justify-between border-b border-border px-5 py-4">
           <h2 className="font-bold">Create Event</h2>
           <button onClick={onClose} className="rounded-lg p-1 hover:bg-muted"><X size={18} /></button>
         </div>
-        <div className="p-5 space-y-4">
+        <div className="flex-1 space-y-4 overflow-y-auto p-4 sm:p-5">
           <input value={title} onChange={(e) => setTitle(e.target.value)} placeholder="Event title"
             className="w-full rounded-xl border border-border bg-muted/30 px-3 py-2 text-sm" />
           <textarea value={description} onChange={(e) => setDescription(e.target.value)} rows={3} placeholder="Description"
             className="w-full rounded-xl border border-border bg-muted/30 px-3 py-2 text-sm resize-none" />
           <input value={location} onChange={(e) => setLocation(e.target.value)} placeholder="Location"
             className="w-full rounded-xl border border-border bg-muted/30 px-3 py-2 text-sm" />
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid gap-3 sm:grid-cols-2">
             <input type="date" value={eventDate} onChange={(e) => setEventDate(e.target.value)}
               className="rounded-xl border border-border bg-muted/30 px-3 py-2 text-sm" />
             <input type="time" value={eventTime} onChange={(e) => setEventTime(e.target.value)}
@@ -69,7 +69,7 @@ function CreateEventModal({ onClose, userId }: { onClose: () => void; userId: st
           <input type="number" min={1} value={maxAttendees} onChange={(e) => setMaxAttendees(e.target.value)} placeholder="Max attendees (optional)"
             className="w-full rounded-xl border border-border bg-muted/30 px-3 py-2 text-sm" />
         </div>
-        <div className="flex justify-end gap-2 border-t border-border bg-muted/20 px-5 py-4">
+        <div className="flex shrink-0 justify-end gap-2 border-t border-border bg-muted/20 px-4 py-3 sm:px-5 sm:py-4">
           <Button variant="ghost" onClick={onClose}>Cancel</Button>
           <Button onClick={() => create.mutate()}
             disabled={title.trim().length < 3 || description.trim().length < 5 || !eventDate || create.isPending}>
@@ -126,8 +126,8 @@ function EventsPage() {
 
   return (
     <div className="max-w-3xl mx-auto">
-      <div className="mb-6 flex items-center justify-between">
-        <div className="flex items-center gap-3">
+      <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <div className="flex min-w-0 items-center gap-3">
           <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-accent/10 text-accent">
             <Calendar className="h-6 w-6" />
           </div>
@@ -136,7 +136,7 @@ function EventsPage() {
             <p className="text-sm text-muted-foreground">Upcoming community events.</p>
           </div>
         </div>
-        <Button onClick={() => setShowCreate(true)}><Plus size={16} className="mr-1.5" />New Event</Button>
+        <Button onClick={() => setShowCreate(true)} className="w-full sm:w-auto"><Plus size={16} className="mr-1.5" />New Event</Button>
       </div>
 
       {isLoading ? (
@@ -156,7 +156,7 @@ function EventsPage() {
             const full = !!ev.max_attendees && (ev.rsvp_count ?? 0) >= ev.max_attendees;
             return (
               <div key={ev.id} className="rounded-2xl border border-border bg-card p-4">
-                <div className="flex items-start justify-between gap-3">
+                <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
                   <div className="flex-1 min-w-0">
                     <h3 className="font-semibold">{ev.title}</h3>
                     <p className="text-sm text-muted-foreground mt-1">{ev.description}</p>
@@ -167,6 +167,7 @@ function EventsPage() {
                     </div>
                   </div>
                   <Button size="sm" variant={going ? "outline" : "default"}
+                    className="w-full sm:w-auto"
                     onClick={() => toggleRsvp.mutate({ eventId: ev.id, going })}
                     disabled={toggleRsvp.isPending || (!going && full)}>
                     {going ? "Going ✓" : full ? "Full" : "RSVP"}

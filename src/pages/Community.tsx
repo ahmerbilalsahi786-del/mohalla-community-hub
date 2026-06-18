@@ -28,10 +28,10 @@ export default function Community() {
 
       <Sidebar />
 
-      <div className="relative flex flex-1 flex-col overflow-hidden">
+      <div className="relative flex min-w-0 flex-1 flex-col overflow-hidden">
         <TopNavbar />
 
-        <main className="flex-1 overflow-y-auto p-6 pb-24">
+        <main className="flex-1 overflow-y-auto p-3 pb-24 sm:p-6">
           <div className="max-w-4xl mx-auto">
             <div className="mb-6 flex items-center justify-between">
               <div>

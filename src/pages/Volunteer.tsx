@@ -81,10 +81,10 @@ export default function Volunteer() {
 
       <Sidebar />
 
-      <div className="relative flex flex-1 flex-col overflow-hidden">
+      <div className="relative flex min-w-0 flex-1 flex-col overflow-hidden">
         <TopNavbar />
 
-        <main className="flex-1 overflow-y-auto p-6 pb-24">
+        <main className="flex-1 overflow-y-auto p-3 pb-24 sm:p-6">
           <div className="max-w-3xl mx-auto">
             {/* Header */}
             <div className="mb-6 flex items-center justify-between">
@@ -98,7 +98,7 @@ export default function Volunteer() {
             </div>
 
             {/* Stats bar */}
-            <div className="mb-6 grid grid-cols-3 gap-3">
+            <div className="mb-6 grid gap-3 sm:grid-cols-3">
               {[
                 { label: 'Active drives',   value: OPPORTUNITIES.length },
                 { label: 'Spots available', value: OPPORTUNITIES.reduce((s, o) => s + (o.spots - o.joined), 0) },

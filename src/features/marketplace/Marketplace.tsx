@@ -157,7 +157,7 @@ function CreateListingModal({ onClose, me }: { onClose: () => void; me: User }) 
   ];
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm">
+    <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/40 p-3 backdrop-blur-sm sm:items-center sm:p-4">
       <div className="w-full max-w-lg bg-card rounded-2xl shadow-2xl border border-border overflow-hidden max-h-[90vh] flex flex-col">
         <div className="flex items-center justify-between px-5 py-4 border-b border-border shrink-0">
           <h2 className="text-lg font-bold text-foreground">Add Listing</h2>
@@ -168,7 +168,7 @@ function CreateListingModal({ onClose, me }: { onClose: () => void; me: User }) 
         <div className="overflow-y-auto flex-1 p-5 space-y-4">
           <div>
             <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-1.5 block">Category</label>
-            <div className="grid grid-cols-4 gap-2">
+            <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
               {catOptions.map((opt) => (
                 <button key={opt.value} onClick={() => setCategory(opt.value)}
                   className={cn(
@@ -214,7 +214,7 @@ function CreateListingModal({ onClose, me }: { onClose: () => void; me: User }) 
           </div>
           <p className="text-xs text-muted-foreground">Photo uploads will be enabled once storage is set up.</p>
         </div>
-        <div className="flex items-center justify-end gap-2 px-5 py-4 border-t border-border bg-muted/20 shrink-0">
+        <div className="flex shrink-0 items-center justify-end gap-2 border-t border-border bg-muted/20 px-4 py-3 sm:px-5 sm:py-4">
           <Button variant="ghost" onClick={onClose} className="rounded-xl">Cancel</Button>
           <Button onClick={() => create.mutate()}
             disabled={!title.trim() || !description.trim() || !whatsapp.trim() || create.isPending}
@@ -265,34 +265,10 @@ export default function Marketplace() {
   }, [rawListings, search, minPrice, maxPrice]);
 
   return (
-    <div className="relative flex min-h-screen bg-background">
-      <div className="pointer-events-none fixed inset-0 overflow-hidden">
-        <div className="absolute -left-32 top-1/4 h-96 w-96 rounded-full bg-primary/5 blur-3xl" />
-        <div className="absolute -right-32 bottom-1/4 h-96 w-96 rounded-full bg-accent/5 blur-3xl" />
-      </div>
-
-      <div className="relative flex flex-1 flex-col">
-        <header className="border-b border-border bg-card/80 backdrop-blur-md">
-          <div className="mx-auto flex max-w-5xl items-center justify-between px-6 py-3">
-            <div className="flex items-center gap-3">
-              <Link to="/" className="flex h-9 w-9 items-center justify-center rounded-xl bg-primary">
-                <span className="font-bold text-primary-foreground">م</span>
-              </Link>
-              <div>
-                <p className="text-xs font-semibold uppercase tracking-wider text-primary">Mohalla</p>
-                <h1 className="text-sm font-semibold leading-tight">Marketplace</h1>
-              </div>
-            </div>
-            <nav className="flex items-center gap-1 text-sm">
-              <Link to="/" className="rounded-lg px-3 py-1.5 text-muted-foreground hover:bg-muted">Feed</Link>
-              <Link to="/marketplace" className="rounded-lg px-3 py-1.5 bg-muted font-medium">Marketplace</Link>
-            </nav>
-          </div>
-        </header>
-
-        <div className="sticky top-0 z-30 bg-background/90 backdrop-blur-md border-b border-border px-6 py-3 space-y-3">
+    <div className="relative">
+        <div className="sticky top-16 z-30 -mx-3 border-b border-border bg-background/90 px-3 py-3 backdrop-blur-md sm:-mx-6 sm:px-6">
           <div className="mx-auto max-w-5xl space-y-3">
-            <div className="flex items-center gap-3">
+            <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:gap-3">
               <div className="relative flex-1">
                 <Search size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
                 <input type="search" placeholder="Search listings..." value={search} onChange={(e) => setSearch(e.target.value)}
@@ -306,12 +282,12 @@ export default function Marketplace() {
             </div>
 
             {showFilters && (
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-2 overflow-x-auto pb-1">
                 <input type="number" placeholder="Min" value={minPrice} onChange={(e) => setMinPrice(e.target.value)}
-                  className="w-28 rounded-xl border border-border bg-muted/50 px-3 py-1.5 text-sm focus:outline-none focus:border-primary" />
+                  className="w-28 shrink-0 rounded-xl border border-border bg-muted/50 px-3 py-1.5 text-sm focus:outline-none focus:border-primary" />
                 <span className="text-muted-foreground text-sm">to</span>
                 <input type="number" placeholder="Max" value={maxPrice} onChange={(e) => setMaxPrice(e.target.value)}
-                  className="w-28 rounded-xl border border-border bg-muted/50 px-3 py-1.5 text-sm focus:outline-none focus:border-primary" />
+                  className="w-28 shrink-0 rounded-xl border border-border bg-muted/50 px-3 py-1.5 text-sm focus:outline-none focus:border-primary" />
                 {(minPrice || maxPrice) && (
                   <button onClick={() => { setMinPrice(""); setMaxPrice(""); }} className="text-xs text-muted-foreground hover:text-foreground">Clear</button>
                 )}
@@ -334,10 +310,9 @@ export default function Marketplace() {
           </div>
         </div>
 
-        <main className="flex-1">
-          <div className="p-6 max-w-5xl mx-auto pb-24">
+          <div className="mx-auto max-w-5xl py-4 pb-2 sm:py-6">
             {isLoading ? (
-              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+              <div className="grid grid-cols-1 gap-3 min-[380px]:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 sm:gap-4">
                 {[1,2,3,4,5,6,7,8].map((i) => (
                   <div key={i} className="rounded-2xl border border-border bg-card overflow-hidden animate-pulse">
                     <div className="aspect-[4/3] bg-muted" />
@@ -360,16 +335,14 @@ export default function Marketplace() {
                 </Button>
               </div>
             ) : (
-              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+              <div className="grid grid-cols-1 gap-3 min-[380px]:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 sm:gap-4">
                 {listings.map((l) => <ListingCard key={l.id} listing={l} />)}
               </div>
             )}
           </div>
-        </main>
-      </div>
 
       <button onClick={() => setShowCreate(true)} aria-label="Add listing"
-        className="fixed bottom-8 right-8 flex h-14 w-14 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-lg shadow-primary/30 hover:bg-primary/90 hover:scale-105 transition-all z-40">
+        className="fixed bottom-[calc(5.25rem+env(safe-area-inset-bottom))] right-4 z-40 flex h-14 w-14 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-lg shadow-primary/30 transition-all hover:scale-105 hover:bg-primary/90 md:bottom-8 md:right-8">
         <Plus size={24} />
       </button>
 

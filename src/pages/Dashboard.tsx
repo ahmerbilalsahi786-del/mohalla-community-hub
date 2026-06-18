@@ -190,17 +190,17 @@ export default function Dashboard() {
 
       <Sidebar />
 
-      <div className="relative flex flex-1 flex-col overflow-hidden">
+      <div className="relative flex min-w-0 flex-1 flex-col overflow-hidden">
         <TopNavbar />
 
-        <main className="flex-1 overflow-y-auto p-6">
+        <main className="flex-1 overflow-y-auto p-3 pb-24 sm:p-6">
           <div className="mb-8">
-            <div className="flex items-center gap-3">
+            <div className="flex items-start gap-3 sm:items-center">
               <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-primary/10">
                 <TrendingUp className="h-6 w-6 text-primary" />
               </div>
               <div>
-                <h2 className="text-2xl font-bold text-foreground">Assalam-o-Alaikum, Ahmed!</h2>
+                <h2 className="text-xl font-bold text-foreground sm:text-2xl">Assalam-o-Alaikum, Ahmed!</h2>
                 <p className="text-muted-foreground">Here&apos;s what&apos;s happening in your mohalla today</p>
               </div>
             </div>
@@ -248,7 +248,7 @@ export default function Dashboard() {
         </main>
 
         {/* Footer */}
-        <footer className="border-t border-border bg-muted/20 px-6 py-4">
+        <footer className="hidden border-t border-border bg-muted/20 px-6 py-4 md:block">
           <p className="text-center text-xs text-muted-foreground">
             © 2025 Mohalla &nbsp;·&nbsp; Made in Pakistan 🇵🇰
           </p>

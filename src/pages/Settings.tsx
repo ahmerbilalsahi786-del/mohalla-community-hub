@@ -85,9 +85,9 @@ export default function Settings() {
   return (
     <div className="flex min-h-screen bg-background">
       <Sidebar />
-      <div className="flex flex-1 flex-col overflow-hidden">
+      <div className="flex min-w-0 flex-1 flex-col overflow-hidden">
         <TopNavbar />
-        <main className="flex-1 overflow-y-auto p-6 pb-24">
+        <main className="flex-1 overflow-y-auto p-3 pb-24 sm:p-6">
           <div className="max-w-2xl mx-auto space-y-6">
             <div className="flex items-center justify-between">
               <div>
@@ -215,8 +215,8 @@ export default function Settings() {
 
       {/* Delete confirmation modal */}
       {showDelete && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm">
-          <div className="w-full max-w-sm bg-card rounded-2xl shadow-2xl border border-border p-6">
+        <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/40 p-3 backdrop-blur-sm sm:items-center sm:p-4">
+          <div className="w-full max-w-sm rounded-2xl border border-border bg-card p-5 shadow-2xl sm:p-6">
             <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-destructive/10 mb-4">
               <Trash2 size={22} className="text-destructive" />
             </div>
