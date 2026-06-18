@@ -91,7 +91,7 @@ export default function ProfilePage() {
     const f = e.target.files?.[0]
     if (!f) return
     const r = await upload(f)
-    if (r?.objectPath) setEditAvatar(`/api/storage${r.objectPath}`)
+    if (r?.url || r?.objectPath) setEditAvatar(r.url ?? r.objectPath)
   }
 
   const saveProfile = async () => {

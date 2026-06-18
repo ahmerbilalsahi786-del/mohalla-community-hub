@@ -46,11 +46,16 @@ export function getUser(): AuthUser | null {
       return null;
     }
     return {
-      userId: payload.userId,
+      userId: payload.userId ?? payload.sub,
       email: payload.email,
-      name: payload.name,
-      unitNumber: payload.unitNumber,
-      role: payload.role,
+      name:
+        payload.name ??
+        payload.user_metadata?.full_name ??
+        payload.user_metadata?.name ??
+        payload.email?.split("@")[0] ??
+        "Resident",
+      unitNumber: payload.unitNumber ?? payload.user_metadata?.unit_number ?? "",
+      role: payload.role ?? payload.app_metadata?.role ?? "user",
     };
   } catch {
     return null;

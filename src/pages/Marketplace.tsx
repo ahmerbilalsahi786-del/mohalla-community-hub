@@ -164,7 +164,7 @@ function CreateListingModal({ onClose }: { onClose: () => void }) {
     const toUpload = Array.from(files).slice(0, remaining)
     for (const file of toUpload) {
       const result = await uploadFile(file)
-      if (result) setImageUrls((prev) => [...prev, `/api/storage${result.objectPath}`])
+      if (result) setImageUrls((prev) => [...prev, result.url ?? result.objectPath])
     }
   }
 

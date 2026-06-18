@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { setToken } from '@/lib/auth'
 import { useToast } from '@/hooks/use-toast'
+import { supabase } from '@/integrations/supabase/client'
 
 export default function Register() {
   const [, navigate] = useLocation()
@@ -22,21 +23,46 @@ export default function Register() {
     setLoading(true)
     setErrors({})
     try {
-      const res = await fetch('/api/auth/register', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(form),
-      })
-      const data = await res.json()
-      if (!res.ok) {
-        if (data.fields) setErrors(data.fields)
-        toast({ title: data.error || 'Registration failed', variant: 'destructive' })
+      const nextErrors: Record<string, string[]> = {}
+      if (!/^[a-z0-9_-]+$/.test(form.userId)) {
+        nextErrors.userId = ['Use lowercase letters, numbers, - and _ only']
+      }
+      if (form.password.length < 6) {
+        nextErrors.password = ['Password must be at least 6 characters']
+      }
+      if (Object.keys(nextErrors).length > 0) {
+        setErrors(nextErrors)
         return
       }
-      setToken(data.token)
-      navigate('/')
+
+      const { data, error } = await supabase.auth.signUp({
+        email: form.email,
+        password: form.password,
+        options: {
+          data: {
+            username: form.userId,
+            full_name: form.name,
+            name: form.name,
+            unit_number: form.unitNumber,
+          },
+        },
+      })
+
+      if (error) {
+        toast({ title: error.message || 'Registration failed', variant: 'destructive' })
+        return
+      }
+
+      if (data.session?.access_token) {
+        setToken(data.session.access_token)
+        navigate('/')
+        return
+      }
+
+      toast({ title: 'Account created. Check your email to confirm before signing in.' })
+      navigate('/login')
     } catch {
-      toast({ title: 'Cannot connect to server.', variant: 'destructive' })
+      toast({ title: 'Cannot connect to Supabase. Check your project keys.', variant: 'destructive' })
     } finally {
       setLoading(false)
     }

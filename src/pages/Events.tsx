@@ -156,7 +156,7 @@ function CreateEventModal({ onClose }: { onClose: () => void }) {
     const f = e.target.files?.[0]
     if (!f) return
     const r = await upload(f)
-    if (r?.objectPath) setImageUrl(`/api/storage${r.objectPath}`)
+    if (r?.url || r?.objectPath) setImageUrl(r.url ?? r.objectPath)
   }
 
   return (

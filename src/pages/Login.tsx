@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { setToken } from '@/lib/auth'
 import { useToast } from '@/hooks/use-toast'
+import { supabase } from '@/integrations/supabase/client'
 
 export default function Login() {
   const [, navigate] = useLocation()
@@ -23,20 +24,20 @@ export default function Login() {
     e.preventDefault()
     setLoading(true)
     try {
-      const res = await fetch('/api/auth/login', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, password }),
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email,
+        password,
       })
-      const data = await res.json()
-      if (!res.ok) {
-        toast({ title: data.error || 'Login failed', variant: 'destructive' })
+
+      if (error || !data.session?.access_token) {
+        toast({ title: error?.message || 'Login failed', variant: 'destructive' })
         return
       }
-      setToken(data.token)
+
+      setToken(data.session.access_token)
       navigate('/')
     } catch {
-      toast({ title: 'Cannot connect to server. Check your connection.', variant: 'destructive' })
+      toast({ title: 'Cannot connect to Supabase. Check your project keys.', variant: 'destructive' })
     } finally {
       setLoading(false)
     }

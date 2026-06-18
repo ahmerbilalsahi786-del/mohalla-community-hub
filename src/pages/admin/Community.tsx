@@ -50,9 +50,8 @@ export default function AdminCommunity() {
     const file = e.target.files?.[0]
     if (!file) return
     const result = await upload(file)
-    if (result?.objectPath) {
-      const url = `/api/storage${result.objectPath}`
-      setLogoUrl(url)
+    if (result?.url || result?.objectPath) {
+      setLogoUrl(result.url ?? result.objectPath)
     }
   }
 
