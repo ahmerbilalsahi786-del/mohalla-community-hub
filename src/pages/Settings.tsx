@@ -215,7 +215,7 @@ export default function Settings() {
 
       {/* Delete confirmation modal */}
       {showDelete && (
-        <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/40 p-3 backdrop-blur-sm sm:items-center sm:p-4">
+        <div className="fixed inset-0 z-[80] flex items-end justify-center bg-black/40 p-3 backdrop-blur-sm sm:items-center sm:p-4">
           <div className="w-full max-w-sm rounded-2xl border border-border bg-card p-5 shadow-2xl sm:p-6">
             <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-destructive/10 mb-4">
               <Trash2 size={22} className="text-destructive" />
