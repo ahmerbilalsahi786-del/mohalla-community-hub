@@ -1,6 +1,6 @@
 import { createRoot } from "react-dom/client";
 import App from "./App";
-import "./index.css";
+import "./styles.css";
 import { setAuthTokenGetter } from "./lib/custom-fetch";
 import { getToken } from "./lib/auth";
 
