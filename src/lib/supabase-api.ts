@@ -235,15 +235,17 @@ async function listPolls() {
 }
 
 async function listSafety(params: URLSearchParams) {
-  const page = Number(params.get("page") ?? 1);
-  const limit = Number(params.get("limit") ?? 20);
-  const { data, error } = await supabase.from("safety_alerts").select("*").order("created_at", { ascending: false });
+  const resolved = params.get("resolved");
+  let query = supabase.from("safety_alerts").select("*").order("created_at", { ascending: false });
+  if (resolved === "true") query = query.eq("is_resolved", true);
+  if (resolved === "false") query = query.eq("is_resolved", false);
+
+  const { data, error } = await query;
   if (error) throw error;
 
   const rows = data ?? [];
   const profiles = await profilesById(rows.map((row: any) => row.user_id));
-  const alerts = pageRows(rows, page, limit).map((row: any) => toAlert(row, profiles.get(row.user_id)));
-  return { alerts, total: rows.length, page, limit, hasMore: page * limit < rows.length };
+  return rows.map((row: any) => toAlert(row, profiles.get(row.user_id)));
 }
 
 async function createPost(payload: JsonBody) {
