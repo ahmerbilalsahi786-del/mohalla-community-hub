@@ -4,6 +4,7 @@ import tailwindcss from '@tailwindcss/vite'
 import path from 'path'
 
 export default defineConfig({
+  root: __dirname,
   plugins: [react(), tailwindcss()],
   resolve: {
     alias: {
@@ -12,6 +13,10 @@ export default defineConfig({
   },
   build: {
     outDir: "dist",
+    emptyOutDir: true,
+    rollupOptions: {
+      input: path.resolve(__dirname, "index.html"),
+    },
   },
   base: "/",
 })
