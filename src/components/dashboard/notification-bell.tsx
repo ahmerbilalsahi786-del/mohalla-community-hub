@@ -1,6 +1,5 @@
 import { useState, useRef, useEffect } from 'react'
 import { Bell, Check, CheckCheck, MessageSquare, Heart, ShieldAlert, Megaphone, ShoppingBag, UserCheck, X } from 'lucide-react'
-import { useLink } from 'wouter'
 import { cn } from '@/lib/utils'
 
 type Notif = {

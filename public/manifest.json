@@ -1,0 +1,16 @@
+{
+  "name": "Mohalla Community Hub",
+  "short_name": "Mohalla",
+  "description": "A digital hub for neighbourhood communities.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#16a34a",
+  "icons": [
+    {
+      "src": "/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml"
+    }
+  ]
+}

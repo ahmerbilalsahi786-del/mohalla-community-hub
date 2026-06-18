@@ -359,11 +359,11 @@ export default function Marketplace() {
   const [showFilters, setShowFilters] = useState(false)
   const [showCreate, setShowCreate] = useState(false)
   const [page, setPage] = useState(1)
-  const searchTimeoutRef = useRef<ReturnType<typeof setTimeout>>()
+  const searchTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
   const handleSearchChange = (val: string) => {
     setSearch(val)
-    clearTimeout(searchTimeoutRef.current)
+    if (searchTimeoutRef.current) clearTimeout(searchTimeoutRef.current)
     searchTimeoutRef.current = setTimeout(() => {
       setDebouncedSearch(val)
       setPage(1)

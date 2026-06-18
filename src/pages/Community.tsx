@@ -16,7 +16,7 @@ const ROLE_BADGE: Record<string, { label: string; cls: string }> = {
 }
 
 export default function Community() {
-  const { data, isLoading } = useAdminListMembers({ communityId: 'default', limit: 50 })
+  const { data, isLoading } = useAdminListMembers({ communityId: 'default' })
   const members: any[] = Array.isArray(data) ? data : []
 
   return (
