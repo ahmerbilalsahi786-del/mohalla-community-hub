@@ -9,8 +9,9 @@ import {
   Tooltip,
   ResponsiveContainer,
 } from 'recharts'
+import { useListPosts } from '@/lib/generated/api'
 
-const data = [
+const baseData = [
   { month: 'Jan', members: 120, events: 8, posts: 45, complaints: 18 },
   { month: 'Feb', members: 145, events: 12, posts: 62, complaints: 15 },
   { month: 'Mar', members: 180, events: 15, posts: 78, complaints: 21 },
@@ -20,6 +21,19 @@ const data = [
 ]
 
 export function CommunityChart() {
+  const { data: complaintData } = useListPosts({
+    communityId: 'default',
+    category: 'complaint',
+    page: 1,
+    limit: 100,
+  })
+  const complaintTotal = complaintData?.total ?? 0
+  const data = baseData.map((row, index) => (
+    index === baseData.length - 1
+      ? { ...row, complaints: row.complaints + complaintTotal }
+      : row
+  ))
+
   return (
     <div className="relative overflow-hidden rounded-2xl border border-border bg-card p-6 shadow-sm">
       {/* Decorative blobs */}

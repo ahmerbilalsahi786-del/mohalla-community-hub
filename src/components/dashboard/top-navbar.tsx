@@ -33,12 +33,20 @@ function matchPageMeta(location: string) {
 
 export function TopNavbar() {
   const [darkMode, setDarkMode] = useState(false)
-  const [location] = useLocation()
+  const [location, navigate] = useLocation()
   const meta = matchPageMeta(location)
 
   const toggleDarkMode = () => {
     setDarkMode(!darkMode)
     document.documentElement.classList.toggle('dark')
+  }
+
+  const openComposer = () => {
+    if (location.startsWith('/feed')) {
+      window.dispatchEvent(new CustomEvent('mohalla:create-post'))
+      return
+    }
+    navigate('/feed?compose=1')
   }
 
   return (
@@ -81,6 +89,7 @@ export function TopNavbar() {
 
         {/* Quick Action */}
         <Button
+          onClick={openComposer}
           className="hidden gap-2 rounded-xl bg-primary text-primary-foreground shadow-md shadow-primary/20 hover:bg-primary/90 sm:flex"
         >
           <Plus size={16} />
@@ -99,13 +108,13 @@ export function TopNavbar() {
         </button>
 
         {/* User Menu → profile link */}
-        <Link href="/profile/ahmed" className="hidden sm:block">
-          <button className="flex items-center gap-2 rounded-xl bg-muted/50 py-1.5 pl-1.5 pr-3 transition-colors hover:bg-muted">
+        <Link href="/profile/ahmed" className="block">
+          <button aria-label="Open profile" className="flex h-10 items-center gap-2 rounded-xl bg-muted/50 p-1 transition-colors hover:bg-muted sm:py-1.5 sm:pl-1.5 sm:pr-3">
             <div className="h-8 w-8 rounded-lg bg-gradient-to-br from-primary to-accent" />
             <div className="hidden text-left md:block">
               <p className="text-sm font-semibold text-foreground">Ahmed K.</p>
             </div>
-            <ChevronDown size={14} className="text-muted-foreground" />
+            <ChevronDown size={14} className="hidden text-muted-foreground sm:block" />
           </button>
         </Link>
       </div>

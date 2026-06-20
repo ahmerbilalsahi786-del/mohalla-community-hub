@@ -6,6 +6,7 @@ import {
 } from '@/lib/generated/api'
 import { useQueryClient } from '@tanstack/react-query'
 import { useUpload } from '@/lib/useUpload'
+import { InviteTools } from '@/components/community/invite-tools'
 import { Building2, Users, FileText, ShoppingBag, ImagePlus, Save, Loader2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
@@ -168,6 +169,15 @@ export default function AdminCommunity() {
             {saved && <p className="text-sm font-medium text-green-600">✓ Saved successfully</p>}
           </div>
         </div>
+
+        <InviteTools
+          communityName={name || 'Mohalla Community'}
+          area={area}
+          city={city}
+          editableMessage
+          title="Admin Invite Tools"
+          description="Customize the WhatsApp invitation and share a community join link with new members."
+        />
       </div>
     </AdminLayout>
   )

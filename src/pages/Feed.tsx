@@ -8,13 +8,14 @@ import { TopNavbar } from '@/components/dashboard/top-navbar'
 import {
   Pin, Heart, MessageSquare, Plus, X, ChevronDown, ChevronUp,
   Megaphone, Shield, Search, ShoppingBag, Calendar, Users, ImagePlus, Send, Loader2,
-  MapPin, Clock, BarChart2, ChevronRight,
+  MapPin, BarChart2, ChevronRight, AlertTriangle,
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
+import { useToast } from '@/hooks/use-toast'
 import { cn } from '@/lib/utils'
 import { Link, useSearch } from 'wouter'
 
-type PostType = 'general' | 'announcement' | 'safety' | 'lost_found' | 'buy_sell' | 'event'
+type PostType = 'general' | 'announcement' | 'safety' | 'lost_found' | 'buy_sell' | 'event' | 'complaint'
 
 // ─── Feed Widgets ─────────────────────────────────────────────────────────────
 
@@ -112,10 +113,30 @@ function PollWidget() {
   )
 }
 
+function ComplaintBar({ onCompose }: { onCompose: () => void }) {
+  return (
+    <div className="overflow-hidden rounded-2xl border border-red-200 bg-red-50 shadow-sm dark:border-red-900/50 dark:bg-red-950/20">
+      <div className="flex items-center gap-3 p-4">
+        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-red-600 text-white">
+          <AlertTriangle size={20} />
+        </div>
+        <div className="min-w-0 flex-1">
+          <p className="text-sm font-bold text-red-900 dark:text-red-100">File a complaint</p>
+          <p className="text-xs text-red-700/80 dark:text-red-200/80">Noise, water, parking, repairs, cleanliness</p>
+        </div>
+        <Button onClick={onCompose} className="shrink-0 rounded-xl bg-red-600 px-3 text-white hover:bg-red-700">
+          Report
+        </Button>
+      </div>
+    </div>
+  )
+}
+
 const CATEGORIES: { value: string; label: string; icon: React.ElementType; color: string }[] = [
   { value: 'all', label: 'All', icon: Users, color: 'text-foreground' },
   { value: 'announcement', label: 'Announcements', icon: Megaphone, color: 'text-amber-600' },
   { value: 'safety', label: 'Safety', icon: Shield, color: 'text-red-500' },
+  { value: 'complaint', label: 'Complaints', icon: AlertTriangle, color: 'text-red-600' },
   { value: 'lost_found', label: 'Lost & Found', icon: Search, color: 'text-blue-500' },
   { value: 'buy_sell', label: 'Buy & Sell', icon: ShoppingBag, color: 'text-green-600' },
   { value: 'event', label: 'Events', icon: Calendar, color: 'text-accent' },
@@ -124,6 +145,7 @@ const CATEGORIES: { value: string; label: string; icon: React.ElementType; color
 const CATEGORY_BADGE: Record<string, { label: string; bg: string; text: string }> = {
   announcement: { label: 'Announcement', bg: 'bg-amber-500/10', text: 'text-amber-700' },
   safety: { label: 'Safety', bg: 'bg-red-500/10', text: 'text-red-600' },
+  complaint: { label: 'Complaint', bg: 'bg-red-600/10', text: 'text-red-700' },
   lost_found: { label: 'Lost & Found', bg: 'bg-blue-500/10', text: 'text-blue-600' },
   buy_sell: { label: 'Buy & Sell', bg: 'bg-green-500/10', text: 'text-green-700' },
   event: { label: 'Event', bg: 'bg-accent/10', text: 'text-accent' },
@@ -176,6 +198,41 @@ function ImageGrid({ urls }: { urls: string[] }) {
       ))}
     </div>
   )
+}
+
+function readFileAsDataUrl(file: File) {
+  return new Promise<string>((resolve, reject) => {
+    const reader = new FileReader()
+    reader.onload = () => resolve(String(reader.result))
+    reader.onerror = () => reject(reader.error ?? new Error('Could not read this image.'))
+    reader.readAsDataURL(file)
+  })
+}
+
+async function imageToLocalDataUrl(file: File) {
+  const dataUrl = await readFileAsDataUrl(file)
+  if (!file.type.startsWith('image/') || file.type === 'image/svg+xml') return dataUrl
+
+  return new Promise<string>((resolve) => {
+    const img = new Image()
+    img.onload = () => {
+      const maxSide = 1280
+      const scale = Math.min(1, maxSide / Math.max(img.width, img.height))
+      const canvas = document.createElement('canvas')
+      canvas.width = Math.max(1, Math.round(img.width * scale))
+      canvas.height = Math.max(1, Math.round(img.height * scale))
+      const ctx = canvas.getContext('2d')
+      if (!ctx) {
+        resolve(dataUrl)
+        return
+      }
+
+      ctx.drawImage(img, 0, 0, canvas.width, canvas.height)
+      resolve(canvas.toDataURL('image/jpeg', 0.82))
+    }
+    img.onerror = () => resolve(dataUrl)
+    img.src = dataUrl
+  })
 }
 
 function CommentSection({ postId }: { postId: number }) {
@@ -355,34 +412,54 @@ function CreatePostModal({ onClose, initialType = 'general' }: { onClose: () => 
   const [uploadError, setUploadError] = useState<string | null>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
   const queryClient = useQueryClient()
+  const { toast } = useToast()
 
-const [isUploading, setIsUploading] = useState(false)
+  const [isUploading, setIsUploading] = useState(false)
 
-const uploadFile = async (file: File) => {
-  setIsUploading(true)
-  try {
-    const formData = new FormData()
-    formData.append('file', file)
-    formData.append('upload_preset', 'mohalla_uploads')
-    const res = await fetch(
-      `https://api.cloudinary.com/v1_1/${import.meta.env.VITE_CLOUDINARY_CLOUD_NAME}/image/upload`,
-      { method: 'POST', body: formData }
-    )
-    const data = await res.json()
-    setIsUploading(false)
-    return { objectPath: data.secure_url }
-  } catch (err: any) {
-    setUploadError(err.message)
-    setIsUploading(false)
-    return null
+  const uploadFile = async (file: File) => {
+    setIsUploading(true)
+    try {
+      const cloudName = import.meta.env.VITE_CLOUDINARY_CLOUD_NAME
+      if (cloudName) {
+        const formData = new FormData()
+        formData.append('file', file)
+        formData.append('upload_preset', 'mohalla_uploads')
+        const res = await fetch(
+          `https://api.cloudinary.com/v1_1/${cloudName}/image/upload`,
+          { method: 'POST', body: formData },
+        )
+        const data = await res.json()
+        if (!res.ok || !data.secure_url) {
+          throw new Error(data.error?.message ?? 'Image upload failed.')
+        }
+        return { objectPath: data.secure_url }
+      }
+
+      return { objectPath: await imageToLocalDataUrl(file) }
+    } catch {
+      try {
+        return { objectPath: await imageToLocalDataUrl(file) }
+      } catch (err: any) {
+        setUploadError(err?.message ?? 'Could not add this image.')
+        return null
+      }
+    } finally {
+      setIsUploading(false)
+    }
   }
-}
 
   const createPost = useCreatePost({
     mutation: {
       onSuccess: () => {
         queryClient.invalidateQueries({ queryKey: getListPostsQueryKey() })
         onClose()
+      },
+      onError: (error: any) => {
+        toast({
+          title: 'Could not post',
+          description: error?.message ?? 'Please try again.',
+          variant: 'destructive',
+        })
       },
     },
   })
@@ -415,10 +492,13 @@ const uploadFile = async (file: File) => {
     })
   }
 
+  const isComplaint = type === 'complaint'
+
   const typeOptions: { value: PostType; label: string }[] = [
     { value: 'general', label: 'General' },
     { value: 'announcement', label: 'Announcement' },
     { value: 'safety', label: 'Safety' },
+    { value: 'complaint', label: 'Complaint' },
     { value: 'lost_found', label: 'Lost & Found' },
     { value: 'buy_sell', label: 'Buy & Sell' },
     { value: 'event', label: 'Event' },
@@ -429,7 +509,7 @@ const uploadFile = async (file: File) => {
       <div className="flex h-[100dvh] max-h-[100dvh] w-full max-w-lg flex-col overflow-hidden border-0 bg-card shadow-2xl sm:h-auto sm:max-h-[calc(100dvh-2rem)] sm:rounded-2xl sm:border sm:border-border">
         {/* Header */}
         <div className="flex shrink-0 items-center justify-between border-b border-border px-5 py-4">
-          <h2 className="text-lg font-bold text-foreground">Create Post</h2>
+          <h2 className="text-lg font-bold text-foreground">{isComplaint ? 'File Complaint' : 'Create Post'}</h2>
           <button onClick={onClose} className="flex h-8 w-8 items-center justify-center rounded-lg hover:bg-muted text-muted-foreground transition-colors">
             <X size={18} />
           </button>
@@ -456,7 +536,9 @@ const uploadFile = async (file: File) => {
                   className={cn(
                     'rounded-xl py-2 px-3 text-sm font-medium border transition-all',
                     type === opt.value
-                      ? 'border-primary bg-primary/10 text-primary'
+                      ? isComplaint
+                        ? 'border-red-500 bg-red-500/10 text-red-700'
+                        : 'border-primary bg-primary/10 text-primary'
                       : 'border-border bg-background text-muted-foreground hover:border-primary/50'
                   )}
                 >
@@ -468,10 +550,12 @@ const uploadFile = async (file: File) => {
 
           {/* Title */}
           <div>
-            <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-1.5 block">Title</label>
+            <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-1.5 block">
+              {isComplaint ? 'Complaint Title' : 'Title'}
+            </label>
             <input
               type="text"
-              placeholder="What's this about?"
+              placeholder={isComplaint ? 'What needs attention?' : "What's this about?"}
               value={title}
               onChange={(e) => setTitle(e.target.value)}
               className="w-full rounded-xl border border-border bg-muted/30 px-4 py-2.5 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-primary focus:bg-background transition-colors"
@@ -480,9 +564,11 @@ const uploadFile = async (file: File) => {
 
           {/* Body */}
           <div>
-            <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-1.5 block">Message</label>
+            <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-1.5 block">
+              {isComplaint ? 'Details' : 'Message'}
+            </label>
             <textarea
-              placeholder="Share something with your neighbors..."
+              placeholder={isComplaint ? 'Describe the issue, location, and when it happens...' : 'Share something with your neighbors...'}
               value={body}
               onChange={(e) => setBody(e.target.value)}
               rows={4}
@@ -560,9 +646,9 @@ const uploadFile = async (file: File) => {
           <Button
             onClick={handleSubmit}
             disabled={!title.trim() || !body.trim() || createPost.isPending || isUploading}
-            className="rounded-xl bg-primary text-primary-foreground"
+            className={cn('rounded-xl text-primary-foreground', isComplaint ? 'bg-red-600 hover:bg-red-700' : 'bg-primary hover:bg-primary/90')}
           >
-            {createPost.isPending ? 'Posting...' : 'Post'}
+            {createPost.isPending ? 'Posting...' : isComplaint ? 'Submit Complaint' : 'Post'}
           </Button>
         </div>
       </div>
@@ -587,6 +673,16 @@ export default function Feed() {
       // Clean URL without triggering a navigation
       window.history.replaceState(null, '', window.location.pathname)
     }
+  }, [search])
+
+  useEffect(() => {
+    const openComposer = () => {
+      setInitialPostType('general')
+      setShowCreate(true)
+    }
+
+    window.addEventListener('mohalla:create-post', openComposer)
+    return () => window.removeEventListener('mohalla:create-post', openComposer)
   }, [])
 
   const { data, isLoading, isFetching } = useListPosts({
@@ -610,6 +706,11 @@ export default function Feed() {
   const handleLike = useCallback((postId: number) => {
     toggleLike.mutate({ postId })
   }, [toggleLike])
+
+  const openCreatePost = (type: PostType = 'general') => {
+    setInitialPostType(type)
+    setShowCreate(true)
+  }
 
   const posts = data?.posts ?? []
   const hasMore = data?.hasMore ?? false
@@ -653,6 +754,7 @@ export default function Feed() {
           </div>
 
           <div className="mx-auto max-w-2xl space-y-4 p-3 pb-24 sm:p-6">
+            <ComplaintBar onCompose={() => openCreatePost('complaint')} />
             <EventWidget />
             <PollWidget />
 
@@ -682,7 +784,7 @@ export default function Feed() {
                 </div>
                 <h3 className="font-semibold text-foreground">No posts yet.</h3>
                 <p className="text-sm text-muted-foreground mt-1">Be the first to post something!</p>
-                <Button onClick={() => setShowCreate(true)} className="mt-4 rounded-xl bg-primary text-primary-foreground">
+                <Button onClick={() => openCreatePost()} className="mt-4 rounded-xl bg-primary text-primary-foreground">
                   <Plus size={16} className="mr-2" />
                   Create Post
                 </Button>
@@ -710,7 +812,7 @@ export default function Feed() {
 
       {/* Floating create button */}
       <button
-        onClick={() => setShowCreate(true)}
+        onClick={() => openCreatePost()}
         className="fixed bottom-[calc(5.25rem+env(safe-area-inset-bottom))] right-4 z-40 flex h-14 w-14 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-lg shadow-primary/30 transition-all hover:scale-105 hover:bg-primary/90 md:bottom-8 md:right-8"
       >
         <Plus size={24} />

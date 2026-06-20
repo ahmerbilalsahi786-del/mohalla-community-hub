@@ -196,7 +196,7 @@ export function CommandSearch() {
         ) : null}
 
         {/* Footer hint */}
-        <div className="border-t border-border px-4 py-2 flex items-center gap-3 text-xs text-muted-foreground/60">
+        <div className="hidden border-t border-border px-4 py-2 sm:flex items-center gap-3 text-xs text-muted-foreground/60">
           <span><kbd className="rounded border border-border bg-muted px-1 py-0.5">↑↓</kbd> navigate</span>
           <span><kbd className="rounded border border-border bg-muted px-1 py-0.5">↵</kbd> open</span>
           <span><kbd className="rounded border border-border bg-muted px-1 py-0.5">Esc</kbd> close</span>

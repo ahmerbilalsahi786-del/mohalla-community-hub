@@ -11,6 +11,21 @@ const DEFAULT_PREFS = {
   notifyMarketplace: true,
   notifyApprovals: true,
 };
+const TOKEN_KEY = "mohalla_token";
+const DEMO_USER_ID = "ahmed";
+const DEMO_POSTS_KEY = "mohalla_demo_posts";
+const DEMO_LISTINGS_KEY = "mohalla_demo_listings";
+const DEMO_EVENTS_KEY = "mohalla_demo_events";
+const DEMO_ALERTS_KEY = "mohalla_demo_alerts";
+const DEMO_POLLS_KEY = "mohalla_demo_polls";
+const DEMO_PROFILE = {
+  id: DEMO_USER_ID,
+  display_name: "Ahmed Khan",
+  full_name: "Ahmed Khan",
+  unit_number: "B-204",
+  avatar_url: null,
+  created_at: new Date().toISOString(),
+};
 
 let bridgeInstalled = false;
 
@@ -41,7 +56,59 @@ function parseBody(body: BodyInit | null | undefined): JsonBody {
   }
 }
 
+function decodeTokenPayload(token: string) {
+  try {
+    const payload = token.split(".")[1];
+    if (!payload || typeof window === "undefined") return null;
+    const normalized = payload.replace(/-/g, "+").replace(/_/g, "/");
+    const padded = normalized.padEnd(normalized.length + ((4 - normalized.length % 4) % 4), "=");
+    return JSON.parse(window.atob(padded));
+  } catch {
+    return null;
+  }
+}
+
+function isDemoMode() {
+  if (typeof window === "undefined") return false;
+  const payload = decodeTokenPayload(window.localStorage.getItem(TOKEN_KEY) ?? "");
+  return payload?.typ === "demo";
+}
+
+function readDemoPosts() {
+  if (typeof window === "undefined") return [];
+  try {
+    const parsed = JSON.parse(window.localStorage.getItem(DEMO_POSTS_KEY) ?? "[]");
+    return Array.isArray(parsed) ? parsed : [];
+  } catch {
+    return [];
+  }
+}
+
+function writeDemoPosts(posts: JsonBody[]) {
+  writeDemoRows(DEMO_POSTS_KEY, posts, 20);
+}
+
+function readDemoRows(key: string) {
+  if (typeof window === "undefined") return [];
+  try {
+    const parsed = JSON.parse(window.localStorage.getItem(key) ?? "[]");
+    return Array.isArray(parsed) ? parsed : [];
+  } catch {
+    return [];
+  }
+}
+
+function writeDemoRows(key: string, rows: JsonBody[], limit = 20) {
+  if (typeof window === "undefined") return;
+  try {
+    window.localStorage.setItem(key, JSON.stringify(rows.slice(0, limit)));
+  } catch {
+    throw new Error("Your browser storage is full. Try posting with a smaller image.");
+  }
+}
+
 async function currentUserId() {
+  if (isDemoMode()) return DEMO_USER_ID;
   const { data } = await supabase.auth.getSession();
   return data.session?.user.id ?? DEFAULT_USER_ID;
 }
@@ -108,6 +175,109 @@ function toPost(row: any, profile?: any) {
   };
 }
 
+function createDemoPost(payload: JsonBody) {
+  const now = new Date().toISOString();
+  const row = {
+    id: `demo-${Date.now()}`,
+    user_id: DEMO_USER_ID,
+    type: payload.type ?? "general",
+    title: payload.title,
+    body: payload.body,
+    image_urls: Array.isArray(payload.imageUrls) ? payload.imageUrls : [],
+    is_pinned: Boolean(payload.isPinned),
+    likes_count: 0,
+    comments_count: 0,
+    created_at: now,
+    updated_at: now,
+  };
+
+  writeDemoPosts([row, ...readDemoPosts()]);
+  return toPost(row, DEMO_PROFILE);
+}
+
+function createDemoListing(payload: JsonBody) {
+  const now = new Date().toISOString();
+  const row = {
+    id: `demo-listing-${Date.now()}`,
+    user_id: DEMO_USER_ID,
+    title: payload.title,
+    description: payload.description,
+    price_pkr: payload.pricePkr ?? null,
+    category: payload.category ?? "other",
+    condition: payload.condition ?? "good",
+    image_urls: Array.isArray(payload.imageUrls) ? payload.imageUrls : [],
+    status: "available",
+    whatsapp_number: payload.whatsappNumber ?? "",
+    created_at: now,
+    updated_at: now,
+  };
+
+  writeDemoRows(DEMO_LISTINGS_KEY, [row, ...readDemoRows(DEMO_LISTINGS_KEY)], 40);
+  return toListing(row, DEMO_PROFILE);
+}
+
+function createDemoEvent(payload: JsonBody) {
+  const now = new Date().toISOString();
+  const row = {
+    id: `demo-event-${Date.now()}`,
+    user_id: DEMO_USER_ID,
+    title: payload.title,
+    description: payload.description ?? "",
+    event_date: payload.date,
+    event_time: payload.time ?? "",
+    location: payload.location ?? "",
+    image_url: payload.imageUrl ?? null,
+    rsvp_count: 0,
+    created_at: now,
+    updated_at: now,
+  };
+
+  writeDemoRows(DEMO_EVENTS_KEY, [row, ...readDemoRows(DEMO_EVENTS_KEY)], 40);
+  return toEvent(row, DEMO_PROFILE);
+}
+
+function createDemoAlert(payload: JsonBody) {
+  const now = new Date().toISOString();
+  const row = {
+    id: `demo-alert-${Date.now()}`,
+    user_id: DEMO_USER_ID,
+    alert_type: payload.type ?? "general",
+    title: payload.title,
+    description: payload.description,
+    location: payload.locationDetail ?? "",
+    severity: payload.severity ?? "medium",
+    is_resolved: false,
+    created_at: now,
+    updated_at: now,
+  };
+
+  writeDemoRows(DEMO_ALERTS_KEY, [row, ...readDemoRows(DEMO_ALERTS_KEY)], 40);
+  return toAlert(row, DEMO_PROFILE);
+}
+
+function createDemoPoll(payload: JsonBody) {
+  const now = new Date().toISOString();
+  const options = Array.isArray(payload.options) ? payload.options.filter(Boolean) : [];
+  const row = {
+    id: id(`demo-poll-${Date.now()}`),
+    communityId: "default",
+    userId: DEMO_USER_ID,
+    userName: profileName(DEMO_PROFILE),
+    unitNumber: unit(DEMO_PROFILE),
+    question: payload.question,
+    options,
+    endsAt: payload.endsAt ?? new Date(Date.now() + 86400000).toISOString(),
+    createdAt: now,
+    totalVotes: 0,
+    voteCounts: options.map(() => 0),
+    myVoteIndex: null,
+    isEnded: false,
+  };
+
+  writeDemoRows(DEMO_POLLS_KEY, [row, ...readDemoRows(DEMO_POLLS_KEY)], 30);
+  return row;
+}
+
 function toListing(row: any, profile?: any) {
   return {
     id: id(row.id),
@@ -167,11 +337,19 @@ async function listFeed(params: URLSearchParams) {
   const page = Number(params.get("page") ?? 1);
   const limit = Number(params.get("limit") ?? 20);
   const search = params.get("search");
+  const category = params.get("category");
   const { data, error } = await supabase.from("posts").select("*").order("created_at", { ascending: false });
-  if (error) throw error;
+  if (error && !isDemoMode()) throw error;
 
-  const rows = applySearch(data ?? [], search, ["title", "body", "type"]);
-  const profiles = await profilesById(rows.map((row: any) => row.user_id));
+  const remoteRows = error ? [] : data ?? [];
+  const demoRows = isDemoMode() ? readDemoPosts() : [];
+  let rows = applySearch([...demoRows, ...remoteRows], search, ["title", "body", "type"]);
+  if (category && category !== "all") {
+    rows = rows.filter((row: any) => row.type === category);
+  }
+
+  const profiles = await profilesById(rows.map((row: any) => row.user_id).filter((userId: string) => userId !== DEMO_USER_ID));
+  profiles.set(DEMO_USER_ID, DEMO_PROFILE);
   const posts = pageRows(rows, page, limit).map((row: any) => toPost(row, profiles.get(row.user_id)));
   return { posts, total: rows.length, page, limit, hasMore: page * limit < rows.length };
 }
@@ -180,22 +358,32 @@ async function listListings(params: URLSearchParams) {
   const page = Number(params.get("page") ?? 1);
   const limit = Number(params.get("limit") ?? 20);
   const search = params.get("search");
+  const category = params.get("category");
+  const minPrice = Number(params.get("minPrice") ?? 0);
+  const maxPrice = Number(params.get("maxPrice") ?? 0);
   const { data, error } = await supabase.from("listings").select("*").order("created_at", { ascending: false });
-  if (error) throw error;
+  if (error && !isDemoMode()) throw error;
 
-  const rows = applySearch(data ?? [], search, ["title", "description", "category"]);
-  const profiles = await profilesById(rows.map((row: any) => row.user_id));
+  const remoteRows = error ? [] : data ?? [];
+  let rows = applySearch([...(isDemoMode() ? readDemoRows(DEMO_LISTINGS_KEY) : []), ...remoteRows], search, ["title", "description", "category"]);
+  if (category && category !== "all") rows = rows.filter((row: any) => row.category === category);
+  if (minPrice) rows = rows.filter((row: any) => Number(row.price_pkr ?? 0) >= minPrice);
+  if (maxPrice) rows = rows.filter((row: any) => Number(row.price_pkr ?? 0) <= maxPrice);
+  const profiles = await profilesById(rows.map((row: any) => row.user_id).filter((userId: string) => userId !== DEMO_USER_ID));
+  profiles.set(DEMO_USER_ID, DEMO_PROFILE);
   const listings = pageRows(rows, page, limit).map((row: any) => toListing(row, profiles.get(row.user_id)));
   return { listings, total: rows.length, page, limit, hasMore: page * limit < rows.length };
 }
 
 async function listEvents() {
   const { data, error } = await supabase.from("events").select("*").order("event_date", { ascending: true });
-  if (error) throw error;
+  if (error && !isDemoMode()) throw error;
 
-  const profiles = await profilesById((data ?? []).map((row: any) => row.user_id));
+  const rows = [...(isDemoMode() ? readDemoRows(DEMO_EVENTS_KEY) : []), ...((error ? [] : data) ?? [])];
+  const profiles = await profilesById(rows.map((row: any) => row.user_id).filter((userId: string) => userId !== DEMO_USER_ID));
+  profiles.set(DEMO_USER_ID, DEMO_PROFILE);
   const today = new Date().toISOString().slice(0, 10);
-  const events = (data ?? []).map((row: any) => toEvent(row, profiles.get(row.user_id)));
+  const events = rows.map((row: any) => toEvent(row, profiles.get(row.user_id)));
   return {
     upcoming: events.filter((event) => event.date >= today),
     past: events.filter((event) => event.date < today),
@@ -204,11 +392,13 @@ async function listEvents() {
 
 async function listPolls() {
   const { data, error } = await supabase.from("polls").select("*, poll_options(*)").order("created_at", { ascending: false });
-  if (error) throw error;
+  if (error && !isDemoMode()) throw error;
 
-  const profiles = await profilesById((data ?? []).map((row: any) => row.user_id));
+  const remoteRows = error ? [] : data ?? [];
+  const profiles = await profilesById(remoteRows.map((row: any) => row.user_id).filter((userId: string) => userId !== DEMO_USER_ID));
+  profiles.set(DEMO_USER_ID, DEMO_PROFILE);
   const now = Date.now();
-  const polls = (data ?? []).map((row: any) => {
+  const polls = remoteRows.map((row: any) => {
     const options = row.poll_options ?? [];
     const endsAt = row.ends_at ?? new Date(Date.now() + 86400000).toISOString();
     return {
@@ -227,10 +417,15 @@ async function listPolls() {
       isEnded: !row.is_active || new Date(endsAt).getTime() < now,
     };
   });
+  const demoPolls = (isDemoMode() ? readDemoRows(DEMO_POLLS_KEY) : []).map((poll: any) => ({
+    ...poll,
+    isEnded: new Date(poll.endsAt).getTime() < now,
+  }));
+  const mergedPolls = [...demoPolls, ...polls];
 
   return {
-    active: polls.filter((poll) => !poll.isEnded),
-    ended: polls.filter((poll) => poll.isEnded),
+    active: mergedPolls.filter((poll) => !poll.isEnded),
+    ended: mergedPolls.filter((poll) => poll.isEnded),
   };
 }
 
@@ -241,14 +436,19 @@ async function listSafety(params: URLSearchParams) {
   if (resolved === "false") query = query.eq("is_resolved", false);
 
   const { data, error } = await query;
-  if (error) throw error;
+  if (error && !isDemoMode()) throw error;
 
-  const rows = data ?? [];
-  const profiles = await profilesById(rows.map((row: any) => row.user_id));
+  let rows = [...(isDemoMode() ? readDemoRows(DEMO_ALERTS_KEY) : []), ...((error ? [] : data) ?? [])];
+  if (resolved === "true") rows = rows.filter((row: any) => Boolean(row.is_resolved));
+  if (resolved === "false") rows = rows.filter((row: any) => !Boolean(row.is_resolved));
+  const profiles = await profilesById(rows.map((row: any) => row.user_id).filter((userId: string) => userId !== DEMO_USER_ID));
+  profiles.set(DEMO_USER_ID, DEMO_PROFILE);
   return rows.map((row: any) => toAlert(row, profiles.get(row.user_id)));
 }
 
 async function createPost(payload: JsonBody) {
+  if (isDemoMode()) return createDemoPost(payload);
+
   const userId = await requiredUserId();
   const { data, error } = await supabase
     .from("posts")
@@ -268,6 +468,8 @@ async function createPost(payload: JsonBody) {
 }
 
 async function createListing(payload: JsonBody) {
+  if (isDemoMode()) return createDemoListing(payload);
+
   const userId = await requiredUserId();
   const { data, error } = await supabase
     .from("listings")
@@ -289,6 +491,8 @@ async function createListing(payload: JsonBody) {
 }
 
 async function createEvent(payload: JsonBody) {
+  if (isDemoMode()) return createDemoEvent(payload);
+
   const userId = await requiredUserId();
   const { data, error } = await supabase
     .from("events")
@@ -309,6 +513,8 @@ async function createEvent(payload: JsonBody) {
 }
 
 async function createSafetyAlert(payload: JsonBody) {
+  if (isDemoMode()) return createDemoAlert(payload);
+
   const userId = await requiredUserId();
   const { data, error } = await supabase
     .from("safety_alerts")
@@ -328,6 +534,11 @@ async function createSafetyAlert(payload: JsonBody) {
 }
 
 async function createPoll(payload: JsonBody) {
+  if (isDemoMode()) {
+    createDemoPoll(payload);
+    return listPolls();
+  }
+
   const userId = await requiredUserId();
   const { data: poll, error } = await supabase
     .from("polls")
@@ -404,6 +615,39 @@ async function listMembers(params: URLSearchParams) {
 
 async function getProfile(userIdParam: string) {
   const userId = await resolveRequestedUserId(userIdParam);
+  if (isDemoMode() && userId === DEMO_USER_ID) {
+    const demoListings = readDemoRows(DEMO_LISTINGS_KEY);
+    return {
+      profile: {
+        userId: DEMO_USER_ID,
+        displayName: profileName(DEMO_PROFILE),
+        unitNumber: unit(DEMO_PROFILE),
+        avatarUrl: null,
+        whatsappNumber: null,
+        createdAt: DEMO_PROFILE.created_at,
+      },
+      posts: readDemoPosts().map((row: any) => ({
+        id: id(row.id),
+        title: row.title,
+        body: row.body,
+        type: row.type,
+        likesCount: row.likes_count ?? 0,
+        commentsCount: row.comments_count ?? 0,
+        createdAt: row.created_at,
+        isPinned: Boolean(row.is_pinned),
+      })),
+      listings: demoListings.map((row: any) => ({
+        id: id(row.id),
+        title: row.title,
+        price: row.price_pkr ?? 0,
+        category: row.category,
+        imageUrl: row.image_urls?.[0] ?? null,
+        status: row.status,
+        createdAt: row.created_at,
+      })),
+    };
+  }
+
   const [{ data: profile }, { data: privateProfile }, postsResult, listingsResult] = await Promise.all([
     supabase.from("profiles").select("*").eq("id", userId).maybeSingle(),
     supabase.from("private_profiles").select("*").eq("id", userId).maybeSingle(),

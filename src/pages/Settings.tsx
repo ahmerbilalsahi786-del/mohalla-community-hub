@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { Sidebar } from '@/components/dashboard/sidebar'
 import { TopNavbar } from '@/components/dashboard/top-navbar'
 import { Button } from '@/components/ui/button'
+import { InviteTools } from '@/components/community/invite-tools'
 import { cn } from '@/lib/utils'
 import {
   MessageSquare, Heart, ShieldAlert, Megaphone, ShoppingBag, UserCheck,
@@ -180,6 +181,18 @@ export default function Settings() {
                 </div>
                 <ChevronRight size={16} className="text-muted-foreground" />
               </a>
+            </Section>
+
+            <Section title="Invite Neighbors">
+              <div className="p-5">
+                <InviteTools
+                  communityName="Mohalla Community"
+                  area="DHA Phase 5"
+                  city="Karachi"
+                  title="Invite to Your Community"
+                  description="Generate a shareable invite link or open a ready-made WhatsApp invitation."
+                />
+              </div>
             </Section>
 
             {/* Danger Zone */}

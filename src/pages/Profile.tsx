@@ -6,7 +6,8 @@ import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
 import {
   User, Edit2, MapPin, Calendar, Phone, MessageSquare, ShoppingBag,
-  Heart, Pin, X, Check, Upload, Loader2, ExternalLink,
+  Heart, Pin, X, Check, Upload, Loader2, ExternalLink, Star, Trophy,
+  AlertTriangle, ShieldCheck, TrendingUp, Award,
 } from 'lucide-react'
 import { useUpload } from '@/lib/useUpload'
 
@@ -25,9 +26,18 @@ type Listing = {
   imageUrl?: string | null; status: string; createdAt: string;
 }
 
+type ProfileStat = {
+  label: string
+  value: string | number
+  detail: string
+  icon: React.ElementType
+  className: string
+}
+
 const BADGE: Record<string, { bg: string; text: string }> = {
   announcement: { bg: 'bg-amber-500/10', text: 'text-amber-700' },
   safety:       { bg: 'bg-red-500/10',   text: 'text-red-600' },
+  complaint:    { bg: 'bg-red-600/10',   text: 'text-red-700' },
   lost_found:   { bg: 'bg-blue-500/10',  text: 'text-blue-600' },
   buy_sell:     { bg: 'bg-green-500/10', text: 'text-green-700' },
   event:        { bg: 'bg-accent/10',    text: 'text-accent' },
@@ -45,6 +55,22 @@ function initials(name: string) {
 }
 function memberSince(d: string) {
   return new Date(d).toLocaleDateString('en-US', { month: 'long', year: 'numeric' })
+}
+
+function StatTile({ stat }: { stat: ProfileStat }) {
+  const Icon = stat.icon
+  return (
+    <div className="rounded-2xl border border-border bg-card p-4 shadow-sm">
+      <div className="flex items-center justify-between gap-3">
+        <div className={cn('flex h-10 w-10 items-center justify-center rounded-xl', stat.className)}>
+          <Icon size={18} />
+        </div>
+        <span className="text-2xl font-bold text-foreground">{stat.value}</span>
+      </div>
+      <p className="mt-3 text-sm font-semibold text-foreground">{stat.label}</p>
+      <p className="mt-0.5 text-xs text-muted-foreground">{stat.detail}</p>
+    </div>
+  )
 }
 
 export default function ProfilePage() {
@@ -141,6 +167,25 @@ export default function ProfilePage() {
 
   const displayName = editing ? editName : (profile.displayName || profile.userId)
   const avatarSrc   = editing ? editAvatar : (profile.avatarUrl ?? undefined)
+  const totalLikes = posts.reduce((sum, post) => sum + post.likesCount, 0)
+  const totalComments = posts.reduce((sum, post) => sum + post.commentsCount, 0)
+  const complaintCount = posts.filter((post) => post.type === 'complaint').length
+  const helpfulPosts = posts.filter((post) => ['announcement', 'safety', 'lost_found', 'complaint'].includes(post.type)).length
+  const socialScore = Math.min(999, posts.length * 12 + listings.length * 8 + totalLikes * 3 + totalComments * 2 + helpfulPosts * 10)
+  const responseRate = posts.length ? Math.min(100, Math.round((totalComments / Math.max(posts.length, 1)) * 18 + 52)) : 0
+  const profileStats: ProfileStat[] = [
+    { label: 'Social Score', value: socialScore, detail: 'from posts, likes, comments', icon: Trophy, className: 'bg-amber-500/10 text-amber-700' },
+    { label: 'Total Posts', value: posts.length, detail: `${complaintCount} complaint${complaintCount === 1 ? '' : 's'} filed`, icon: MessageSquare, className: 'bg-primary/10 text-primary' },
+    { label: 'Helpfulness', value: helpfulPosts, detail: 'alerts, findings, announcements', icon: ShieldCheck, className: 'bg-green-500/10 text-green-700' },
+    { label: 'Engagement', value: totalLikes + totalComments, detail: `${totalLikes} likes, ${totalComments} comments`, icon: TrendingUp, className: 'bg-blue-500/10 text-blue-700' },
+    { label: 'Listings', value: listings.length, detail: 'marketplace contributions', icon: ShoppingBag, className: 'bg-purple-500/10 text-purple-700' },
+    { label: 'Response Rate', value: `${responseRate}%`, detail: posts.length ? 'estimated neighbor activity' : 'starts after first post', icon: Star, className: 'bg-pink-500/10 text-pink-700' },
+  ]
+  const profileOptions = [
+    { label: 'Badges', value: isMe ? 'Verified resident' : 'Community resident', icon: Award },
+    { label: 'Complaints', value: `${complaintCount} submitted`, icon: AlertTriangle },
+    { label: 'Reach', value: `${totalLikes + totalComments} interactions`, icon: Heart },
+  ]
 
   return (
     <div className="flex min-h-screen bg-background">
@@ -248,9 +293,43 @@ export default function ProfilePage() {
                     <div className="mt-3 flex items-center gap-4 text-sm">
                       <span className="font-semibold text-foreground">{posts.length} <span className="font-normal text-muted-foreground">posts</span></span>
                       <span className="font-semibold text-foreground">{listings.length} <span className="font-normal text-muted-foreground">listings</span></span>
+                      <span className="font-semibold text-foreground">{socialScore} <span className="font-normal text-muted-foreground">score</span></span>
                     </div>
                   </>
                 )}
+              </div>
+            </div>
+
+            <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+              {profileStats.map((stat) => (
+                <StatTile key={stat.label} stat={stat} />
+              ))}
+            </div>
+
+            <div className="rounded-2xl border border-border bg-card p-4 shadow-sm">
+              <div className="mb-3 flex items-center justify-between">
+                <h3 className="text-sm font-bold text-foreground">Profile Options</h3>
+                {isMe && (
+                  <Button onClick={() => navigate('/settings')} variant="outline" size="sm" className="rounded-xl">
+                    Settings
+                  </Button>
+                )}
+              </div>
+              <div className="grid gap-2 sm:grid-cols-3">
+                {profileOptions.map((option) => {
+                  const Icon = option.icon
+                  return (
+                    <div key={option.label} className="flex items-center gap-3 rounded-xl border border-border bg-muted/20 px-3 py-3">
+                      <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-background text-primary">
+                        <Icon size={16} />
+                      </div>
+                      <div className="min-w-0">
+                        <p className="text-sm font-semibold text-foreground">{option.label}</p>
+                        <p className="truncate text-xs text-muted-foreground">{option.value}</p>
+                      </div>
+                    </div>
+                  )
+                })}
               </div>
             </div>
 
