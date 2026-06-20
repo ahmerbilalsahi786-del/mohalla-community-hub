@@ -5,10 +5,11 @@ import {
   getAdminGetCommunityQueryKey,
 } from '@/lib/generated/api'
 import { useQueryClient } from '@tanstack/react-query'
-import { useUpload } from '@/lib/useUpload'
 import { InviteTools } from '@/components/community/invite-tools'
 import { Building2, Users, FileText, ShoppingBag, ImagePlus, Save, Loader2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
+import { useToast } from '@/hooks/use-toast'
+import { uploadImage } from '@/lib/cloudinary'
 import { cn } from '@/lib/utils'
 
 export default function AdminCommunity() {
@@ -21,7 +22,9 @@ export default function AdminCommunity() {
   const [city, setCity]   = useState('')
   const [rules, setRules] = useState('')
   const [logoUrl, setLogoUrl] = useState<string | undefined>(undefined)
+  const [uploading, setUploading] = useState(false)
   const [saved, setSaved] = useState(false)
+  const { toast } = useToast()
 
   useEffect(() => {
     if (settings) {
@@ -43,16 +46,23 @@ export default function AdminCommunity() {
     },
   })
 
-  const { upload, uploading } = useUpload({
-    requestUploadUrl: '/api/storage/uploads/request-url',
-  })
-
   const handleLogoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
     if (!file) return
-    const result = await upload(file)
-    if (result?.url || result?.objectPath) {
-      setLogoUrl(result.url ?? result.objectPath)
+    setUploading(true)
+    try {
+      const url = await uploadImage(file)
+      if (url) {
+        setLogoUrl(url)
+      } else {
+        toast({
+          title: 'Image upload failed',
+          description: 'Please try again.',
+          variant: 'destructive',
+        })
+      }
+    } finally {
+      setUploading(false)
     }
   }
 

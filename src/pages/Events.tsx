@@ -12,7 +12,8 @@ import {
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
-import { useUpload } from '@/lib/useUpload'
+import { useToast } from '@/hooks/use-toast'
+import { uploadImage } from '@/lib/cloudinary'
 
 type EventItem = {
   id: number; title: string; description: string; date: string; time: string;
@@ -140,8 +141,8 @@ function CreateEventModal({ onClose }: { onClose: () => void }) {
   const [time, setTime]         = useState('')
   const [location, setLocation] = useState('')
   const [imageUrl, setImageUrl] = useState<string | undefined>()
-
-  const { upload, uploading } = useUpload({ requestUploadUrl: '/api/storage/uploads/request-url' })
+  const [uploading, setUploading] = useState(false)
+  const { toast } = useToast()
 
   const create = useCreateEvent({
     mutation: {
@@ -155,8 +156,21 @@ function CreateEventModal({ onClose }: { onClose: () => void }) {
   const handleImg = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const f = e.target.files?.[0]
     if (!f) return
-    const r = await upload(f)
-    if (r?.url || r?.objectPath) setImageUrl(r.url ?? r.objectPath)
+    setUploading(true)
+    try {
+      const url = await uploadImage(f)
+      if (url) {
+        setImageUrl(url)
+      } else {
+        toast({
+          title: 'Image upload failed',
+          description: 'Please try again.',
+          variant: 'destructive',
+        })
+      }
+    } finally {
+      setUploading(false)
+    }
   }
 
   return (

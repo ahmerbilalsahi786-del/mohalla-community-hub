@@ -1,7 +1,6 @@
 import { useState, useRef } from 'react'
 import { Link } from 'wouter'
 import { useListListings, useCreateListing, getListListingsQueryKey } from '@/lib/generated/api'
-import { useUpload } from '@/lib/useUpload'
 import { useQueryClient } from '@tanstack/react-query'
 import { Sidebar } from '@/components/dashboard/sidebar'
 import { TopNavbar } from '@/components/dashboard/top-navbar'
@@ -11,6 +10,8 @@ import {
   Tag, CheckCircle2, Clock, Image as ImageIcon
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
+import { useToast } from '@/hooks/use-toast'
+import { uploadMultipleImages } from '@/lib/cloudinary'
 import { cn } from '@/lib/utils'
 
 type Category = 'all' | 'furniture' | 'electronics' | 'clothes' | 'vehicles' | 'services' | 'free' | 'other'
@@ -142,12 +143,10 @@ function CreateListingModal({ onClose }: { onClose: () => void }) {
   const [condition, setCondition] = useState<Condition>('good')
   const [whatsapp, setWhatsapp] = useState('')
   const [imageUrls, setImageUrls] = useState<string[]>([])
+  const [isUploading, setIsUploading] = useState(false)
   const fileRef = useRef<HTMLInputElement>(null)
   const queryClient = useQueryClient()
-
-  const { uploadFile, isUploading } = useUpload({
-    requestUploadUrl: '/api/storage/uploads/request-url',
-  })
+  const { toast } = useToast()
 
   const createListing = useCreateListing({
     mutation: {
@@ -162,9 +161,23 @@ function CreateListingModal({ onClose }: { onClose: () => void }) {
     if (!files) return
     const remaining = 4 - imageUrls.length
     const toUpload = Array.from(files).slice(0, remaining)
-    for (const file of toUpload) {
-      const result = await uploadFile(file)
-      if (result) setImageUrls((prev) => [...prev, result.url ?? result.objectPath])
+    if (toUpload.length === 0) return
+
+    setIsUploading(true)
+    try {
+      const urls = await uploadMultipleImages(toUpload)
+      if (urls.length > 0) {
+        setImageUrls((prev) => [...prev, ...urls])
+      }
+      if (urls.length !== toUpload.length) {
+        toast({
+          title: 'Image upload failed',
+          description: 'Some photos could not be uploaded. Please try again.',
+          variant: 'destructive',
+        })
+      }
+    } finally {
+      setIsUploading(false)
     }
   }
 

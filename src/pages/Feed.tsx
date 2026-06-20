@@ -12,6 +12,7 @@ import {
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { useToast } from '@/hooks/use-toast'
+import { uploadImage } from '@/lib/cloudinary'
 import { cn } from '@/lib/utils'
 import { Link, useSearch } from 'wouter'
 
@@ -200,41 +201,6 @@ function ImageGrid({ urls }: { urls: string[] }) {
   )
 }
 
-function readFileAsDataUrl(file: File) {
-  return new Promise<string>((resolve, reject) => {
-    const reader = new FileReader()
-    reader.onload = () => resolve(String(reader.result))
-    reader.onerror = () => reject(reader.error ?? new Error('Could not read this image.'))
-    reader.readAsDataURL(file)
-  })
-}
-
-async function imageToLocalDataUrl(file: File) {
-  const dataUrl = await readFileAsDataUrl(file)
-  if (!file.type.startsWith('image/') || file.type === 'image/svg+xml') return dataUrl
-
-  return new Promise<string>((resolve) => {
-    const img = new Image()
-    img.onload = () => {
-      const maxSide = 1280
-      const scale = Math.min(1, maxSide / Math.max(img.width, img.height))
-      const canvas = document.createElement('canvas')
-      canvas.width = Math.max(1, Math.round(img.width * scale))
-      canvas.height = Math.max(1, Math.round(img.height * scale))
-      const ctx = canvas.getContext('2d')
-      if (!ctx) {
-        resolve(dataUrl)
-        return
-      }
-
-      ctx.drawImage(img, 0, 0, canvas.width, canvas.height)
-      resolve(canvas.toDataURL('image/jpeg', 0.82))
-    }
-    img.onerror = () => resolve(dataUrl)
-    img.src = dataUrl
-  })
-}
-
 function CommentSection({ postId }: { postId: number }) {
   const [commentBody, setCommentBody] = useState('')
   const { data: comments = [], isLoading } = useListComments(postId)
@@ -419,30 +385,26 @@ function CreatePostModal({ onClose, initialType = 'general' }: { onClose: () => 
   const uploadFile = async (file: File) => {
     setIsUploading(true)
     try {
-      const cloudName = import.meta.env.VITE_CLOUDINARY_CLOUD_NAME
-      if (cloudName) {
-        const formData = new FormData()
-        formData.append('file', file)
-        formData.append('upload_preset', 'mohalla_uploads')
-        const res = await fetch(
-          `https://api.cloudinary.com/v1_1/${cloudName}/image/upload`,
-          { method: 'POST', body: formData },
-        )
-        const data = await res.json()
-        if (!res.ok || !data.secure_url) {
-          throw new Error(data.error?.message ?? 'Image upload failed.')
-        }
-        return { objectPath: data.secure_url }
-      }
-
-      return { objectPath: await imageToLocalDataUrl(file) }
-    } catch {
-      try {
-        return { objectPath: await imageToLocalDataUrl(file) }
-      } catch (err: any) {
-        setUploadError(err?.message ?? 'Could not add this image.')
+      const url = await uploadImage(file)
+      if (!url) {
+        setUploadError('Could not add this image.')
+        toast({
+          title: 'Image upload failed',
+          description: 'Please try again.',
+          variant: 'destructive',
+        })
         return null
       }
+
+      return { objectPath: url }
+    } catch {
+      setUploadError('Could not add this image.')
+      toast({
+        title: 'Image upload failed',
+        description: 'Please try again.',
+        variant: 'destructive',
+      })
+      return null
     } finally {
       setIsUploading(false)
     }

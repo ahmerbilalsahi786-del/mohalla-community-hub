@@ -9,7 +9,8 @@ import {
   Heart, Pin, X, Check, Upload, Loader2, ExternalLink, Star, Trophy,
   AlertTriangle, ShieldCheck, TrendingUp, Award,
 } from 'lucide-react'
-import { useUpload } from '@/lib/useUpload'
+import { useToast } from '@/hooks/use-toast'
+import { uploadImage } from '@/lib/cloudinary'
 
 const ME = 'ahmed'
 
@@ -93,8 +94,8 @@ export default function ProfilePage() {
   const [editAvatar, setEditAvatar] = useState<string | undefined>()
   const [saving, setSaving]         = useState(false)
   const [saved, setSaved]           = useState(false)
-
-  const { upload, uploading } = useUpload({ requestUploadUrl: '/api/storage/uploads/request-url' })
+  const [uploading, setUploading]   = useState(false)
+  const { toast } = useToast()
 
   useEffect(() => {
     setLoading(true)
@@ -116,8 +117,21 @@ export default function ProfilePage() {
   const handleAvatarUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const f = e.target.files?.[0]
     if (!f) return
-    const r = await upload(f)
-    if (r?.url || r?.objectPath) setEditAvatar(r.url ?? r.objectPath)
+    setUploading(true)
+    try {
+      const url = await uploadImage(f)
+      if (url) {
+        setEditAvatar(url)
+      } else {
+        toast({
+          title: 'Image upload failed',
+          description: 'Please try again.',
+          variant: 'destructive',
+        })
+      }
+    } finally {
+      setUploading(false)
+    }
   }
 
   const saveProfile = async () => {
