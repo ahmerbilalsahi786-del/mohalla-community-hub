@@ -59,18 +59,18 @@ export function Sidebar() {
       <div className="absolute -left-10 bottom-40 h-32 w-32 rounded-full bg-accent/10 blur-2xl" />
 
       {/* Logo Section */}
-      <div className="flex h-16 items-center justify-between border-b border-sidebar-border px-4">
+      <div className="flex h-16 items-center justify-between border-b border-[#f9b233]/40 bg-[#0b4f49] px-4 text-white shadow-sm">
         <Link href="/" className="flex items-center gap-3">
-          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-sidebar-primary">
-            <span className="text-lg font-bold text-sidebar-primary-foreground">م</span>
-          </div>
+          <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-white p-0.5 shadow-sm ring-1 ring-white/70">
+            <img src="/brand/mohalla-mark.svg" alt="" className="h-full w-full rounded-[10px]" />
+          </span>
           {!collapsed && (
-            <span className="text-xl font-bold tracking-tight">Mohalla</span>
+            <span className="text-xl font-bold tracking-tight text-white">Mohalla</span>
           )}
         </Link>
         <button
           onClick={() => setCollapsed(!collapsed)}
-          className="flex h-8 w-8 items-center justify-center rounded-lg bg-sidebar-accent/50 text-sidebar-foreground/70 transition-colors hover:bg-sidebar-accent hover:text-sidebar-foreground"
+          className="flex h-8 w-8 items-center justify-center rounded-lg bg-white/12 text-white/85 transition-colors hover:bg-white/20 hover:text-white"
         >
           {collapsed ? <ChevronRight size={16} /> : <ChevronLeft size={16} />}
         </button>

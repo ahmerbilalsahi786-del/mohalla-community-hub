@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 430 120" role="img" aria-labelledby="title desc">
+  <title id="title">Mohalla logo</title>
+  <desc id="desc">Mohalla brand lockup with a neighbourhood app mark and lowercase wordmark.</desc>
+  <g transform="translate(12 12)">
+    <rect width="96" height="96" rx="24" fill="#0f766e"/>
+    <path d="M22 60c7.2-13.3 15.9-22.7 26-28.2C58.1 37.3 66.8 46.7 74 60v10.5A5.5 5.5 0 0 1 68.5 76h-41A5.5 5.5 0 0 1 22 70.5V60Z" fill="#f8faf7"/>
+    <path d="M19.5 47.8 35.3 34l14.4 12.8-6.7 6.4-7.7-6.9-11 9.7a3.3 3.3 0 0 1-4.8-.4 3.6 3.6 0 0 1 .4-7.8Z" fill="#bfe9d6"/>
+    <path d="m76.5 47.8-15.8-13.8-14.4 12.8 6.7 6.4 7.7-6.9 11 9.7a3.3 3.3 0 0 0 4.8-.4 3.6 3.6 0 0 0-.4-7.8Z" fill="#bfe9d6"/>
+    <path d="M35 64c3.6-7.8 7.9-13.4 13-16.9C53.1 50.6 57.4 56.2 61 64v12H35V64Z" fill="#0f766e"/>
+    <path d="M42 76V64.5a6 6 0 0 1 12 0V76H42Z" fill="#f8faf7"/>
+    <path d="M32 61h32" stroke="#f9b233" stroke-width="5.5" stroke-linecap="round"/>
+    <path d="M48 31.8v-9.3" stroke="#f8faf7" stroke-width="5" stroke-linecap="round"/>
+    <circle cx="48" cy="19" r="5.5" fill="#f97357"/>
+  </g>
+  <text x="132" y="76" fill="#123b3a" font-family="Nunito, Avenir Next, Inter, Arial, sans-serif" font-size="56" font-weight="800" letter-spacing="0">mohalla</text>
+  <circle cx="354" cy="37" r="5" fill="#f97357"/>
+</svg>

@@ -5,10 +5,10 @@
   "start_url": "/",
   "display": "standalone",
   "background_color": "#ffffff",
-  "theme_color": "#16a34a",
+  "theme_color": "#0f766e",
   "icons": [
     {
-      "src": "/favicon.svg",
+      "src": "/brand/mohalla-mark.svg",
       "sizes": "any",
       "type": "image/svg+xml"
     }
