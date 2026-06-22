@@ -7,6 +7,13 @@ import { setToken } from '@/lib/auth'
 import { useToast } from '@/hooks/use-toast'
 import { supabase } from '@/integrations/supabase/client'
 
+function emailRedirectTo() {
+  const configuredUrl = import.meta.env.VITE_APP_URL?.trim()
+  const origin = configuredUrl || window.location.origin
+
+  return `${origin.replace(/\/$/, '')}/login`
+}
+
 export default function Register() {
   const [, navigate] = useLocation()
   const { toast } = useToast()
@@ -39,6 +46,7 @@ export default function Register() {
         email: form.email,
         password: form.password,
         options: {
+          emailRedirectTo: emailRedirectTo(),
           data: {
             username: form.userId,
             full_name: form.name,
