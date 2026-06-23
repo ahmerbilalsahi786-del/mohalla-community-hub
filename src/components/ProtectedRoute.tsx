@@ -1,7 +1,7 @@
 import { type ComponentType } from 'react'
 import { Redirect } from 'wouter'
-import { isLoggedIn, getUser } from '@/lib/auth'
-import { useToast } from '@/hooks/use-toast'
+import { isLoggedIn } from '@/lib/auth'
+import { canManageCommunity, useCurrentUser } from '@/hooks/use-current-user'
 
 /** Wraps a page component — redirects to /login if user is not authenticated. */
 export function ProtectedRoute<P extends object>(Component: ComponentType<P>) {
@@ -19,8 +19,9 @@ export function AdminRoute<P extends object>(Component: ComponentType<P>) {
     if (!isLoggedIn()) {
       return <Redirect to="/login" />
     }
-    const user = getUser()
-    if (!user || (user.role !== 'admin' && user.role !== 'moderator')) {
+    const { data: user, isLoading } = useCurrentUser()
+    if (isLoading) return null
+    if (!canManageCommunity(user?.role)) {
       return <Redirect to="/feed" />
     }
     return <Component {...props} />

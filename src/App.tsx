@@ -27,6 +27,7 @@ import { OnboardingModal } from "@/components/modals/onboarding-modal";
 import { CommandSearch } from "@/components/search/command-search";
 import { MobileNav } from "@/components/dashboard/mobile-nav";
 import { ProtectedRoute, AdminRoute } from "@/components/ProtectedRoute";
+import { InstallAppPrompt } from "@/components/pwa/install-app";
 import { clearToken } from "@/lib/auth";
 
 const queryClient = new QueryClient({
@@ -129,6 +130,7 @@ function App() {
         <WouterRouter base={import.meta.env.BASE_URL.replace(/\/$/, "")}>
           <AppChrome />
         </WouterRouter>
+        <InstallAppPrompt />
         <CommandSearch />
         <Toaster />
       </TooltipProvider>

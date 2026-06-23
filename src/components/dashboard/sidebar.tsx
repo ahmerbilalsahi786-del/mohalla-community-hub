@@ -19,7 +19,10 @@ import {
   ShieldAlert,
   ShieldCheck,
   BarChart2,
+  LogOut,
 } from 'lucide-react'
+import { InstallAppButton } from '@/components/pwa/install-app'
+import { canManageCommunity, useCurrentUser, useLogout } from '@/hooks/use-current-user'
 
 const navItems = [
   { name: 'Dashboard', icon: Home, href: '/', badge: null },
@@ -43,8 +46,14 @@ const bottomItems = [
 export function Sidebar() {
   const [collapsed, setCollapsed] = useState(false)
   const [location] = useLocation()
+  const { data: user } = useCurrentUser()
+  const logout = useLogout()
+  const profileHref = `/profile/${user?.userId ?? 'me'}`
+  const visibleNavItems = navItems.filter((item) => item.href !== '/admin' || canManageCommunity(user?.role))
 
-  const activeItem = navItems.find((i) => location === i.href || (i.href !== '/' && location.startsWith(i.href)))?.name ?? 'Dashboard'
+  const activeItem =
+    [...visibleNavItems, ...bottomItems].find((i) => location === i.href || (i.href !== '/' && location.startsWith(i.href)))?.name ??
+    'Dashboard'
 
   return (
     <aside
@@ -81,7 +90,7 @@ export function Sidebar() {
         <div className={cn('mb-2 px-3 text-xs font-semibold uppercase tracking-wider text-sidebar-foreground/50', collapsed && 'sr-only')}>
           Main Menu
         </div>
-        {navItems.map((item) => (
+        {visibleNavItems.map((item) => (
           <Link
             key={item.name}
             href={item.href}
@@ -120,6 +129,7 @@ export function Sidebar() {
 
       {/* Bottom Navigation */}
       <div className="border-t border-sidebar-border p-3">
+        <InstallAppButton collapsed={collapsed} className="mb-1" />
         {bottomItems.map((item) => (
           <Link
             key={item.name}
@@ -148,21 +158,43 @@ export function Sidebar() {
 
       {/* User Profile */}
       <div className="border-t border-sidebar-border p-3">
-        <div className={cn(
-          'flex items-center gap-3 rounded-xl bg-sidebar-accent/30 p-3',
-          collapsed && 'justify-center'
-        )}>
-          <div className="relative">
-            <div className="h-10 w-10 rounded-full bg-gradient-to-br from-sidebar-primary to-accent" />
+        <Link
+          href={profileHref}
+          className={cn(
+            'flex items-center gap-3 rounded-xl bg-sidebar-accent/30 p-3 transition-colors hover:bg-sidebar-accent/60',
+            collapsed && 'justify-center'
+          )}
+        >
+          <div className="relative shrink-0">
+            {user?.avatarUrl ? (
+              <img src={user.avatarUrl} alt="" className="h-10 w-10 rounded-full object-cover" />
+            ) : (
+              <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-br from-sidebar-primary to-accent text-sm font-bold text-white">
+                {(user?.name ?? 'R').slice(0, 1).toUpperCase()}
+              </div>
+            )}
             <div className="absolute -bottom-0.5 -right-0.5 h-3 w-3 rounded-full border-2 border-sidebar bg-green-500" />
           </div>
           {!collapsed && (
-            <div className="flex-1 overflow-hidden">
-              <p className="truncate text-sm font-semibold">Ahmed Khan</p>
-              <p className="truncate text-xs text-sidebar-foreground/60">Community Leader</p>
+            <div className="min-w-0 flex-1 overflow-hidden">
+              <p className="truncate text-sm font-semibold">{user?.name ?? 'Resident'}</p>
+              <p className="truncate text-xs text-sidebar-foreground/60">
+                {user?.unitNumber ? `${user.unitNumber} · ` : ''}{canManageCommunity(user?.role) ? 'Admin' : 'Member'}
+              </p>
             </div>
           )}
-        </div>
+        </Link>
+        <button
+          type="button"
+          onClick={logout}
+          className={cn(
+            'mt-2 flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-sidebar-foreground/70 transition-colors hover:bg-sidebar-accent/50 hover:text-sidebar-foreground',
+            collapsed && 'justify-center'
+          )}
+        >
+          <LogOut size={20} className="shrink-0" />
+          {!collapsed && <span>Logout</span>}
+        </button>
       </div>
     </aside>
   )

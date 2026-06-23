@@ -1,9 +1,10 @@
 
 import { useState } from 'react'
-import { Search, Sun, Moon, Plus, ChevronDown } from 'lucide-react'
+import { Search, Sun, Moon, Plus, LogOut } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { useLocation, Link } from 'wouter'
 import { NotificationBell } from './notification-bell'
+import { useCurrentUser, useLogout } from '@/hooks/use-current-user'
 
 const PAGE_META: Record<string, { title: string; subtitle: string }> = {
   '/': { title: 'Dashboard', subtitle: 'Welcome back to your community' },
@@ -34,7 +35,10 @@ function matchPageMeta(location: string) {
 export function TopNavbar() {
   const [darkMode, setDarkMode] = useState(false)
   const [location, navigate] = useLocation()
+  const { data: user } = useCurrentUser()
+  const logout = useLogout()
   const meta = matchPageMeta(location)
+  const profileHref = `/profile/${user?.userId ?? 'me'}`
 
   const toggleDarkMode = () => {
     setDarkMode(!darkMode)
@@ -50,11 +54,11 @@ export function TopNavbar() {
   }
 
   return (
-    <header className="sticky top-0 z-40 flex h-16 items-center justify-between gap-3 border-b border-border bg-background/90 px-3 backdrop-blur-md sm:px-6">
+    <header className="sticky top-0 z-40 flex h-16 items-center justify-between gap-3 border-b border-[#f9b233]/40 bg-[#0b4f49] px-3 text-white shadow-sm backdrop-blur-md sm:px-6">
       {/* Left Section - Page Title */}
       <div className="flex min-w-0 flex-col">
-        <h1 className="truncate text-lg font-bold text-foreground sm:text-xl">{meta.title}</h1>
-        <p className="hidden truncate text-sm text-muted-foreground sm:block">{meta.subtitle}</p>
+        <h1 className="truncate text-lg font-bold text-white sm:text-xl">{meta.title}</h1>
+        <p className="hidden truncate text-sm text-white/75 sm:block">{meta.subtitle}</p>
       </div>
 
       {/* Center Section - Search (click opens Cmd+K palette) */}
@@ -64,11 +68,11 @@ export function TopNavbar() {
             const e = new KeyboardEvent('keydown', { key: 'k', metaKey: true, bubbles: true })
             document.dispatchEvent(e)
           }}
-          className="relative w-full max-w-md flex items-center gap-2 h-10 rounded-xl border border-border bg-muted/50 pl-10 pr-4 text-sm text-muted-foreground hover:bg-muted transition-colors text-left"
+          className="relative flex h-10 w-full max-w-md items-center gap-2 rounded-xl border border-white/25 bg-white/10 pl-10 pr-3 text-left text-sm text-white/80 transition-colors hover:bg-white/15"
         >
-          <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-          Search community, events, people...
-          <kbd className="pointer-events-none ml-auto rounded-md border border-border bg-background px-1.5 py-0.5 text-xs text-muted-foreground">
+          <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-white/70" />
+          <span className="min-w-0 flex-1 truncate">Search community, events, people...</span>
+          <kbd className="pointer-events-none ml-auto shrink-0 rounded-md border border-white/20 bg-white/10 px-1.5 py-0.5 text-xs text-white/70">
             ⌘K
           </kbd>
         </button>
@@ -82,7 +86,7 @@ export function TopNavbar() {
             document.dispatchEvent(e)
           }}
           aria-label="Search"
-          className="flex h-10 w-10 items-center justify-center rounded-xl bg-muted/50 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground md:hidden"
+          className="flex h-10 w-10 items-center justify-center rounded-xl bg-white/10 text-white/80 transition-colors hover:bg-white/15 hover:text-white md:hidden"
         >
           <Search size={20} />
         </button>
@@ -90,7 +94,7 @@ export function TopNavbar() {
         {/* Quick Action */}
         <Button
           onClick={openComposer}
-          className="hidden gap-2 rounded-xl bg-primary text-primary-foreground shadow-md shadow-primary/20 hover:bg-primary/90 sm:flex"
+          className="hidden gap-2 rounded-xl bg-[#f9b233] text-[#103d39] shadow-md shadow-black/10 hover:bg-[#ffc24f] sm:flex"
         >
           <Plus size={16} />
           <span>New Post</span>
@@ -102,21 +106,34 @@ export function TopNavbar() {
         {/* Theme Toggle */}
         <button
           onClick={toggleDarkMode}
-          className="flex h-10 w-10 items-center justify-center rounded-xl bg-muted/50 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+          className="flex h-10 w-10 items-center justify-center rounded-xl bg-white/10 text-white/80 transition-colors hover:bg-white/15 hover:text-white"
         >
           {darkMode ? <Sun size={20} /> : <Moon size={20} />}
         </button>
 
         {/* User Menu → profile link */}
-        <Link href="/profile/ahmed" className="block">
-          <button aria-label="Open profile" className="flex h-10 items-center gap-2 rounded-xl bg-muted/50 p-1 transition-colors hover:bg-muted sm:py-1.5 sm:pl-1.5 sm:pr-3">
-            <div className="h-8 w-8 rounded-lg bg-gradient-to-br from-primary to-accent" />
+        <Link href={profileHref} className="block">
+          <button aria-label="Open profile" className="flex h-10 items-center gap-2 rounded-xl bg-white/10 p-1 transition-colors hover:bg-white/15 sm:py-1.5 sm:pl-1.5 sm:pr-3">
+            {user?.avatarUrl ? (
+              <img src={user.avatarUrl} alt="" className="h-8 w-8 rounded-lg object-cover" />
+            ) : (
+              <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-[#f9b233] text-sm font-bold text-[#103d39]">
+                {(user?.name ?? 'R').slice(0, 1).toUpperCase()}
+              </div>
+            )}
             <div className="hidden text-left md:block">
-              <p className="text-sm font-semibold text-foreground">Ahmed K.</p>
+              <p className="max-w-28 truncate text-sm font-semibold text-white">{user?.name ?? 'Resident'}</p>
             </div>
-            <ChevronDown size={14} className="hidden text-muted-foreground sm:block" />
           </button>
         </Link>
+        <button
+          type="button"
+          onClick={logout}
+          aria-label="Logout"
+          className="flex h-10 w-10 items-center justify-center rounded-xl bg-white/10 text-white/80 transition-colors hover:bg-white/15 hover:text-white"
+        >
+          <LogOut size={18} />
+        </button>
       </div>
     </header>
   )

@@ -28,7 +28,9 @@
 
     <!-- PWA -->
     <link rel="manifest" href="/manifest.json" />
-    <meta name="theme-color" content="#0f766e" />
+    <meta name="application-name" content="Mohalla" />
+    <meta name="theme-color" content="#0b4f49" />
+    <meta name="msapplication-TileColor" content="#0b4f49" />
     <meta name="mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="default" />
@@ -36,7 +38,8 @@
 
     <!-- Icons -->
     <link rel="icon" type="image/svg+xml" href="/brand/mohalla-mark.svg" />
-    <link rel="apple-touch-icon" href="/apple-icon.png" />
+    <link rel="icon" type="image/png" sizes="192x192" href="/pwa-192.png" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
 
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -46,12 +49,5 @@
   <body>
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
-    <script>
-      if ('serviceWorker' in navigator) {
-        window.addEventListener('load', () => {
-          navigator.serviceWorker.register('/sw.js').catch(() => {})
-        })
-      }
-    </script>
   </body>
 </html>

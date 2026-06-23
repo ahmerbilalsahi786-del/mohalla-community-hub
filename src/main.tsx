@@ -6,12 +6,14 @@ import "./styles.css";
 import { setAuthTokenGetter, setBaseUrl } from "./lib/custom-fetch";
 import { getToken } from "./lib/auth";
 import { installSupabaseApiBridge } from "./lib/supabase-api";
+import { registerPwa } from "./lib/pwa";
 
 setBaseUrl(import.meta.env.VITE_API_BASE_URL || null);
 
 // Wire the auth token into every API call made via customFetch
 setAuthTokenGetter(() => getToken());
 installSupabaseApiBridge();
+registerPwa();
 
 createRoot(document.getElementById("root")!).render(
   <Sentry.ErrorBoundary fallback={<div role="alert">Something went wrong.</div>}>
