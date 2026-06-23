@@ -26,7 +26,25 @@ let _authTokenGetter: AuthTokenGetter | null = null;
  * Pass `null` to clear the base URL.
  */
 export function setBaseUrl(url: string | null): void {
-  _baseUrl = url ? url.replace(/\/+$/, "") : null;
+  if (!url) {
+    _baseUrl = null;
+    return;
+  }
+
+  try {
+    const parsed = new URL(url, typeof window !== "undefined" ? window.location.origin : undefined);
+    if (typeof window !== "undefined" && parsed.origin === window.location.origin) {
+      _baseUrl = null;
+      return;
+    }
+    if (parsed.hostname.endsWith(".vercel.app")) {
+      _baseUrl = null;
+      return;
+    }
+    _baseUrl = parsed.toString().replace(/\/+$/, "");
+  } catch {
+    _baseUrl = null;
+  }
 }
 
 /**

@@ -48,6 +48,19 @@ function resolveSupabasePublishableKey(...values: Array<string | undefined>) {
   }) ?? DEFAULT_SUPABASE_PUBLISHABLE_KEY
 }
 
+function resolveApiBaseUrl(value?: string) {
+  const candidate = value?.trim()
+  if (!candidate) return ""
+
+  try {
+    const url = new URL(candidate)
+    if (url.hostname.endsWith(".vercel.app")) return ""
+    return url.toString().replace(/\/$/, "")
+  } catch {
+    return ""
+  }
+}
+
 export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, process.cwd(), "")
   const supabaseUrl = resolveSupabaseUrl(env.VITE_SUPABASE_URL || env.SUPABASE_URL)
@@ -85,6 +98,7 @@ export default defineConfig(({ mode }) => {
       "import.meta.env.VITE_SUPABASE_URL": JSON.stringify(supabaseUrl),
       "import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY": JSON.stringify(supabasePublishableKey),
       "import.meta.env.VITE_SUPABASE_ANON_KEY": JSON.stringify(supabasePublishableKey),
+      "import.meta.env.VITE_API_BASE_URL": JSON.stringify(resolveApiBaseUrl(env.VITE_API_BASE_URL)),
     },
     resolve: {
       alias: {
