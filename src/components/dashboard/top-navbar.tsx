@@ -54,7 +54,7 @@ export function TopNavbar() {
   }
 
   return (
-    <header className="sticky top-0 z-40 flex h-16 items-center justify-between gap-3 border-b border-[#f9b233]/40 bg-[#0b4f49] px-3 text-white shadow-sm backdrop-blur-md sm:px-6">
+    <header className="sticky top-0 z-40 flex h-16 shrink-0 items-center justify-between gap-3 border-b border-[#f9b233]/40 bg-[#0b4f49] px-3 text-white shadow-sm backdrop-blur-md sm:px-6">
       {/* Left Section - Page Title */}
       <div className="flex min-w-0 flex-col">
         <h1 className="truncate text-lg font-bold text-white sm:text-xl">{meta.title}</h1>

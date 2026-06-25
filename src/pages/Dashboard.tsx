@@ -107,13 +107,13 @@ export default function Dashboard() {
   }))
 
   return (
-    <div className="flex min-h-screen bg-background">
+    <div className="flex h-screen overflow-hidden bg-background">
       <Sidebar />
 
-      <div className="relative flex min-w-0 flex-1 flex-col overflow-hidden">
+      <div className="relative flex h-screen min-w-0 flex-1 flex-col overflow-hidden">
         <TopNavbar />
 
-        <main className="flex-1 overflow-y-auto p-3 pb-24 sm:p-6">
+        <main className="min-h-0 flex-1 overflow-y-auto p-3 pb-24 sm:p-6">
           <div className="mb-8">
             <div className="flex items-start gap-3 sm:items-center">
               <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-primary/10">
