@@ -1,6 +1,6 @@
 import { Sidebar } from '@/components/dashboard/sidebar'
 import { TopNavbar } from '@/components/dashboard/top-navbar'
-import { useAdminListMembers } from '@/lib/generated/api'
+import { useQuery } from '@tanstack/react-query'
 import { Users, MapPin, Phone } from 'lucide-react'
 import { Link } from 'wouter'
 import { cn } from '@/lib/utils'
@@ -11,12 +11,21 @@ function getInitials(name: string) {
 
 const ROLE_BADGE: Record<string, { label: string; cls: string }> = {
   admin:    { label: 'Admin',    cls: 'bg-primary/10 text-primary' },
+  moderator:{ label: 'Moderator',cls: 'bg-blue-500/10 text-blue-700' },
+  user:     { label: 'Resident', cls: 'bg-muted text-muted-foreground' },
   resident: { label: 'Resident', cls: 'bg-muted text-muted-foreground' },
   security: { label: 'Security', cls: 'bg-amber-100 text-amber-700' },
 }
 
 export default function Community() {
-  const { data, isLoading } = useAdminListMembers({ communityId: 'default' })
+  const { data, isLoading } = useQuery({
+    queryKey: ["community-members"],
+    queryFn: async () => {
+      const response = await fetch("/api/community/members?communityId=default");
+      if (!response.ok) throw new Error("Could not load members.");
+      return response.json();
+    },
+  })
   const members: any[] = Array.isArray(data) ? data : []
 
   return (
@@ -71,7 +80,7 @@ export default function Community() {
             ) : (
               <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
                 {members.map((m) => {
-                  const role = ROLE_BADGE[m.role] ?? ROLE_BADGE.resident
+                  const role = ROLE_BADGE[m.role] ?? ROLE_BADGE.user
                   return (
                     <Link key={m.id} href={`/profile/${m.userId}`}>
                       <div className="group cursor-pointer rounded-2xl border border-border bg-card p-4 hover:border-primary/30 hover:shadow-sm transition-all">

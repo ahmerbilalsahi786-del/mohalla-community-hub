@@ -16,12 +16,12 @@ type Member = {
   status: string; role: string; isVerified: boolean; joinDate: string; communityId: string;
 }
 
-const ROLE_OPTIONS = ['resident', 'moderator', 'admin']
+const ROLE_OPTIONS = ['user', 'moderator', 'admin']
 
 const ROLE_COLORS: Record<string, string> = {
   admin:     'bg-purple-500/10 text-purple-700',
   moderator: 'bg-blue-500/10 text-blue-700',
-  resident:  'bg-muted text-muted-foreground',
+  user:      'bg-muted text-muted-foreground',
 }
 
 function timeAgo(d: string) {
@@ -61,7 +61,7 @@ function MemberRow({ member, refetch }: { member: Member; refetch: () => void })
       <td className="px-4 py-3 text-sm text-muted-foreground">{member.phone || '—'}</td>
       <td className="px-4 py-3 text-sm text-muted-foreground">{timeAgo(member.joinDate)}</td>
       <td className="px-4 py-3">
-        <span className={cn('rounded-full px-2 py-0.5 text-xs font-semibold', ROLE_COLORS[member.role] || ROLE_COLORS.resident)}>
+        <span className={cn('rounded-full px-2 py-0.5 text-xs font-semibold', ROLE_COLORS[member.role] || ROLE_COLORS.user)}>
           {member.role}
         </span>
       </td>

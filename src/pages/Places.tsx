@@ -1,6 +1,8 @@
 import { Sidebar } from '@/components/dashboard/sidebar'
 import { TopNavbar } from '@/components/dashboard/top-navbar'
 import { MapPin, Building2, Trees, ShoppingCart, Stethoscope, GraduationCap, Utensils } from 'lucide-react'
+import { useQuery } from '@tanstack/react-query'
+import { getUser } from '@/lib/auth'
 
 const PLACES = [
   {
@@ -51,6 +53,31 @@ const TAG_COLORS: Record<string, string> = {
 }
 
 export default function Places() {
+  const demo = getUser()?.userId === "ahmed" && getUser()?.email === "demo@mohalla.app"
+  const { data: remotePlaces = [], isLoading } = useQuery({
+    queryKey: ["places"],
+    enabled: !demo,
+    queryFn: async () => {
+      const response = await fetch("/api/places")
+      if (!response.ok) throw new Error("Could not load places.")
+      return response.json()
+    },
+  })
+  const sections = demo
+    ? PLACES
+    : Object.entries(
+        (remotePlaces as any[]).reduce((groups: Record<string, any[]>, place: any) => {
+          const category = place.category || "Other"
+          groups[category] = [...(groups[category] ?? []), {
+            name: place.name,
+            detail: [place.location, place.hours].filter(Boolean).join(" · ") || place.description,
+            tag: category,
+            icon: category.includes("Health") ? Stethoscope : category.includes("Green") ? Trees : category.includes("Food") ? ShoppingCart : Building2,
+          }]
+          return groups
+        }, {}),
+      ).map(([category, items]) => ({ category, items }))
+
   return (
     <div className="flex min-h-screen bg-background">
       <div className="pointer-events-none fixed inset-0 overflow-hidden">
@@ -75,7 +102,11 @@ export default function Places() {
             </div>
 
             <div className="space-y-8">
-              {PLACES.map((section) => (
+              {isLoading && !demo ? (
+                <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+                  {[1, 2, 3, 4, 5, 6].map((item) => <div key={item} className="h-28 animate-pulse rounded-lg bg-muted" />)}
+                </div>
+              ) : sections.map((section) => (
                 <div key={section.category}>
                   <h3 className="text-xs font-semibold uppercase tracking-widest text-muted-foreground mb-3">
                     {section.category}

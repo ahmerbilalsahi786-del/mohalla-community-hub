@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { Link, useLocation } from 'wouter'
-import { Eye, EyeOff, LogIn, PlayCircle } from 'lucide-react'
+import { Eye, EyeOff, LogIn, PlayCircle, ShieldCheck, User } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { setDemoToken, setToken } from '@/lib/auth'
@@ -14,6 +14,8 @@ export default function Login() {
   const [password, setPassword] = useState('')
   const [showPw, setShowPw] = useState(false)
   const [loading, setLoading] = useState(false)
+  const [accountType, setAccountType] = useState<"member" | "admin">("member")
+  const [resetting, setResetting] = useState(false)
 
   const enterDemo = () => {
     setDemoToken()
@@ -39,13 +41,42 @@ export default function Login() {
         return
       }
 
+      if (accountType === "admin") {
+        const { data: roles, error: roleError } = await supabase
+          .from("user_roles")
+          .select("role")
+          .eq("user_id", data.user.id)
+        const canManage = roles?.some((row: { role: string }) => row.role === "admin" || row.role === "moderator")
+        if (roleError || !canManage) {
+          await supabase.auth.signOut()
+          toast({ title: "This account does not have administrator access.", variant: "destructive" })
+          return
+        }
+      }
+
       setToken(data.session.access_token)
-      navigate('/')
+      navigate(accountType === "admin" ? "/admin" : "/")
     } catch {
       toast({ title: 'Cannot connect to Supabase. Check your project keys.', variant: 'destructive' })
     } finally {
       setLoading(false)
     }
+  }
+
+  const sendPasswordReset = async () => {
+    if (!email.trim()) {
+      toast({ title: "Enter your email address first.", variant: "destructive" })
+      return
+    }
+    setResetting(true)
+    const { error } = await supabase.auth.resetPasswordForEmail(email.trim(), {
+      redirectTo: `${window.location.origin}/reset-password`,
+    })
+    setResetting(false)
+    toast({
+      title: error ? error.message : "Password reset email sent.",
+      variant: error ? "destructive" : "default",
+    })
   }
 
   return (
@@ -80,9 +111,18 @@ export default function Login() {
         </button>
 
         <form onSubmit={submit} className="space-y-4">
+          <div className="grid grid-cols-2 gap-1 rounded-lg border border-border bg-muted/40 p-1" aria-label="Account type">
+            <button type="button" onClick={() => setAccountType("member")} className={`flex items-center justify-center gap-2 rounded-md px-3 py-2 text-sm font-semibold ${accountType === "member" ? "bg-background text-foreground shadow-sm" : "text-muted-foreground"}`}>
+              <User size={15} /> Member
+            </button>
+            <button type="button" onClick={() => setAccountType("admin")} className={`flex items-center justify-center gap-2 rounded-md px-3 py-2 text-sm font-semibold ${accountType === "admin" ? "bg-background text-foreground shadow-sm" : "text-muted-foreground"}`}>
+              <ShieldCheck size={15} /> Admin
+            </button>
+          </div>
           <div className="space-y-1.5">
-            <label className="text-sm font-medium text-foreground">Email</label>
+            <label htmlFor="login-email" className="text-sm font-medium text-foreground">Email</label>
             <Input
+              id="login-email"
               type="email"
               value={email}
               onChange={e => setEmail(e.target.value)}
@@ -93,9 +133,15 @@ export default function Login() {
           </div>
 
           <div className="space-y-1.5">
-            <label className="text-sm font-medium text-foreground">Password</label>
+            <div className="flex items-center justify-between">
+              <label htmlFor="login-password" className="text-sm font-medium text-foreground">Password</label>
+              <button type="button" disabled={resetting} onClick={sendPasswordReset} className="text-xs font-medium text-primary hover:underline">
+                {resetting ? "Sending..." : "Forgot password?"}
+              </button>
+            </div>
             <div className="relative">
               <Input
+                id="login-password"
                 type={showPw ? 'text' : 'password'}
                 value={password}
                 onChange={e => setPassword(e.target.value)}
@@ -105,6 +151,7 @@ export default function Login() {
               />
               <button
                 type="button"
+                aria-label={showPw ? "Hide password" : "Show password"}
                 onClick={() => setShowPw(!showPw)}
                 className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
               >
@@ -114,7 +161,7 @@ export default function Login() {
           </div>
 
           <Button type="submit" disabled={loading} className="w-full rounded-xl bg-primary">
-            {loading ? 'Signing in…' : <><LogIn size={16} className="mr-2" /> Sign in</>}
+            {loading ? 'Signing in…' : <><LogIn size={16} className="mr-2" /> Sign in as {accountType === "admin" ? "admin" : "member"}</>}
           </Button>
         </form>
 

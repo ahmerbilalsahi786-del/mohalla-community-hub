@@ -19,6 +19,7 @@ type EventItem = {
   id: number; title: string; description: string; date: string; time: string;
   location: string; imageUrl?: string | null; rsvpCount: number; createdAt: string;
   userName: string; unitNumber: string; userId: string;
+  myStatus?: string | null;
 }
 
 const RSVP_OPTIONS = [
@@ -41,17 +42,11 @@ function isUpcomingSoon(date: string) {
   return diff >= 0 && diff <= 3
 }
 
-// Per-event RSVP state stored in component memory (refresh resets it; real auth would persist to DB)
-const myRsvps: Record<number, string> = {}
-
 function EventCard({ event, isPast }: { event: EventItem; isPast?: boolean }) {
   const qc = useQueryClient()
-  const [myStatus, setMyStatus] = useState<string | null>(myRsvps[event.id] || null)
   const rsvp = useRsvpEvent({
     mutation: {
-      onSuccess: (data) => {
-        myRsvps[event.id] = (data as any).status
-        setMyStatus((data as any).status)
+      onSuccess: () => {
         qc.invalidateQueries({ queryKey: getListEventsQueryKey() })
       },
     },
@@ -106,7 +101,7 @@ function EventCard({ event, isPast }: { event: EventItem; isPast?: boolean }) {
             <div className="flex items-center gap-1">
               {RSVP_OPTIONS.map(opt => {
                 const Icon = opt.icon
-                const active = myStatus === opt.status
+                const active = event.myStatus === opt.status
                 return (
                   <button
                     key={opt.status}

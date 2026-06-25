@@ -1,7 +1,20 @@
+const MAX_IMAGE_BYTES = 8 * 1024 * 1024
+const ALLOWED_IMAGE_TYPES = new Set(['image/jpeg', 'image/png', 'image/webp', 'image/gif'])
+
+export function validateImageFile(file: File) {
+  if (!ALLOWED_IMAGE_TYPES.has(file.type)) {
+    throw new Error('Use a JPG, PNG, WebP, or GIF image.')
+  }
+  if (file.size > MAX_IMAGE_BYTES) {
+    throw new Error('Images must be smaller than 8 MB.')
+  }
+}
+
 export async function uploadImage(
   file: File
 ): Promise<string | null> {
   try {
+    validateImageFile(file)
     const formData = new FormData()
     formData.append('file', file)
     formData.append(
@@ -11,6 +24,9 @@ export async function uploadImage(
 
     const cloudName =
       import.meta.env.VITE_CLOUDINARY_CLOUD_NAME
+    if (!cloudName) {
+      throw new Error('Image uploads are not configured.')
+    }
 
     const response = await fetch(
       `https://api.cloudinary.com/v1_1/${cloudName}/image/upload`,

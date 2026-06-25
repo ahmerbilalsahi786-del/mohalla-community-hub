@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { supabase } from './supabase';
+import { validateImageFile } from './cloudinary';
 
 function readAsDataUrl(file: File) {
   return new Promise<string>((resolve, reject) => {
@@ -42,7 +43,11 @@ export function useUpload(options?: any) {
   const uploadFile = async (file: File) => {
     setIsUploading(true);
     try {
-      const fileName = `${Math.random()}-${file.name}`;
+      validateImageFile(file);
+      const { data: authData } = await supabase.auth.getUser();
+      if (!authData.user) throw new Error('Sign in before uploading images.');
+      const safeName = file.name.replace(/[^a-zA-Z0-9._-]/g, '-');
+      const fileName = `${authData.user.id}/${crypto.randomUUID()}-${safeName}`;
       const { data, error } = await supabase.storage.from('uploads').upload(fileName, file);
       if (error) throw error;
       const { data: { publicUrl } } = supabase.storage.from('uploads').getPublicUrl(fileName);

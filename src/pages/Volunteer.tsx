@@ -4,6 +4,8 @@ import { TopNavbar } from '@/components/dashboard/top-navbar'
 import { Heart, Clock, Users, CheckCircle2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import { getUser } from '@/lib/auth'
 
 type Opportunity = {
   id: number
@@ -68,9 +70,42 @@ const CAT_COLORS: Record<string, string> = {
 
 export default function Volunteer() {
   const [joined, setJoined] = useState<number[]>([])
+  const demo = getUser()?.userId === "ahmed" && getUser()?.email === "demo@mohalla.app"
+  const queryClient = useQueryClient()
+  const { data: remote = [], isLoading } = useQuery({
+    queryKey: ["volunteer-opportunities"],
+    enabled: !demo,
+    queryFn: async () => {
+      const response = await fetch("/api/volunteer")
+      if (!response.ok) throw new Error("Could not load volunteer opportunities.")
+      return response.json()
+    },
+  })
+  const signup = useMutation({
+    mutationFn: async (opportunityId: string) => {
+      const response = await fetch(`/api/volunteer/${opportunityId}/signup`, { method: "POST" })
+      if (!response.ok) throw new Error("Could not update signup.")
+      return response.json()
+    },
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["volunteer-opportunities"] }),
+  })
 
   const toggle = (id: number) =>
     setJoined((prev) => prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id])
+  const opportunities = demo
+    ? OPPORTUNITIES
+    : (remote as any[]).map((row) => ({
+        id: row.id,
+        title: row.title,
+        description: row.description,
+        date: row.schedule,
+        time: row.location ?? "",
+        spots: row.capacity ?? 999,
+        joined: row.joinedCount ?? 0,
+        category: row.category,
+        isJoined: Boolean(row.isJoined),
+      }))
+  const joinedCount = demo ? joined.length : opportunities.filter((item: any) => item.isJoined).length
 
   return (
     <div className="flex min-h-screen bg-background">
@@ -100,9 +135,9 @@ export default function Volunteer() {
             {/* Stats bar */}
             <div className="mb-6 grid gap-3 sm:grid-cols-3">
               {[
-                { label: 'Active drives',   value: OPPORTUNITIES.length },
-                { label: 'Spots available', value: OPPORTUNITIES.reduce((s, o) => s + (o.spots - o.joined), 0) },
-                { label: 'You joined',      value: joined.length },
+                { label: 'Active drives',   value: opportunities.length },
+                { label: 'Spots available', value: opportunities.reduce((s: number, o: any) => s + Math.max(0, o.spots - o.joined), 0) },
+                { label: 'You joined',      value: joinedCount },
               ].map((s) => (
                 <div key={s.label} className="rounded-2xl border border-border bg-card p-4 text-center">
                   <p className="text-2xl font-bold text-foreground">{s.value}</p>
@@ -113,8 +148,8 @@ export default function Volunteer() {
 
             {/* Opportunity cards */}
             <div className="space-y-4">
-              {OPPORTUNITIES.map((opp) => {
-                const isJoined = joined.includes(opp.id)
+              {isLoading && !demo ? [1, 2, 3].map((item) => <div key={item} className="h-44 animate-pulse rounded-lg bg-muted" />) : opportunities.map((opp: any) => {
+                const isJoined = demo ? joined.includes(opp.id) : opp.isJoined
                 const full = opp.joined >= opp.spots
                 const catCls = CAT_COLORS[opp.category] ?? 'bg-muted text-muted-foreground'
                 const pct = Math.round((opp.joined / opp.spots) * 100)
@@ -151,8 +186,8 @@ export default function Volunteer() {
                     <div className="mt-4 flex justify-end">
                       <Button
                         size="sm"
-                        disabled={full && !isJoined}
-                        onClick={() => toggle(opp.id)}
+                        onClick={() => demo ? toggle(opp.id) : signup.mutate(String(opp.id))}
+                        disabled={(full && !isJoined) || signup.isPending}
                         className={cn(
                           'rounded-xl',
                           isJoined

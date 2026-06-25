@@ -4,12 +4,9 @@ import tailwindcss from '@tailwindcss/vite'
 import { sentryVitePlugin } from '@sentry/vite-plugin'
 import path from 'path'
 
-const DEFAULT_SUPABASE_URL = "https://ytlzepxlwpzeirccwsov.supabase.co"
-const DEFAULT_SUPABASE_PUBLISHABLE_KEY = "sb_publishable_EWGhNG-fnh-7T_u7v7839A_26Ce2ahB"
-
 function resolveSupabaseUrl(value?: string) {
   const candidate = value?.trim()
-  if (!candidate) return DEFAULT_SUPABASE_URL
+  if (!candidate) throw new Error("Missing VITE_SUPABASE_URL or SUPABASE_URL")
 
   try {
     const url = new URL(candidate)
@@ -17,10 +14,10 @@ function resolveSupabaseUrl(value?: string) {
       return url.toString().replace(/\/$/, "")
     }
   } catch {
-    // Fall back to the known Mohalla project below.
+    // The explicit error below gives the deployment a useful failure message.
   }
 
-  return DEFAULT_SUPABASE_URL
+  throw new Error("Supabase URL must be an HTTPS *.supabase.co URL")
 }
 
 function jwtRole(value: string) {
@@ -42,10 +39,14 @@ function isBrowserSafeSupabaseKey(value: string) {
 }
 
 function resolveSupabasePublishableKey(...values: Array<string | undefined>) {
-  return values.find((value) => {
+  const key = values.find((value) => {
     const candidate = value?.trim()
     return candidate ? isBrowserSafeSupabaseKey(candidate) : false
-  }) ?? DEFAULT_SUPABASE_PUBLISHABLE_KEY
+  })
+  if (!key) {
+    throw new Error("Missing a browser-safe Supabase publishable or anon key")
+  }
+  return key
 }
 
 function resolveApiBaseUrl(value?: string) {
@@ -109,8 +110,35 @@ export default defineConfig(({ mode }) => {
       outDir: "dist",
       emptyOutDir: true,
       sourcemap: shouldUploadSentrySourceMaps,
-      rollupOptions: {
+      rolldownOptions: {
         input: path.resolve(__dirname, "index.html"),
+        output: {
+          codeSplitting: {
+            minSize: 20_000,
+            groups: [
+              {
+                name: "react-vendor",
+                test: /node_modules[\\/](react|react-dom|scheduler)[\\/]/,
+              },
+              {
+                name: "supabase-vendor",
+                test: /node_modules[\\/]@supabase[\\/]/,
+              },
+              {
+                name: "sentry-vendor",
+                test: /node_modules[\\/]@sentry[\\/]/,
+              },
+              {
+                name: "query-vendor",
+                test: /node_modules[\\/]@tanstack[\\/]/,
+              },
+              {
+                name: "ui-vendor",
+                test: /node_modules[\\/](@radix-ui|lucide-react|cmdk|vaul)[\\/]/,
+              },
+            ],
+          },
+        },
       },
     },
     base: "/",

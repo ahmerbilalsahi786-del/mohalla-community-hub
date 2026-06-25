@@ -34,7 +34,7 @@ export function NotificationBell() {
   const fetchNotifs = async () => {
     try {
       setLoading(true)
-      const res = await fetch('/api/notifications?userId=ahmed')
+      const res = await fetch('/api/notifications')
       const data = await res.json()
       setNotifs(data.notifications ?? [])
       setUnread(data.unreadCount ?? 0)
@@ -62,7 +62,6 @@ export function NotificationBell() {
     await fetch('/api/notifications/read-all', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ userId: 'ahmed' }),
     })
     setNotifs(n => n.map(x => ({ ...x, isRead: true })))
     setUnread(0)
@@ -78,6 +77,8 @@ export function NotificationBell() {
   return (
     <div ref={ref} className="relative">
       <button
+        type="button"
+        aria-label="Notifications"
         onClick={() => { setOpen(o => !o); if (!open) fetchNotifs() }}
         className="relative flex h-10 w-10 items-center justify-center rounded-xl bg-muted/50 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
       >
@@ -100,7 +101,7 @@ export function NotificationBell() {
                   <CheckCheck size={12} /> Mark all read
                 </button>
               )}
-              <button onClick={() => setOpen(false)} className="flex h-6 w-6 items-center justify-center rounded-lg hover:bg-muted text-muted-foreground">
+              <button type="button" aria-label="Close notifications" onClick={() => setOpen(false)} className="flex h-6 w-6 items-center justify-center rounded-lg hover:bg-muted text-muted-foreground">
                 <X size={14} />
               </button>
             </div>

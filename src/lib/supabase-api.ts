@@ -1,6 +1,7 @@
 import { supabase } from "@/integrations/supabase/client";
 
 type JsonBody = Record<string, any>;
+const extendedDb = supabase as any;
 
 const DEFAULT_USER_ID = "00000000-0000-0000-0000-000000000000";
 const DEFAULT_PREFS = {
@@ -23,6 +24,7 @@ const DEMO_ALERT_COMMENTS_KEY = "mohalla_demo_alert_comments";
 const DEMO_RSVPS_KEY = "mohalla_demo_rsvps";
 const DEMO_MEMBERS_KEY = "mohalla_demo_members";
 const DEMO_COMMUNITY_KEY = "mohalla_demo_community";
+const DEMO_PREFS_KEY = "mohalla_demo_notification_preferences";
 const DEMO_PROFILE = {
   id: DEMO_USER_ID,
   display_name: "Ahmed Khan",
@@ -123,6 +125,21 @@ function readDemoMap(key: string): Record<string, JsonBody[]> {
 }
 
 function writeDemoMap(key: string, value: Record<string, JsonBody[]>) {
+  if (typeof window === "undefined") return;
+  window.localStorage.setItem(key, JSON.stringify(value));
+}
+
+function readDemoObject(key: string, fallback: JsonBody = {}) {
+  if (typeof window === "undefined") return fallback;
+  try {
+    const parsed = JSON.parse(window.localStorage.getItem(key) ?? "{}");
+    return parsed && typeof parsed === "object" && !Array.isArray(parsed) ? parsed : fallback;
+  } catch {
+    return fallback;
+  }
+}
+
+function writeDemoObject(key: string, value: JsonBody) {
   if (typeof window === "undefined") return;
   window.localStorage.setItem(key, JSON.stringify(value));
 }
@@ -228,6 +245,18 @@ async function requiredUserId() {
     throw new Error("Please sign in before saving community content.");
   }
   return userId;
+}
+
+async function canManageCommunity() {
+  if (isDemoMode()) return true;
+  const userId = await requiredUserId();
+  const { data, error } = await supabase
+    .from("user_roles")
+    .select("role")
+    .eq("user_id", userId)
+    .in("role", ["admin", "moderator"]);
+  if (error) throw error;
+  return Boolean(data?.length);
 }
 
 async function resolveRequestedUserId(value?: string | null) {
@@ -434,7 +463,7 @@ function toListing(row: any, profile?: any) {
   };
 }
 
-function toEvent(row: any, profile?: any) {
+function toEvent(row: any, profile?: any, myStatus: string | null = null) {
   return {
     id: id(row.id),
     communityId: "default",
@@ -448,6 +477,7 @@ function toEvent(row: any, profile?: any) {
     location: row.location ?? "",
     imageUrl: row.image_url,
     rsvpCount: row.rsvp_count ?? 0,
+    myStatus,
     createdAt: row.created_at ?? new Date().toISOString(),
   };
 }
@@ -485,7 +515,14 @@ async function listFeed(params: URLSearchParams) {
   const { data, error } = await supabase.from("posts").select("*").order("created_at", { ascending: false });
   if (error) throw error;
 
-  let rows = applySearch(data ?? [], search, ["title", "body", "type"]);
+  const userId = await requiredUserId();
+  const { data: blockedRows, error: blockedError } = await extendedDb
+    .from("user_blocks")
+    .select("blocked_id")
+    .eq("blocker_id", userId);
+  if (blockedError) throw blockedError;
+  const blockedIds = new Set((blockedRows ?? []).map((row: any) => row.blocked_id));
+  let rows = applySearch((data ?? []).filter((row: any) => !blockedIds.has(row.user_id)), search, ["title", "body", "type"]);
   if (category && category !== "all") {
     rows = rows.filter((row: any) => row.type === category);
   }
@@ -527,7 +564,11 @@ async function listEvents() {
   if (isDemoMode()) {
     const rows = readDemoRows(DEMO_EVENTS_KEY);
     const today = new Date().toISOString().slice(0, 10);
-    const events = rows.map((row: any) => toEvent(row, DEMO_PROFILE));
+    const rsvps = readDemoRows(DEMO_RSVPS_KEY);
+    const events = rows.map((row: any) => {
+      const myStatus = rsvps.find((rsvp: any) => String(rsvp.event_id) === String(row.id) && rsvp.user_id === DEMO_USER_ID)?.status ?? null;
+      return toEvent(row, DEMO_PROFILE, myStatus);
+    });
     return {
       upcoming: events.filter((event) => event.date >= today),
       past: events.filter((event) => event.date < today),
@@ -539,8 +580,15 @@ async function listEvents() {
 
   const rows = data ?? [];
   const profiles = await profilesById(rows.map((row: any) => row.user_id));
+  const userId = await requiredUserId();
+  const { data: myRsvps, error: rsvpError } = await supabase
+    .from("event_rsvps")
+    .select("event_id, status")
+    .eq("user_id", userId);
+  if (rsvpError) throw rsvpError;
+  const myStatusByEvent = new Map((myRsvps ?? []).map((rsvp: any) => [rsvp.event_id, rsvp.status]));
   const today = new Date().toISOString().slice(0, 10);
-  const events = rows.map((row: any) => toEvent(row, profiles.get(row.user_id)));
+  const events = rows.map((row: any) => toEvent(row, profiles.get(row.user_id), myStatusByEvent.get(row.id) ?? null));
   return {
     upcoming: events.filter((event) => event.date >= today),
     past: events.filter((event) => event.date < today),
@@ -1055,7 +1103,11 @@ async function listMembers(params: URLSearchParams) {
   }
 
   const limit = Number(params.get("limit") ?? 100);
-  const { data, error } = await supabase.from("profiles").select("*, private_profiles(*), user_roles(*)").limit(limit);
+  const manager = await canManageCommunity();
+  const select = manager ? "*, private_profiles(*), user_roles(*)" : "*, user_roles(*)";
+  let query = extendedDb.from("profiles").select(select).limit(limit);
+  if (!manager) query = query.eq("membership_status", "approved");
+  const { data, error } = await query;
   if (error) throw error;
 
   const members = (data ?? []).map((profile: any) => ({
@@ -1064,14 +1116,15 @@ async function listMembers(params: URLSearchParams) {
     userId: profile.id,
     name: profileName(profile),
     unitNumber: unit(profile),
-    phone: profile.private_profiles?.phone ?? profile.private_profiles?.whatsapp_number ?? "",
-    status: profile.is_verified ? "approved" : "pending",
+    phone: manager ? profile.private_profiles?.phone ?? profile.private_profiles?.whatsapp_number ?? "" : "",
+    whatsappNumber: manager ? profile.private_profiles?.whatsapp_number ?? "" : "",
+    status: profile.membership_status ?? (profile.is_verified ? "approved" : "pending"),
     role: profile.user_roles?.[0]?.role ?? "user",
     isVerified: Boolean(profile.is_verified),
     joinDate: profile.created_at ?? new Date().toISOString(),
   }));
   const status = params.get("status");
-  return status && status !== "all" ? members.filter((member) => member.status === status) : members;
+  return status && status !== "all" ? members.filter((member: any) => member.status === status) : members;
 }
 
 async function createMember(payload: JsonBody) {
@@ -1092,25 +1145,7 @@ async function createMember(payload: JsonBody) {
     return row;
   }
 
-  const { data, error } = await supabase
-    .from("profiles")
-    .upsert({ id: payload.userId, display_name: payload.name, unit_number: payload.unitNumber, is_verified: false })
-    .select("*")
-    .single();
-  if (error) throw error;
-  if (payload.phone) await supabase.from("private_profiles").upsert({ id: payload.userId, phone: payload.phone, whatsapp_number: payload.phone });
-  return {
-    id: id(data.id),
-    communityId: "default",
-    userId: data.id,
-    name: profileName(data),
-    unitNumber: unit(data),
-    phone: payload.phone ?? "",
-    status: "pending",
-    role: payload.role ?? "user",
-    isVerified: false,
-    joinDate: data.created_at ?? new Date().toISOString(),
-  };
+  throw new Error("Members create their own accounts from the registration page.");
 }
 
 async function updateDemoMember(memberId: string, patch: JsonBody) {
@@ -1134,24 +1169,17 @@ async function updateMember(memberId: string, action: string, payload: JsonBody 
     if (action === "role") return updateDemoMember(memberId, { role: payload.role ?? "user" });
   }
 
-  if (action === "delete") {
-    const { error } = await supabase.from("profiles").delete().eq("id", memberId);
-    if (error) throw error;
-    return { ok: true };
-  }
-
-  if (action === "role") {
-    await supabase.from("user_roles").delete().eq("user_id", memberId);
-    const { error } = await supabase.from("user_roles").insert({ user_id: memberId, role: payload.role ?? "user" });
-    if (error) throw error;
-  } else {
-    const isVerified = action === "approve" || action === "verify";
-    const { error } = await supabase.from("profiles").update({ is_verified: isVerified }).eq("id", memberId);
-    if (error) throw error;
-  }
+  const requestedAction = action === "delete" ? "remove" : action;
+  const { error } = await (supabase as any).rpc("admin_manage_member", {
+    target_user: memberId,
+    requested_action: requestedAction,
+    requested_role: action === "role" ? payload.role ?? "user" : null,
+  });
+  if (error) throw error;
+  if (action === "delete") return { ok: true };
 
   const members = await listMembers(new URLSearchParams());
-  return members.find((member) => String(member.userId) === memberId || String(member.id) === memberId) ?? members[0];
+  return members.find((member: any) => String(member.userId) === memberId || String(member.id) === memberId) ?? members[0];
 }
 
 async function listAdminPosts(params: URLSearchParams) {
@@ -1166,8 +1194,19 @@ async function deletePost(postId: string) {
     return { ok: true };
   }
 
-  const { error } = await supabase.from("posts").delete().eq("id", postId);
-  if (error) throw error;
+  const userId = await requiredUserId();
+  const { data: post, error: postError } = await supabase.from("posts").select("user_id").eq("id", postId).single();
+  if (postError) throw postError;
+  if (post.user_id === userId) {
+    const { error } = await supabase.from("posts").delete().eq("id", postId);
+    if (error) throw error;
+  } else {
+    const { error } = await (supabase as any).rpc("admin_moderate_post", {
+      target_post: postId,
+      requested_action: "delete",
+    });
+    if (error) throw error;
+  }
   return { ok: true };
 }
 
@@ -1181,16 +1220,12 @@ async function togglePostPin(postId: string) {
     return toPost(rows[index], DEMO_PROFILE);
   }
 
-  const post = await getPost(postId);
-  const { data, error } = await supabase
-    .from("posts")
-    .update({ is_pinned: !post.isPinned, updated_at: new Date().toISOString() })
-    .eq("id", postId)
-    .select("*")
-    .single();
+  const { error } = await (supabase as any).rpc("admin_moderate_post", {
+    target_post: postId,
+    requested_action: "toggle_pin",
+  });
   if (error) throw error;
-  const profiles = await profilesById([data.user_id]);
-  return toPost(data, profiles.get(data.user_id));
+  return getPost(postId);
 }
 
 async function getCommunity() {
@@ -1359,6 +1394,143 @@ async function getNotifications() {
   return { notifications, unreadCount: notifications.filter((notification) => !notification.isRead).length };
 }
 
+function mapPreferences(row?: any) {
+  return {
+    notifyComments: row?.notify_comments ?? true,
+    notifyLikes: row?.notify_likes ?? true,
+    notifySafety: row?.notify_safety ?? true,
+    notifyAnnouncements: row?.notify_announcements ?? true,
+    notifyMarketplace: row?.notify_marketplace ?? true,
+    notifyApprovals: row?.notify_approvals ?? true,
+  };
+}
+
+async function getNotificationPreferences() {
+  if (isDemoMode()) return { ...DEFAULT_PREFS, ...readDemoObject(DEMO_PREFS_KEY, {}) };
+  const userId = await requiredUserId();
+  const { data, error } = await extendedDb.from("notification_preferences").select("*").eq("user_id", userId).maybeSingle();
+  if (error) throw error;
+  return mapPreferences(data);
+}
+
+async function saveNotificationPreferences(payload: JsonBody) {
+  if (isDemoMode()) {
+    const prefs = { ...DEFAULT_PREFS, ...payload };
+    writeDemoObject(DEMO_PREFS_KEY, prefs);
+    return prefs;
+  }
+  const userId = await requiredUserId();
+  const { data, error } = await extendedDb
+    .from("notification_preferences")
+    .upsert({
+      user_id: userId,
+      notify_comments: payload.notifyComments,
+      notify_likes: payload.notifyLikes,
+      notify_safety: payload.notifySafety,
+      notify_announcements: payload.notifyAnnouncements,
+      notify_marketplace: payload.notifyMarketplace,
+      notify_approvals: payload.notifyApprovals,
+      updated_at: new Date().toISOString(),
+    })
+    .select("*")
+    .single();
+  if (error) throw error;
+  return mapPreferences(data);
+}
+
+async function markNotificationsRead(notificationId?: string) {
+  if (isDemoMode()) return { ok: true };
+  const userId = await requiredUserId();
+  let query = supabase.from("notifications").update({ is_read: true }).eq("user_id", userId);
+  if (notificationId) query = query.eq("id", notificationId);
+  const { error } = await query;
+  if (error) throw error;
+  return { ok: true };
+}
+
+async function listPlaces() {
+  if (isDemoMode()) return [];
+  const { data, error } = await extendedDb.from("places").select("*").eq("is_active", true).order("category").order("name");
+  if (error) throw error;
+  return data ?? [];
+}
+
+async function listVolunteerOpportunities() {
+  if (isDemoMode()) return [];
+  const userId = await requiredUserId();
+  const [{ data, error }, { data: signups, error: signupError }] = await Promise.all([
+    extendedDb.from("volunteer_opportunities").select("*, volunteer_signups(user_id)").eq("is_active", true).order("created_at"),
+    extendedDb.from("volunteer_signups").select("opportunity_id").eq("user_id", userId),
+  ]);
+  if (error) throw error;
+  if (signupError) throw signupError;
+  const joinedIds = new Set((signups ?? []).map((row: any) => row.opportunity_id));
+  return (data ?? []).map((row: any) => ({
+    ...row,
+    joinedCount: row.volunteer_signups?.length ?? 0,
+    isJoined: joinedIds.has(row.id),
+  }));
+}
+
+async function toggleVolunteerSignup(opportunityId: string) {
+  if (isDemoMode()) return { ok: true };
+  const userId = await requiredUserId();
+  const { data: existing, error: existingError } = await extendedDb
+    .from("volunteer_signups")
+    .select("id")
+    .eq("opportunity_id", opportunityId)
+    .eq("user_id", userId)
+    .maybeSingle();
+  if (existingError) throw existingError;
+  if (existing) {
+    const { error } = await extendedDb.from("volunteer_signups").delete().eq("id", existing.id);
+    if (error) throw error;
+    return { joined: false };
+  }
+  const { error } = await extendedDb.from("volunteer_signups").insert({ opportunity_id: opportunityId, user_id: userId });
+  if (error) throw error;
+  return { joined: true };
+}
+
+async function createModerationReport(payload: JsonBody) {
+  if (isDemoMode()) return { ok: true };
+  const userId = await requiredUserId();
+  const { data, error } = await extendedDb
+    .from("moderation_reports")
+    .insert({
+      reporter_id: userId,
+      target_type: payload.targetType,
+      target_id: String(payload.targetId),
+      reason: payload.reason,
+      details: payload.details ?? null,
+    })
+    .select("*")
+    .single();
+  if (error) throw error;
+  return data;
+}
+
+async function toggleUserBlock(payload: JsonBody) {
+  if (isDemoMode()) return { blocked: true };
+  const userId = await requiredUserId();
+  const blockedId = String(payload.userId);
+  const { data: existing, error: existingError } = await extendedDb
+    .from("user_blocks")
+    .select("*")
+    .eq("blocker_id", userId)
+    .eq("blocked_id", blockedId)
+    .maybeSingle();
+  if (existingError) throw existingError;
+  if (existing) {
+    const { error } = await extendedDb.from("user_blocks").delete().eq("blocker_id", userId).eq("blocked_id", blockedId);
+    if (error) throw error;
+    return { blocked: false };
+  }
+  const { error } = await extendedDb.from("user_blocks").insert({ blocker_id: userId, blocked_id: blockedId });
+  if (error) throw error;
+  return { blocked: true };
+}
+
 export async function handleSupabaseApi<T = unknown>(url: string, method = "GET", body?: BodyInit | null): Promise<T> {
   const requestUrl = apiUrl(url);
   const path = requestUrl.pathname;
@@ -1367,6 +1539,7 @@ export async function handleSupabaseApi<T = unknown>(url: string, method = "GET"
   if (path === "/api/healthz") return { status: "ok" } as T;
   if (path === "/api/feed" && method === "GET") return listFeed(requestUrl.searchParams) as T;
   if (path === "/api/feed" && method === "POST") return createPost(payload) as T;
+  if (/^\/api\/feed\/[^/]+$/.test(path) && method === "DELETE") return deletePost(path.split("/")[3]) as T;
   if (/^\/api\/feed\/[^/]+\/like$/.test(path) && method === "POST") return toggleLike(path.split("/")[3]) as T;
   if (/^\/api\/feed\/[^/]+\/comments$/.test(path) && method === "GET") return listComments(path.split("/")[3]) as T;
   if (/^\/api\/feed\/[^/]+\/comments$/.test(path) && method === "POST") return createComment(path.split("/")[3], payload) as T;
@@ -1401,11 +1574,17 @@ export async function handleSupabaseApi<T = unknown>(url: string, method = "GET"
   if (path === "/api/admin/community" && method === "PUT") return updateCommunity(payload) as T;
   if (path === "/api/admin/stats" && method === "GET") return adminStats() as T;
   if (path === "/api/admin/announcements" && method === "POST") return createAnnouncement(payload) as T;
-  if (path === "/api/settings/notifications" && method === "GET") return DEFAULT_PREFS as T;
-  if (path === "/api/settings/notifications") return { ...DEFAULT_PREFS, ...payload } as T;
+  if (path === "/api/settings/notifications" && method === "GET") return getNotificationPreferences() as T;
+  if (path === "/api/settings/notifications") return saveNotificationPreferences(payload) as T;
   if (path === "/api/notifications" && method === "GET") return getNotifications() as T;
-  if (path === "/api/notifications/read-all") return { ok: true } as T;
-  if (/^\/api\/notifications\/[^/]+\/read$/.test(path)) return { ok: true } as T;
+  if (path === "/api/notifications/read-all") return markNotificationsRead() as T;
+  if (/^\/api\/notifications\/[^/]+\/read$/.test(path)) return markNotificationsRead(path.split("/")[3]) as T;
+  if (path === "/api/places" && method === "GET") return listPlaces() as T;
+  if (path === "/api/volunteer" && method === "GET") return listVolunteerOpportunities() as T;
+  if (/^\/api\/volunteer\/[^/]+\/signup$/.test(path) && method === "POST") return toggleVolunteerSignup(path.split("/")[3]) as T;
+  if (path === "/api/reports" && method === "POST") return createModerationReport(payload) as T;
+  if (path === "/api/blocks" && method === "POST") return toggleUserBlock(payload) as T;
+  if (path === "/api/community/members" && method === "GET") return listMembers(requestUrl.searchParams) as T;
   if (path.startsWith("/api/profile/") && method === "GET") return getProfile(path.split("/").pop() ?? "") as T;
   if (path.startsWith("/api/profile/") && method === "PUT") return saveProfile(path.split("/").pop() ?? "", payload) as T;
 

@@ -2,12 +2,9 @@
 import { createClient } from '@supabase/supabase-js';
 import type { Database } from './types';
 
-const DEFAULT_SUPABASE_URL = "https://ytlzepxlwpzeirccwsov.supabase.co";
-const DEFAULT_SUPABASE_PUBLISHABLE_KEY = "sb_publishable_EWGhNG-fnh-7T_u7v7839A_26Ce2ahB";
-
 function resolveSupabaseUrl(value?: string) {
   const candidate = value?.trim();
-  if (!candidate) return DEFAULT_SUPABASE_URL;
+  if (!candidate) throw new Error("Missing VITE_SUPABASE_URL.");
 
   try {
     const url = new URL(candidate);
@@ -15,10 +12,10 @@ function resolveSupabaseUrl(value?: string) {
       return url.toString().replace(/\/$/, "");
     }
   } catch {
-    // Fall back to the known Mohalla project below.
+    // The explicit error below keeps configuration failures visible.
   }
 
-  return DEFAULT_SUPABASE_URL;
+  throw new Error("VITE_SUPABASE_URL must be an HTTPS *.supabase.co URL.");
 }
 
 function jwtRole(value: string) {
@@ -40,10 +37,14 @@ function isBrowserSafeSupabaseKey(value: string) {
 }
 
 function resolveSupabasePublishableKey(...values: Array<string | undefined>) {
-  return values.find((value) => {
+  const key = values.find((value) => {
     const candidate = value?.trim();
     return candidate ? isBrowserSafeSupabaseKey(candidate) : false;
-  }) ?? DEFAULT_SUPABASE_PUBLISHABLE_KEY;
+  });
+  if (!key) {
+    throw new Error("Missing a browser-safe Supabase publishable or anon key.");
+  }
+  return key;
 }
 
 const SUPABASE_URL =
@@ -53,10 +54,6 @@ const SUPABASE_PUBLISHABLE_KEY =
     import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
     import.meta.env.VITE_SUPABASE_ANON_KEY,
   );
-
-if (!SUPABASE_PUBLISHABLE_KEY) {
-  console.error("Missing VITE_SUPABASE_PUBLISHABLE_KEY or VITE_SUPABASE_ANON_KEY.");
-}
 
 // Import the supabase client like this:
 // import { supabase } from "@/integrations/supabase/client";

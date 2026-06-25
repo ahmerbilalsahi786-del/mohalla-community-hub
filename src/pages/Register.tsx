@@ -17,7 +17,7 @@ function emailRedirectTo() {
 export default function Register() {
   const [, navigate] = useLocation()
   const { toast } = useToast()
-  const [form, setForm] = useState({ email: '', password: '', userId: '', name: '', unitNumber: '' })
+  const [form, setForm] = useState({ email: '', password: '', confirmPassword: '', userId: '', name: '', unitNumber: '' })
   const [showPw, setShowPw] = useState(false)
   const [loading, setLoading] = useState(false)
   const [errors, setErrors] = useState<Record<string, string[]>>({})
@@ -34,8 +34,11 @@ export default function Register() {
       if (!/^[a-z0-9_-]+$/.test(form.userId)) {
         nextErrors.userId = ['Use lowercase letters, numbers, - and _ only']
       }
-      if (form.password.length < 6) {
-        nextErrors.password = ['Password must be at least 6 characters']
+      if (form.password.length < 12) {
+        nextErrors.password = ['Password must be at least 12 characters']
+      }
+      if (form.password !== form.confirmPassword) {
+        nextErrors.confirmPassword = ['Passwords do not match']
       }
       if (Object.keys(nextErrors).length > 0) {
         setErrors(nextErrors)
@@ -135,13 +138,14 @@ export default function Register() {
                 type={showPw ? 'text' : 'password'}
                 value={form.password}
                 onChange={set('password')}
-                placeholder="Min 6 characters"
+                placeholder="Min 12 characters"
                 required
-                minLength={6}
+                minLength={12}
                 className="rounded-xl pr-10"
               />
               <button
                 type="button"
+                aria-label={showPw ? "Hide password" : "Show password"}
                 onClick={() => setShowPw(!showPw)}
                 className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
               >
@@ -149,6 +153,19 @@ export default function Register() {
               </button>
             </div>
             {errors.password && <p className="text-xs text-destructive">{errors.password[0]}</p>}
+          </div>
+
+          <div className="space-y-1.5">
+            <label className="text-sm font-medium text-foreground">Confirm password</label>
+            <Input
+              type={showPw ? 'text' : 'password'}
+              value={form.confirmPassword}
+              onChange={set('confirmPassword')}
+              required
+              minLength={12}
+              className="rounded-xl"
+            />
+            {errors.confirmPassword && <p className="text-xs text-destructive">{errors.confirmPassword[0]}</p>}
           </div>
 
           <Button type="submit" disabled={loading} className="w-full rounded-xl bg-primary">

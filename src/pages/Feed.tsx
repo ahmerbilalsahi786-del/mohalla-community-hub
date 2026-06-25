@@ -8,13 +8,14 @@ import { TopNavbar } from '@/components/dashboard/top-navbar'
 import {
   Pin, Heart, MessageSquare, Plus, X, ChevronDown, ChevronUp,
   Megaphone, Shield, Search, ShoppingBag, Calendar, Users, ImagePlus, Send, Loader2,
-  MapPin, BarChart2, ChevronRight, AlertTriangle,
+  MapPin, BarChart2, ChevronRight, AlertTriangle, Flag, Trash2, UserX,
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { useToast } from '@/hooks/use-toast'
 import { uploadImage } from '@/lib/cloudinary'
 import { cn } from '@/lib/utils'
 import { Link, useSearch } from 'wouter'
+import { useCurrentUser } from '@/hooks/use-current-user'
 
 type PostType = 'general' | 'announcement' | 'safety' | 'lost_found' | 'buy_sell' | 'event' | 'complaint'
 
@@ -205,6 +206,7 @@ function CommentSection({ postId }: { postId: number }) {
   const [commentBody, setCommentBody] = useState('')
   const { data: comments = [], isLoading } = useListComments(postId)
   const queryClient = useQueryClient()
+  const { data: currentUser } = useCurrentUser()
   const createComment = useCreateComment({
     mutation: {
       onSuccess: () => {
@@ -257,7 +259,7 @@ function CommentSection({ postId }: { postId: number }) {
       )}
 
       <div className="flex gap-2 mt-3">
-        <AvatarInitials name="Ahmed Khan" size="sm" />
+        <AvatarInitials name={currentUser?.name ?? 'Resident'} size="sm" />
         <div className="flex-1 flex gap-2 items-center">
           <input
             type="text"
@@ -299,11 +301,55 @@ interface Post {
 function PostCard({ post, onLike }: { post: Post; onLike: (id: number) => void }) {
   const [expanded, setExpanded] = useState(false)
   const [liked, setLiked] = useState(false)
+  const [actionBusy, setActionBusy] = useState(false)
   const badge = CATEGORY_BADGE[post.type] || CATEGORY_BADGE.general
+  const queryClient = useQueryClient()
+  const { data: currentUser } = useCurrentUser()
+  const { toast } = useToast()
+  const isOwner = currentUser?.userId === post.userId
 
   const handleLike = () => {
     setLiked(!liked)
     onLike(post.id)
+  }
+
+  const deleteOwnPost = async () => {
+    if (!window.confirm('Delete this post permanently?')) return
+    setActionBusy(true)
+    const response = await fetch(`/api/feed/${post.id}`, { method: 'DELETE' })
+    setActionBusy(false)
+    if (!response.ok) {
+      toast({ title: 'Could not delete post.', variant: 'destructive' })
+      return
+    }
+    queryClient.invalidateQueries({ queryKey: getListPostsQueryKey() })
+  }
+
+  const reportPost = async () => {
+    const reason = window.prompt('Why are you reporting this post?')
+    if (!reason?.trim()) return
+    const response = await fetch('/api/reports', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ targetType: 'post', targetId: post.id, reason: reason.trim() }),
+    })
+    toast({
+      title: response.ok ? 'Report sent to community administrators.' : 'Could not send report.',
+      variant: response.ok ? 'default' : 'destructive',
+    })
+  }
+
+  const blockAuthor = async () => {
+    if (!window.confirm(`Block ${post.userName}?`)) return
+    const response = await fetch('/api/blocks', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ userId: post.userId }),
+    })
+    toast({
+      title: response.ok ? `${post.userName} was blocked.` : 'Could not update block.',
+      variant: response.ok ? 'default' : 'destructive',
+    })
   }
 
   return (
@@ -331,6 +377,22 @@ function PostCard({ post, onLike }: { post: Post; onLike: (id: number) => void }
                 {badge.label}
               </span>
             </div>
+          </div>
+          <div className="flex shrink-0 items-center gap-1">
+            {isOwner ? (
+              <button type="button" aria-label="Delete post" disabled={actionBusy} onClick={deleteOwnPost} className="flex h-8 w-8 items-center justify-center rounded-md text-muted-foreground hover:bg-destructive/10 hover:text-destructive disabled:opacity-50">
+                <Trash2 size={15} />
+              </button>
+            ) : (
+              <>
+                <button type="button" aria-label="Report post" onClick={reportPost} className="flex h-8 w-8 items-center justify-center rounded-md text-muted-foreground hover:bg-muted hover:text-foreground">
+                  <Flag size={15} />
+                </button>
+                <button type="button" aria-label="Block member" onClick={blockAuthor} className="flex h-8 w-8 items-center justify-center rounded-md text-muted-foreground hover:bg-muted hover:text-foreground">
+                  <UserX size={15} />
+                </button>
+              </>
+            )}
           </div>
         </div>
 
@@ -379,6 +441,7 @@ function CreatePostModal({ onClose, initialType = 'general' }: { onClose: () => 
   const fileInputRef = useRef<HTMLInputElement>(null)
   const queryClient = useQueryClient()
   const { toast } = useToast()
+  const { data: currentUser } = useCurrentUser()
 
   const [isUploading, setIsUploading] = useState(false)
 
@@ -480,10 +543,10 @@ function CreatePostModal({ onClose, initialType = 'general' }: { onClose: () => 
         <div className="min-h-0 flex-1 space-y-4 overflow-y-auto p-4 pb-6 sm:p-5">
           {/* Author row */}
           <div className="flex items-center gap-3">
-            <AvatarInitials name="Ahmed Khan" />
+            <AvatarInitials name={currentUser?.name ?? 'Resident'} />
             <div>
-              <p className="font-semibold text-sm text-foreground">Ahmed Khan</p>
-              <p className="text-xs text-muted-foreground">B-204 · Mohalla Community</p>
+              <p className="font-semibold text-sm text-foreground">{currentUser?.name ?? 'Resident'}</p>
+              <p className="text-xs text-muted-foreground">{currentUser?.unitNumber || 'No unit set'} · Mohalla Community</p>
             </div>
           </div>
 

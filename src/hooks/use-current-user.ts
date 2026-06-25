@@ -9,26 +9,31 @@ export interface CurrentUser {
   name: string;
   unitNumber: string;
   role: string;
+  membershipStatus: "pending" | "approved" | "rejected";
   avatarUrl?: string | null;
 }
 
 async function loadCurrentUser(): Promise<CurrentUser | null> {
   const storedUser = getStoredUser();
   if (storedUser?.userId === "ahmed" && storedUser.email === "demo@mohalla.app") {
-    return storedUser;
+    return { ...storedUser, membershipStatus: "approved" };
   }
 
   const {
     data: { user },
   } = await supabase.auth.getUser();
 
-  if (!user) return storedUser;
+  if (!user) {
+    clearToken();
+    return null;
+  }
 
   const [{ data: profile }, { data: roles }] = await Promise.all([
     supabase.from("profiles").select("*").eq("id", user.id).maybeSingle(),
     supabase.from("user_roles").select("role").eq("user_id", user.id),
   ]);
 
+  const typedProfile = profile as any;
   const role =
     roles?.find((row: any) => row.role === "admin")?.role ??
     roles?.find((row: any) => row.role === "moderator")?.role ??
@@ -50,6 +55,10 @@ async function loadCurrentUser(): Promise<CurrentUser | null> {
       "Resident",
     unitNumber: profile?.unit_number ?? user.user_metadata?.unit_number ?? storedUser?.unitNumber ?? "",
     role,
+    membershipStatus:
+      typedProfile?.membership_status === "approved" || typedProfile?.membership_status === "rejected"
+        ? typedProfile.membership_status
+        : "pending",
     avatarUrl: profile?.avatar_url ?? null,
   };
 }

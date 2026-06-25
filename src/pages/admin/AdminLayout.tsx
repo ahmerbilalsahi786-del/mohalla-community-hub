@@ -1,7 +1,7 @@
 import { Link, useLocation } from 'wouter'
 import { Sidebar } from '@/components/dashboard/sidebar'
 import { TopNavbar } from '@/components/dashboard/top-navbar'
-import { Users, FileText, Building2, Megaphone, ShieldCheck } from 'lucide-react'
+import { Users, FileText, Building2, Megaphone, ShieldCheck, Flag } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { useAdminListMembers } from '@/lib/generated/api'
 
@@ -10,6 +10,7 @@ const TABS = [
   { label: 'Posts',         href: '/admin/posts',         icon: FileText },
   { label: 'Community',     href: '/admin/community',     icon: Building2 },
   { label: 'Announcements', href: '/admin/announcements', icon: Megaphone },
+  { label: 'Moderation',    href: '/admin/moderation',    icon: Flag },
 ]
 
 export function AdminLayout({ children }: { children: React.ReactNode }) {

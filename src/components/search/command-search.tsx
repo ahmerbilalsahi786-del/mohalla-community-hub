@@ -71,7 +71,7 @@ export function CommandSearch() {
         const [postsRes, listingsRes, membersRes] = await Promise.allSettled([
           fetch(`/api/feed?search=${encodeURIComponent(q)}&limit=4`).then(r => r.json()),
           fetch(`/api/listings?search=${encodeURIComponent(q)}&limit=4`).then(r => r.json()),
-          fetch(`/api/admin/members?communityId=default&limit=4`).then(r => r.json()),
+          fetch(`/api/community/members?communityId=default&limit=4`).then(r => r.json()),
         ])
 
         if (cancelled) return

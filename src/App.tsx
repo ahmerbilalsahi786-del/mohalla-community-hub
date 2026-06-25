@@ -1,34 +1,42 @@
+import { lazy, Suspense } from "react";
 import { Route, Router as WouterRouter, Switch, useLocation } from "wouter";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
-import NotFound from "@/pages/not-found";
-import Dashboard from "@/pages/Dashboard";
-import Feed from "@/pages/Feed";
-import Marketplace from "@/pages/Marketplace";
-import MarketplaceListing from "@/pages/MarketplaceListing";
-import Safety from "@/pages/Safety";
-import Events from "@/pages/Events";
-import Polls from "@/pages/Polls";
-import Profile from "@/pages/Profile";
-import SettingsPage from "@/pages/Settings";
-import AdminMembers from "@/pages/admin/Members";
-import AdminPosts from "@/pages/admin/Posts";
-import AdminCommunity from "@/pages/admin/Community";
-import AdminAnnouncements from "@/pages/admin/Announcements";
-import Community from "@/pages/Community";
-import Places from "@/pages/Places";
-import Volunteer from "@/pages/Volunteer";
-import Help from "@/pages/Help";
-import Login from "@/pages/Login";
-import Register from "@/pages/Register";
 import { CommunityRulesModal } from "@/components/modals/community-rules-modal";
 import { OnboardingModal } from "@/components/modals/onboarding-modal";
 import { CommandSearch } from "@/components/search/command-search";
 import { MobileNav } from "@/components/dashboard/mobile-nav";
-import { ProtectedRoute, AdminRoute } from "@/components/ProtectedRoute";
+import { ProtectedRoute, AdminRoute, AuthenticatedRoute } from "@/components/ProtectedRoute";
 import { InstallAppButton, InstallAppPrompt } from "@/components/pwa/install-app";
 import { clearToken } from "@/lib/auth";
+
+const NotFound = lazy(() => import("@/pages/not-found"));
+const Dashboard = lazy(() => import("@/pages/Dashboard"));
+const Feed = lazy(() => import("@/pages/Feed"));
+const Marketplace = lazy(() => import("@/pages/Marketplace"));
+const MarketplaceListing = lazy(() => import("@/pages/MarketplaceListing"));
+const Safety = lazy(() => import("@/pages/Safety"));
+const Events = lazy(() => import("@/pages/Events"));
+const Polls = lazy(() => import("@/pages/Polls"));
+const Profile = lazy(() => import("@/pages/Profile"));
+const SettingsPage = lazy(() => import("@/pages/Settings"));
+const AdminMembers = lazy(() => import("@/pages/admin/Members"));
+const AdminPosts = lazy(() => import("@/pages/admin/Posts"));
+const AdminCommunity = lazy(() => import("@/pages/admin/Community"));
+const AdminAnnouncements = lazy(() => import("@/pages/admin/Announcements"));
+const AdminModeration = lazy(() => import("@/pages/admin/Moderation"));
+const Community = lazy(() => import("@/pages/Community"));
+const Places = lazy(() => import("@/pages/Places"));
+const Volunteer = lazy(() => import("@/pages/Volunteer"));
+const Help = lazy(() => import("@/pages/Help"));
+const Login = lazy(() => import("@/pages/Login"));
+const Register = lazy(() => import("@/pages/Register"));
+const ResetPassword = lazy(() => import("@/pages/ResetPassword"));
+const MembershipPending = lazy(() => import("@/pages/MembershipPending"));
+const Notifications = lazy(() => import("@/pages/Notifications"));
+const Privacy = lazy(() => import("@/pages/Privacy"));
+const Terms = lazy(() => import("@/pages/Terms"));
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -63,12 +71,15 @@ const PCommunity       = ProtectedRoute(Community);
 const PPlaces          = ProtectedRoute(Places);
 const PVolunteer       = ProtectedRoute(Volunteer);
 const PHelp            = ProtectedRoute(Help);
+const PMembershipPending = AuthenticatedRoute(MembershipPending);
+const PNotifications     = ProtectedRoute(Notifications);
 
 // Admin-only page wrappers
 const AAdminMembers       = AdminRoute(AdminMembers);
 const AAdminPosts         = AdminRoute(AdminPosts);
 const AAdminCommunity     = AdminRoute(AdminCommunity);
 const AAdminAnnouncements = AdminRoute(AdminAnnouncements);
+const AAdminModeration    = AdminRoute(AdminModeration);
 
 function Router() {
   return (
@@ -76,6 +87,10 @@ function Router() {
       {/* Public routes */}
       <Route path="/login" component={Login} />
       <Route path="/register" component={Register} />
+      <Route path="/reset-password" component={ResetPassword} />
+      <Route path="/pending" component={PMembershipPending} />
+      <Route path="/privacy" component={Privacy} />
+      <Route path="/terms" component={Terms} />
 
       {/* Protected routes */}
       <Route path="/" component={PDashboard} />
@@ -91,6 +106,7 @@ function Router() {
       <Route path="/places" component={PPlaces} />
       <Route path="/volunteer" component={PVolunteer} />
       <Route path="/help" component={PHelp} />
+      <Route path="/notifications" component={PNotifications} />
 
       {/* Admin-only routes */}
       <Route path="/announcements" component={AAdminAnnouncements} />
@@ -99,6 +115,7 @@ function Router() {
       <Route path="/admin/posts" component={AAdminPosts} />
       <Route path="/admin/community" component={AAdminCommunity} />
       <Route path="/admin/announcements" component={AAdminAnnouncements} />
+      <Route path="/admin/moderation" component={AAdminModeration} />
 
       <Route component={NotFound} />
     </Switch>
@@ -107,11 +124,13 @@ function Router() {
 
 function AppChrome() {
   const [location] = useLocation();
-  const isPublicAuth = location === "/login" || location === "/register";
+  const isPublicAuth = location === "/login" || location === "/register" || location === "/reset-password" || location === "/pending";
 
   return (
     <>
-      <Router />
+      <Suspense fallback={<div className="flex min-h-screen items-center justify-center bg-background text-sm text-muted-foreground">Loading Mohalla...</div>}>
+        <Router />
+      </Suspense>
       {isPublicAuth && <InstallAppButton variant="floating" />}
       {!isPublicAuth && (
         <>

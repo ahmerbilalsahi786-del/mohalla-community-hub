@@ -1,12 +1,17 @@
 import { useState, useEffect } from 'react'
+import { Link } from 'wouter'
 import { Sidebar } from '@/components/dashboard/sidebar'
 import { TopNavbar } from '@/components/dashboard/top-navbar'
 import { Button } from '@/components/ui/button'
 import { InviteTools } from '@/components/community/invite-tools'
 import { cn } from '@/lib/utils'
+import { useCurrentUser, useLogout } from '@/hooks/use-current-user'
+import { useToast } from '@/hooks/use-toast'
+import { getUser } from '@/lib/auth'
+import { supabase } from '@/integrations/supabase/client'
 import {
   MessageSquare, Heart, ShieldAlert, Megaphone, ShoppingBag, UserCheck,
-  Lock, Trash2, ChevronRight, Loader2, Check, Bell,
+  Lock, Trash2, ChevronRight, Loader2, Check, Download, Eye, EyeOff,
 } from 'lucide-react'
 
 type Prefs = {
@@ -26,6 +31,10 @@ const PREF_OPTIONS: { key: keyof Prefs; icon: React.ElementType; label: string; 
 function Toggle({ checked, onChange }: { checked: boolean; onChange: (v: boolean) => void }) {
   return (
     <button
+      type="button"
+      role="switch"
+      aria-checked={checked}
+      aria-label="Toggle notification preference"
       onClick={() => onChange(!checked)}
       className={cn(
         'relative inline-flex h-6 w-11 shrink-0 items-center rounded-full transition-colors focus:outline-none',
@@ -57,9 +66,18 @@ export default function Settings() {
   const [saving, setSaving]     = useState(false)
   const [saved, setSaved]       = useState(false)
   const [showDelete, setShowDelete] = useState(false)
+  const [showPassword, setShowPassword] = useState(false)
+  const [newPassword, setNewPassword] = useState("")
+  const [confirmPassword, setConfirmPassword] = useState("")
+  const [passwordVisible, setPasswordVisible] = useState(false)
+  const [accountBusy, setAccountBusy] = useState(false)
+  const { data: user } = useCurrentUser()
+  const logout = useLogout()
+  const { toast } = useToast()
+  const demo = getUser()?.userId === "ahmed" && getUser()?.email === "demo@mohalla.app"
 
   useEffect(() => {
-    fetch('/api/settings/notifications?userId=ahmed')
+    fetch('/api/settings/notifications')
       .then(r => r.json())
       .then(setPrefs)
       .catch(() => {})
@@ -75,12 +93,110 @@ export default function Settings() {
       await fetch('/api/settings/notifications', {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ userId: 'ahmed', ...updated }),
+        body: JSON.stringify(updated),
       })
       setSaved(true)
       setTimeout(() => setSaved(false), 2000)
     } catch {}
     setSaving(false)
+  }
+
+  const changePassword = async () => {
+    if (demo) {
+      toast({ title: "Demo password changes are disabled." })
+      setShowPassword(false)
+      return
+    }
+    if (newPassword.length < 12) {
+      toast({ title: "Use at least 12 characters.", variant: "destructive" })
+      return
+    }
+    if (newPassword !== confirmPassword) {
+      toast({ title: "Passwords do not match.", variant: "destructive" })
+      return
+    }
+    setAccountBusy(true)
+    const { error } = await supabase.auth.updateUser({ password: newPassword })
+    setAccountBusy(false)
+    if (error) {
+      toast({ title: error.message, variant: "destructive" })
+      return
+    }
+    setShowPassword(false)
+    setNewPassword("")
+    setConfirmPassword("")
+    toast({ title: "Password updated." })
+  }
+
+  const exportAccountData = async () => {
+    if (demo) {
+      const blob = new Blob([JSON.stringify({ mode: "demo", user }, null, 2)], { type: "application/json" })
+      const url = URL.createObjectURL(blob)
+      const anchor = document.createElement("a")
+      anchor.href = url
+      anchor.download = "mohalla-demo-data.json"
+      anchor.click()
+      URL.revokeObjectURL(url)
+      return
+    }
+
+    setAccountBusy(true)
+    const userId = user?.userId
+    if (!userId) {
+      setAccountBusy(false)
+      toast({ title: "Sign in again before exporting data.", variant: "destructive" })
+      return
+    }
+    const extendedDb = supabase as any
+    const [profile, privateProfile, posts, comments, listings, events, rsvps, votes, preferences] = await Promise.all([
+      supabase.from("profiles").select("*").eq("id", userId).maybeSingle(),
+      supabase.from("private_profiles").select("*").eq("id", userId).maybeSingle(),
+      supabase.from("posts").select("*").eq("user_id", userId),
+      supabase.from("comments").select("*").eq("user_id", userId),
+      supabase.from("listings").select("*").eq("user_id", userId),
+      supabase.from("events").select("*").eq("user_id", userId),
+      supabase.from("event_rsvps").select("*").eq("user_id", userId),
+      supabase.from("poll_votes").select("*").eq("user_id", userId),
+      extendedDb.from("notification_preferences").select("*").eq("user_id", userId).maybeSingle(),
+    ])
+    setAccountBusy(false)
+    const payload = {
+      exportedAt: new Date().toISOString(),
+      account: user,
+      profile: profile.data,
+      privateProfile: privateProfile.data,
+      posts: posts.data ?? [],
+      comments: comments.data ?? [],
+      listings: listings.data ?? [],
+      events: events.data ?? [],
+      eventRsvps: rsvps.data ?? [],
+      pollVotes: votes.data ?? [],
+      notificationPreferences: preferences.data,
+    }
+    const blob = new Blob([JSON.stringify(payload, null, 2)], { type: "application/json" })
+    const url = URL.createObjectURL(blob)
+    const anchor = document.createElement("a")
+    anchor.href = url
+    anchor.download = `mohalla-account-${new Date().toISOString().slice(0, 10)}.json`
+    anchor.click()
+    URL.revokeObjectURL(url)
+  }
+
+  const deleteAccount = async () => {
+    if (demo) {
+      setShowDelete(false)
+      toast({ title: "Demo account deletion is disabled." })
+      return
+    }
+    setAccountBusy(true)
+    const { error } = await (supabase as any).rpc("delete_my_account")
+    setAccountBusy(false)
+    if (error) {
+      toast({ title: error.message, variant: "destructive" })
+      return
+    }
+    setShowDelete(false)
+    await logout()
   }
 
   return (
@@ -147,7 +263,7 @@ export default function Settings() {
 
             {/* Account Security */}
             <Section title="Account Security">
-              <button className="w-full flex items-center justify-between px-5 py-4 hover:bg-muted/30 transition-colors border-b border-border">
+              <button type="button" onClick={() => setShowPassword(true)} className="w-full flex items-center justify-between px-5 py-4 hover:bg-muted/30 transition-colors border-b border-border">
                 <div className="flex items-center gap-3">
                   <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-muted/50 text-muted-foreground">
                     <Lock size={15} />
@@ -159,28 +275,32 @@ export default function Settings() {
                 </div>
                 <ChevronRight size={16} className="text-muted-foreground" />
               </button>
-              <div className="px-5 py-3 bg-muted/20">
-                <p className="text-xs text-muted-foreground">
-                  Password management will be available once authentication is set up.
-                  Currently running in demo mode with a shared community account.
-                </p>
-              </div>
+              <button type="button" onClick={exportAccountData} disabled={accountBusy} className="flex w-full items-center justify-between px-5 py-4 text-left hover:bg-muted/30 disabled:opacity-50">
+                <div className="flex items-center gap-3">
+                  <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-muted/50 text-muted-foreground"><Download size={15} /></div>
+                  <div>
+                    <p className="text-sm font-medium text-foreground">Export My Data</p>
+                    <p className="text-xs text-muted-foreground">Download your Mohalla account information</p>
+                  </div>
+                </div>
+                <ChevronRight size={16} className="text-muted-foreground" />
+              </button>
             </Section>
 
             {/* Profile Quick Link */}
             <Section title="Your Profile">
-              <a href="/profile/me" className="w-full flex items-center justify-between px-5 py-4 hover:bg-muted/30 transition-colors">
+              <Link href={`/profile/${user?.userId ?? "me"}`} className="w-full flex items-center justify-between px-5 py-4 hover:bg-muted/30 transition-colors">
                 <div className="flex items-center gap-3">
                   <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-br from-primary/60 to-accent/60 text-white font-bold text-sm">
-                    AK
+                    {(user?.name ?? "R").slice(0, 1).toUpperCase()}
                   </div>
                   <div>
-                    <p className="text-sm font-semibold text-foreground">Ahmed Khan</p>
-                    <p className="text-xs text-muted-foreground">B-204 · View and edit your profile</p>
+                    <p className="text-sm font-semibold text-foreground">{user?.name ?? "Resident"}</p>
+                    <p className="text-xs text-muted-foreground">{user?.unitNumber || "No unit set"} · View and edit your profile</p>
                   </div>
                 </div>
                 <ChevronRight size={16} className="text-muted-foreground" />
-              </a>
+              </Link>
             </Section>
 
             <Section title="Invite Neighbors">
@@ -220,7 +340,7 @@ export default function Settings() {
             {/* App info */}
             <div className="text-center text-xs text-muted-foreground/60 pb-4">
               <p>Mohalla Community Hub · v1.0</p>
-              <p className="mt-0.5">Made with ❤️ for your neighbourhood</p>
+              <p className="mt-1"><Link href="/privacy" className="hover:text-primary">Privacy</Link> · <Link href="/terms" className="hover:text-primary">Terms</Link></p>
             </div>
           </div>
         </main>
@@ -239,13 +359,35 @@ export default function Settings() {
             </p>
             <div className="flex gap-3 mt-6">
               <Button variant="outline" onClick={() => setShowDelete(false)} className="flex-1 rounded-xl">Cancel</Button>
-              <Button variant="destructive" onClick={() => setShowDelete(false)} className="flex-1 rounded-xl">
-                Delete Account
+              <Button variant="destructive" disabled={accountBusy} onClick={deleteAccount} className="flex-1 rounded-xl">
+                {accountBusy ? "Deleting..." : "Delete Account"}
               </Button>
             </div>
             <p className="text-xs text-muted-foreground/60 mt-3 text-center">
-              Account deletion requires authentication to be enabled.
+              This action permanently removes the authentication account and linked community data.
             </p>
+          </div>
+        </div>
+      )}
+
+      {showPassword && (
+        <div className="fixed inset-0 z-[80] flex items-end justify-center bg-black/40 p-3 backdrop-blur-sm sm:items-center sm:p-4">
+          <div className="w-full max-w-sm rounded-lg border border-border bg-card p-5 shadow-2xl">
+            <h3 className="text-lg font-bold">Change password</h3>
+            <p className="mt-1 text-sm text-muted-foreground">Use at least 12 characters.</p>
+            <div className="mt-4 space-y-3">
+              <div className="relative">
+                <input type={passwordVisible ? "text" : "password"} value={newPassword} onChange={(event) => setNewPassword(event.target.value)} placeholder="New password" className="w-full rounded-md border border-border bg-background px-3 py-2 pr-10 text-sm" />
+                <button type="button" aria-label={passwordVisible ? "Hide password" : "Show password"} onClick={() => setPasswordVisible((value) => !value)} className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground">
+                  {passwordVisible ? <EyeOff size={15} /> : <Eye size={15} />}
+                </button>
+              </div>
+              <input type={passwordVisible ? "text" : "password"} value={confirmPassword} onChange={(event) => setConfirmPassword(event.target.value)} placeholder="Confirm password" className="w-full rounded-md border border-border bg-background px-3 py-2 text-sm" />
+            </div>
+            <div className="mt-5 flex gap-2">
+              <Button type="button" variant="outline" className="flex-1" onClick={() => setShowPassword(false)}>Cancel</Button>
+              <Button type="button" className="flex-1" disabled={accountBusy} onClick={changePassword}>{accountBusy ? "Saving..." : "Update"}</Button>
+            </div>
           </div>
         </div>
       )}
