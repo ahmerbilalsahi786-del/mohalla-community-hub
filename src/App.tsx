@@ -27,7 +27,7 @@ import { OnboardingModal } from "@/components/modals/onboarding-modal";
 import { CommandSearch } from "@/components/search/command-search";
 import { MobileNav } from "@/components/dashboard/mobile-nav";
 import { ProtectedRoute, AdminRoute } from "@/components/ProtectedRoute";
-import { InstallAppPrompt } from "@/components/pwa/install-app";
+import { InstallAppButton, InstallAppPrompt } from "@/components/pwa/install-app";
 import { clearToken } from "@/lib/auth";
 
 const queryClient = new QueryClient({
@@ -112,6 +112,7 @@ function AppChrome() {
   return (
     <>
       <Router />
+      {isPublicAuth && <InstallAppButton variant="floating" />}
       {!isPublicAuth && (
         <>
           <MobileNav />

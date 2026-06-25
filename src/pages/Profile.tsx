@@ -11,6 +11,7 @@ import {
 } from 'lucide-react'
 import { useToast } from '@/hooks/use-toast'
 import { uploadImage } from '@/lib/cloudinary'
+import { useCurrentUser } from '@/hooks/use-current-user'
 
 const ME = 'ahmed'
 
@@ -76,8 +77,10 @@ function StatTile({ stat }: { stat: ProfileStat }) {
 
 export default function ProfilePage() {
   const params = useParams<{ id: string }>()
-  const userId = params.id || ME
-  const isMe = userId === ME
+  const requestedUserId = params.id || 'me'
+  const { data: currentUser } = useCurrentUser()
+  const userId = requestedUserId === 'me' ? currentUser?.userId ?? 'me' : requestedUserId
+  const isMe = requestedUserId === 'me' || requestedUserId === ME || requestedUserId === currentUser?.userId
   const [, navigate] = useLocation()
 
   const [profile, setProfile]   = useState<Profile | null>(null)

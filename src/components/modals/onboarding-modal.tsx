@@ -12,7 +12,7 @@ const STEPS = [
     icon: User,
     title: 'Complete your profile',
     description: 'Add your name, unit number and WhatsApp so neighbours can reach you.',
-    href: '/profile/ahmed',
+    href: '/profile/me',
     cta: 'Go to Profile',
     color: 'text-primary',
     bg: 'bg-primary/10',

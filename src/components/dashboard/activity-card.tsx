@@ -1,4 +1,5 @@
 import { cn } from '@/lib/utils'
+import { Link } from 'wouter'
 
 interface Activity {
   id: string
@@ -31,14 +32,16 @@ export function ActivityCard({ activities }: ActivityCardProps) {
           <h3 className="text-lg font-bold text-card-foreground">Recent Activity</h3>
           <p className="text-sm text-muted-foreground">What&apos;s happening in your mohalla</p>
         </div>
-        <button className="text-sm font-medium text-primary hover:text-primary/80">
+        <Link href="/feed" className="text-sm font-medium text-primary hover:text-primary/80">
           View all
-        </button>
+        </Link>
       </div>
 
       {/* Activity List */}
       <div className="divide-y divide-border">
-        {activities.map((activity) => (
+        {activities.length === 0 ? (
+          <p className="px-6 py-8 text-center text-sm text-muted-foreground">No community activity yet.</p>
+        ) : activities.map((activity) => (
           <div
             key={activity.id}
             className="flex items-start gap-4 p-4 transition-colors hover:bg-muted/30"

@@ -169,7 +169,7 @@ export default function Settings() {
 
             {/* Profile Quick Link */}
             <Section title="Your Profile">
-              <a href="/profile/ahmed" className="w-full flex items-center justify-between px-5 py-4 hover:bg-muted/30 transition-colors">
+              <a href="/profile/me" className="w-full flex items-center justify-between px-5 py-4 hover:bg-muted/30 transition-colors">
                 <div className="flex items-center gap-3">
                   <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-br from-primary/60 to-accent/60 text-white font-bold text-sm">
                     AK

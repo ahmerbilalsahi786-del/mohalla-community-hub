@@ -16,10 +16,10 @@ export function ProtectedRoute<P extends object>(Component: ComponentType<P>) {
 /** Wraps a page component — redirects to /feed if user is not admin/moderator. */
 export function AdminRoute<P extends object>(Component: ComponentType<P>) {
   return function AdminProtected(props: P) {
+    const { data: user, isLoading } = useCurrentUser()
     if (!isLoggedIn()) {
       return <Redirect to="/login" />
     }
-    const { data: user, isLoading } = useCurrentUser()
     if (isLoading) return null
     if (!canManageCommunity(user?.role)) {
       return <Redirect to="/feed" />

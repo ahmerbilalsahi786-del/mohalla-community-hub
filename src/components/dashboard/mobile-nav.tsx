@@ -14,7 +14,7 @@ const NAV = [
 ]
 
 const MORE_LINKS = [
-  { label: 'Profile', icon: Users, href: '/profile/ahmed' },
+  { label: 'Profile', icon: Users, href: '/profile/me' },
   { label: 'Polls', icon: BarChart2, href: '/polls' },
   { label: 'Community', icon: Users, href: '/community' },
   { label: 'Announcements', icon: Megaphone, href: '/announcements' },

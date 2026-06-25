@@ -1,5 +1,4 @@
-import { MessageSquare, UserPlus } from 'lucide-react'
-import { Button } from '@/components/ui/button'
+import { Link } from 'wouter'
 import { cn } from '@/lib/utils'
 
 interface Member {
@@ -7,7 +6,8 @@ interface Member {
   name: string
   role: string
   avatar?: string
-  isOnline: boolean
+  isVerified: boolean
+  href: string
   mutualConnections?: number
 }
 
@@ -24,19 +24,22 @@ export function MemberCard({ members }: MemberCardProps) {
       {/* Header */}
       <div className="flex items-center justify-between border-b border-border px-6 py-4">
         <div>
-          <h3 className="text-lg font-bold text-card-foreground">Active Neighbors</h3>
+          <h3 className="text-lg font-bold text-card-foreground">Community Members</h3>
           <p className="text-sm text-muted-foreground">People in your mohalla</p>
         </div>
-        <button className="text-sm font-medium text-primary hover:text-primary/80">
+        <Link href="/community" className="text-sm font-medium text-primary hover:text-primary/80">
           See all
-        </button>
+        </Link>
       </div>
 
       {/* Members List */}
       <div className="divide-y divide-border">
-        {members.map((member) => (
-          <div
+        {members.length === 0 ? (
+          <p className="px-6 py-8 text-center text-sm text-muted-foreground">No members to show yet.</p>
+        ) : members.map((member) => (
+          <Link
             key={member.id}
+            href={member.href}
             className="flex items-center gap-4 p-4 transition-colors hover:bg-muted/30"
           >
             {/* Avatar */}
@@ -45,8 +48,9 @@ export function MemberCard({ members }: MemberCardProps) {
               <div
                 className={cn(
                   'absolute -bottom-0.5 -right-0.5 h-3.5 w-3.5 rounded-full border-2 border-card',
-                  member.isOnline ? 'bg-green-500' : 'bg-muted-foreground/30'
+                  member.isVerified ? 'bg-green-500' : 'bg-muted-foreground/30'
                 )}
+                title={member.isVerified ? 'Verified member' : 'Verification pending'}
               />
             </div>
 
@@ -60,25 +64,7 @@ export function MemberCard({ members }: MemberCardProps) {
                 </p>
               )}
             </div>
-
-            {/* Actions */}
-            <div className="flex gap-2">
-              <Button
-                variant="ghost"
-                size="icon"
-                className="h-9 w-9 rounded-lg text-muted-foreground hover:bg-muted hover:text-foreground"
-              >
-                <MessageSquare size={16} />
-              </Button>
-              <Button
-                variant="ghost"
-                size="icon"
-                className="h-9 w-9 rounded-lg text-primary hover:bg-primary/10"
-              >
-                <UserPlus size={16} />
-              </Button>
-            </div>
-          </div>
+          </Link>
         ))}
       </div>
     </div>

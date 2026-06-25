@@ -8,7 +8,7 @@ import { dismissInstallPrompt, useInstallPrompt } from "@/hooks/use-install-prom
 type InstallAppButtonProps = {
   collapsed?: boolean;
   className?: string;
-  variant?: "sidebar" | "mobile";
+  variant?: "sidebar" | "mobile" | "floating";
 };
 
 function useInstallAction() {
@@ -35,9 +35,25 @@ function useInstallAction() {
 
 export function InstallAppButton({ collapsed, className, variant = "sidebar" }: InstallAppButtonProps) {
   const { install, runInstall } = useInstallAction();
-  const showFallback = !install.installed && !install.standalone && variant === "mobile";
+  const showFallback = !install.installed && !install.standalone;
 
   if (!install.isInstallable && !showFallback) return null;
+
+  if (variant === "floating") {
+    return (
+      <button
+        type="button"
+        onClick={runInstall}
+        className={cn(
+          "fixed right-4 top-4 z-50 flex h-10 items-center gap-2 rounded-xl border border-border bg-card px-3 text-sm font-semibold text-foreground shadow-md",
+          className,
+        )}
+      >
+        <Download size={17} />
+        Install App
+      </button>
+    );
+  }
 
   if (variant === "mobile") {
     return (

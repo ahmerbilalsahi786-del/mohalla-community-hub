@@ -184,7 +184,7 @@ export function CommandSearch() {
             {[
               { label: 'Community Feed', href: '/feed', icon: MessageSquare },
               { label: 'Marketplace', href: '/marketplace', icon: ShoppingBag },
-              { label: 'My Profile', href: '/profile/ahmed', icon: Users },
+              { label: 'My Profile', href: '/profile/me', icon: Users },
             ].map(q => (
               <button key={q.href} onClick={() => { navigate(q.href); setOpen(false) }}
                 className="flex items-center gap-3 w-full px-3 py-2.5 rounded-xl hover:bg-muted/50 transition-colors text-sm text-muted-foreground hover:text-foreground">

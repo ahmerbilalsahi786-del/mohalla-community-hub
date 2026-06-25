@@ -18,7 +18,7 @@ const FAQ = [
   },
   {
     q: 'How do I update my profile or unit number?',
-    a: 'Go to your Profile page (click your avatar in the top-right or visit /profile/ahmed) and tap "Edit Profile".',
+    a: 'Open your Profile from the avatar in the top-right, then tap "Edit Profile".',
   },
   {
     q: 'How do I turn off notifications?',

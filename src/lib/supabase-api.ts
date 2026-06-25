@@ -231,7 +231,7 @@ async function requiredUserId() {
 }
 
 async function resolveRequestedUserId(value?: string | null) {
-  if (!value || value === "ahmed" || value === "default") return currentUserId();
+  if (!value || value === "me" || value === "ahmed" || value === "default") return currentUserId();
   return value;
 }
 

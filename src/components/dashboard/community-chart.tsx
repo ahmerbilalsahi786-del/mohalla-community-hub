@@ -1,89 +1,44 @@
-
 import {
-  AreaChart,
-  Area,
-  Line,
+  Bar,
+  BarChart,
+  Cell,
+  CartesianGrid,
+  ResponsiveContainer,
+  Tooltip,
   XAxis,
   YAxis,
-  CartesianGrid,
-  Tooltip,
-  ResponsiveContainer,
 } from 'recharts'
-import { useListPosts } from '@/lib/generated/api'
-
-const baseData = [
-  { month: 'Jan', members: 120, events: 8, posts: 45, complaints: 18 },
-  { month: 'Feb', members: 145, events: 12, posts: 62, complaints: 15 },
-  { month: 'Mar', members: 180, events: 15, posts: 78, complaints: 21 },
-  { month: 'Apr', members: 220, events: 18, posts: 95, complaints: 12 },
-  { month: 'May', members: 280, events: 22, posts: 120, complaints: 9 },
-  { month: 'Jun', members: 350, events: 28, posts: 150, complaints: 14 },
-]
+import { useAdminGetStats, useListAlerts, useListEvents } from '@/lib/generated/api'
 
 export function CommunityChart() {
-  const { data: complaintData } = useListPosts({
-    communityId: 'default',
-    category: 'complaint',
-    page: 1,
-    limit: 100,
-  })
-  const complaintTotal = complaintData?.total ?? 0
-  const data = baseData.map((row, index) => (
-    index === baseData.length - 1
-      ? { ...row, complaints: row.complaints + complaintTotal }
-      : row
-  ))
+  const { data: stats } = useAdminGetStats({ communityId: 'default' })
+  const { data: eventData } = useListEvents({ communityId: 'default' })
+  const { data: alertData = [] } = useListAlerts({ communityId: 'default' })
+
+  const data = [
+    { name: 'Members', total: stats?.totalMembers ?? 0, fill: '#0f766e' },
+    { name: 'Posts', total: stats?.postsThisMonth ?? 0, fill: '#2563eb' },
+    { name: 'Events', total: eventData?.upcoming?.length ?? 0, fill: '#f59e0b' },
+    {
+      name: 'Alerts',
+      total: (alertData as any[]).filter((alert) => !alert.isResolved).length,
+      fill: '#ef4444',
+    },
+  ]
 
   return (
-    <div className="relative overflow-hidden rounded-2xl border border-border bg-card p-6 shadow-sm">
-      {/* Decorative blobs */}
-      <div className="absolute -right-20 -top-20 h-40 w-40 rounded-full bg-primary/5 blur-3xl" />
-      <div className="absolute -bottom-10 -left-10 h-32 w-32 rounded-full bg-accent/5 blur-2xl" />
-
-      {/* Header */}
-      <div className="relative mb-6 flex items-start justify-between">
-        <div>
-          <h3 className="text-lg font-bold text-card-foreground">Community Growth</h3>
-          <p className="text-sm text-muted-foreground">Member activity over time</p>
-        </div>
-        <div className="flex flex-wrap gap-4">
-          <div className="flex items-center gap-2">
-            <div className="h-3 w-3 rounded-full bg-primary" />
-            <span className="text-xs text-muted-foreground">Members</span>
-          </div>
-          <div className="flex items-center gap-2">
-            <div className="h-3 w-3 rounded-full bg-accent" />
-            <span className="text-xs text-muted-foreground">Posts</span>
-          </div>
-          <div className="flex items-center gap-2">
-            <div className="h-3 w-3 rounded-full bg-red-500" />
-            <span className="text-xs text-muted-foreground">Complaints</span>
-          </div>
-        </div>
+    <div className="overflow-hidden rounded-2xl border border-border bg-card p-6 shadow-sm">
+      <div className="mb-6">
+        <h3 className="text-lg font-bold text-card-foreground">Community Overview</h3>
+        <p className="text-sm text-muted-foreground">Current data from your mohalla</p>
       </div>
 
-      {/* Chart */}
-      <div className="relative h-64">
+      <div className="h-64">
         <ResponsiveContainer width="100%" height="100%">
-          <AreaChart data={data}>
-            <defs>
-              <linearGradient id="colorMembers" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="5%" stopColor="#1B5E20" stopOpacity={0.3} />
-                <stop offset="95%" stopColor="#1B5E20" stopOpacity={0} />
-              </linearGradient>
-              <linearGradient id="colorPosts" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="5%" stopColor="#0288D1" stopOpacity={0.3} />
-                <stop offset="95%" stopColor="#0288D1" stopOpacity={0} />
-              </linearGradient>
-            </defs>
-            <CartesianGrid
-              strokeDasharray="3 3"
-              stroke="currentColor"
-              className="text-border"
-              vertical={false}
-            />
+          <BarChart data={data}>
+            <CartesianGrid strokeDasharray="3 3" stroke="currentColor" className="text-border" vertical={false} />
             <XAxis
-              dataKey="month"
+              dataKey="name"
               stroke="currentColor"
               className="text-muted-foreground"
               fontSize={12}
@@ -91,6 +46,7 @@ export function CommunityChart() {
               axisLine={false}
             />
             <YAxis
+              allowDecimals={false}
               stroke="currentColor"
               className="text-muted-foreground"
               fontSize={12}
@@ -98,39 +54,19 @@ export function CommunityChart() {
               axisLine={false}
             />
             <Tooltip
+              cursor={{ fill: 'hsl(var(--muted))', opacity: 0.35 }}
               contentStyle={{
                 backgroundColor: 'hsl(var(--card))',
                 border: '1px solid hsl(var(--border))',
-                borderRadius: '12px',
-                boxShadow: '0 10px 25px -5px rgba(0,0,0,0.1)',
+                borderRadius: '8px',
               }}
-              labelStyle={{ color: 'hsl(var(--card-foreground))', fontWeight: 600 }}
             />
-            <Area
-              type="monotone"
-              dataKey="members"
-              stroke="#1B5E20"
-              strokeWidth={2}
-              fillOpacity={1}
-              fill="url(#colorMembers)"
-            />
-            <Area
-              type="monotone"
-              dataKey="posts"
-              stroke="#0288D1"
-              strokeWidth={2}
-              fillOpacity={1}
-              fill="url(#colorPosts)"
-            />
-            <Line
-              type="monotone"
-              dataKey="complaints"
-              stroke="#EF4444"
-              strokeWidth={3}
-              dot={{ r: 3, fill: '#EF4444', strokeWidth: 0 }}
-              activeDot={{ r: 5, fill: '#EF4444', stroke: '#FFFFFF', strokeWidth: 2 }}
-            />
-          </AreaChart>
+            <Bar dataKey="total" radius={[6, 6, 0, 0]}>
+              {data.map((entry) => (
+                <Cell key={entry.name} fill={entry.fill} />
+              ))}
+            </Bar>
+          </BarChart>
         </ResponsiveContainer>
       </div>
     </div>
