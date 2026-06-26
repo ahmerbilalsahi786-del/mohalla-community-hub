@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { Link, useLocation } from 'wouter'
-import { Eye, EyeOff, UserPlus } from 'lucide-react'
+import { Building2, Eye, EyeOff, UserPlus } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { setToken } from '@/lib/auth'
@@ -17,7 +17,17 @@ function emailRedirectTo() {
 export default function Register() {
   const [, navigate] = useLocation()
   const { toast } = useToast()
-  const [form, setForm] = useState({ email: '', password: '', confirmPassword: '', userId: '', name: '', unitNumber: '' })
+  const [form, setForm] = useState({
+    email: '',
+    password: '',
+    confirmPassword: '',
+    userId: '',
+    name: '',
+    unitNumber: '',
+    communityName: '',
+    communityArea: '',
+    communityCity: '',
+  })
   const [showPw, setShowPw] = useState(false)
   const [loading, setLoading] = useState(false)
   const [errors, setErrors] = useState<Record<string, string[]>>({})
@@ -40,6 +50,12 @@ export default function Register() {
       if (form.password !== form.confirmPassword) {
         nextErrors.confirmPassword = ['Passwords do not match']
       }
+      if (!form.communityName.trim()) {
+        nextErrors.communityName = ['Society name is required']
+      }
+      if (!form.communityCity.trim()) {
+        nextErrors.communityCity = ['City is required']
+      }
       if (Object.keys(nextErrors).length > 0) {
         setErrors(nextErrors)
         return
@@ -55,6 +71,10 @@ export default function Register() {
             full_name: form.name,
             name: form.name,
             unit_number: form.unitNumber,
+            registration_type: 'community_admin',
+            community_name: form.communityName,
+            community_area: form.communityArea,
+            community_city: form.communityCity,
           },
         },
       })
@@ -66,7 +86,7 @@ export default function Register() {
 
       if (data.session?.access_token) {
         setToken(data.session.access_token)
-        navigate('/')
+        navigate('/pending-approval')
         return
       }
 
@@ -107,10 +127,22 @@ export default function Register() {
             <span className="text-2xl font-bold text-primary-foreground">م</span>
           </div>
           <h1 className="text-2xl font-bold text-foreground">Join your Mohalla</h1>
-          <p className="text-sm text-muted-foreground mt-1">Create your community account</p>
+          <p className="text-sm text-muted-foreground mt-1">Register your society for approval</p>
         </div>
 
         <form onSubmit={submit} className="space-y-4">
+          <div className="rounded-xl border border-border bg-card p-4">
+            <div className="mb-3 flex items-center gap-2 text-sm font-semibold text-foreground">
+              <Building2 size={16} className="text-primary" />
+              Society details
+            </div>
+            <div className="space-y-3">
+              {field('communityName', 'Society name', 'text', 'DHA Phase 5 Residents')}
+              {field('communityArea', 'Area', 'text', 'DHA Phase 5')}
+              {field('communityCity', 'City', 'text', 'Karachi')}
+            </div>
+          </div>
+
           {field('name', 'Full name', 'text', 'Ahmed Khan')}
           {field('email', 'Email', 'email', 'you@example.com')}
 

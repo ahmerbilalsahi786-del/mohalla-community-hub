@@ -7,9 +7,11 @@ import { CommunityRulesModal } from "@/components/modals/community-rules-modal";
 import { OnboardingModal } from "@/components/modals/onboarding-modal";
 import { CommandSearch } from "@/components/search/command-search";
 import { MobileNav } from "@/components/dashboard/mobile-nav";
-import { ProtectedRoute, AdminRoute, AuthenticatedRoute } from "@/components/ProtectedRoute";
+import { ProtectedRoute, AdminRoute, AuthenticatedRoute, SuperAdminRoute } from "@/components/ProtectedRoute";
 import { InstallAppButton, InstallAppPrompt } from "@/components/pwa/install-app";
 import { clearToken } from "@/lib/auth";
+import { useCurrentUser } from "@/hooks/use-current-user";
+import { useCommunityTheme } from "@/lib/theme";
 
 const NotFound = lazy(() => import("@/pages/not-found"));
 const Dashboard = lazy(() => import("@/pages/Dashboard"));
@@ -24,8 +26,12 @@ const SettingsPage = lazy(() => import("@/pages/Settings"));
 const AdminMembers = lazy(() => import("@/pages/admin/Members"));
 const AdminPosts = lazy(() => import("@/pages/admin/Posts"));
 const AdminCommunity = lazy(() => import("@/pages/admin/Community"));
+const AdminBranding = lazy(() => import("@/pages/admin/Branding"));
 const AdminAnnouncements = lazy(() => import("@/pages/admin/Announcements"));
 const AdminModeration = lazy(() => import("@/pages/admin/Moderation"));
+const SuperAdminDashboard = lazy(() => import("@/pages/super-admin/Dashboard"));
+const SuperAdminCommunities = lazy(() => import("@/pages/super-admin/Communities"));
+const SuperAdminCommunityDetail = lazy(() => import("@/pages/super-admin/CommunityDetail"));
 const Community = lazy(() => import("@/pages/Community"));
 const Places = lazy(() => import("@/pages/Places"));
 const Volunteer = lazy(() => import("@/pages/Volunteer"));
@@ -78,8 +84,12 @@ const PNotifications     = ProtectedRoute(Notifications);
 const AAdminMembers       = AdminRoute(AdminMembers);
 const AAdminPosts         = AdminRoute(AdminPosts);
 const AAdminCommunity     = AdminRoute(AdminCommunity);
+const AAdminBranding      = AdminRoute(AdminBranding);
 const AAdminAnnouncements = AdminRoute(AdminAnnouncements);
 const AAdminModeration    = AdminRoute(AdminModeration);
+const SAdminDashboard     = SuperAdminRoute(SuperAdminDashboard);
+const SAdminCommunities   = SuperAdminRoute(SuperAdminCommunities);
+const SAdminCommunityDetail = SuperAdminRoute(SuperAdminCommunityDetail);
 
 function Router() {
   return (
@@ -89,6 +99,7 @@ function Router() {
       <Route path="/register" component={Register} />
       <Route path="/reset-password" component={ResetPassword} />
       <Route path="/pending" component={PMembershipPending} />
+      <Route path="/pending-approval" component={PMembershipPending} />
       <Route path="/privacy" component={Privacy} />
       <Route path="/terms" component={Terms} />
 
@@ -114,8 +125,15 @@ function Router() {
       <Route path="/admin/members" component={AAdminMembers} />
       <Route path="/admin/posts" component={AAdminPosts} />
       <Route path="/admin/community" component={AAdminCommunity} />
+      <Route path="/admin/branding" component={AAdminBranding} />
       <Route path="/admin/announcements" component={AAdminAnnouncements} />
       <Route path="/admin/moderation" component={AAdminModeration} />
+
+      {/* Super-admin routes */}
+      <Route path="/super-admin" component={SAdminDashboard} />
+      <Route path="/super-admin/dashboard" component={SAdminDashboard} />
+      <Route path="/super-admin/communities" component={SAdminCommunities} />
+      <Route path="/super-admin/communities/:id" component={SAdminCommunityDetail} />
 
       <Route component={NotFound} />
     </Switch>
@@ -124,7 +142,10 @@ function Router() {
 
 function AppChrome() {
   const [location] = useLocation();
-  const isPublicAuth = location === "/login" || location === "/register" || location === "/reset-password" || location === "/pending";
+  const { data: user } = useCurrentUser();
+  useCommunityTheme(user?.community);
+  const isPublicAuth = location === "/login" || location === "/register" || location === "/reset-password" || location === "/pending" || location === "/pending-approval";
+  const isPlatformArea = location.startsWith("/super-admin");
 
   return (
     <>
@@ -132,7 +153,7 @@ function AppChrome() {
         <Router />
       </Suspense>
       {isPublicAuth && <InstallAppButton variant="floating" />}
-      {!isPublicAuth && (
+      {!isPublicAuth && !isPlatformArea && (
         <>
           <MobileNav />
           <CommunityRulesModal />

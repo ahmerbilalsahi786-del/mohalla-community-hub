@@ -1,7 +1,7 @@
 import { Link, useLocation } from 'wouter'
 import { Sidebar } from '@/components/dashboard/sidebar'
 import { TopNavbar } from '@/components/dashboard/top-navbar'
-import { Users, FileText, Building2, Megaphone, ShieldCheck, Flag } from 'lucide-react'
+import { Users, FileText, Building2, Megaphone, ShieldCheck, Flag, Palette } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { useAdminListMembers } from '@/lib/generated/api'
 
@@ -9,6 +9,7 @@ const TABS = [
   { label: 'Members',       href: '/admin/members',       icon: Users },
   { label: 'Posts',         href: '/admin/posts',         icon: FileText },
   { label: 'Community',     href: '/admin/community',     icon: Building2 },
+  { label: 'Branding',      href: '/admin/branding',      icon: Palette },
   { label: 'Announcements', href: '/admin/announcements', icon: Megaphone },
   { label: 'Moderation',    href: '/admin/moderation',    icon: Flag },
 ]

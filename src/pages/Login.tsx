@@ -41,12 +41,14 @@ export default function Login() {
         return
       }
 
+      const { data: roles, error: roleError } = await supabase
+        .from("user_roles")
+        .select("role")
+        .eq("user_id", data.user.id)
+      const isPlatformOwner = roles?.some((row: { role: string }) => row.role === "super_admin")
+
       if (accountType === "admin") {
-        const { data: roles, error: roleError } = await supabase
-          .from("user_roles")
-          .select("role")
-          .eq("user_id", data.user.id)
-        const canManage = roles?.some((row: { role: string }) => row.role === "admin" || row.role === "moderator")
+        const canManage = roles?.some((row: { role: string }) => row.role === "admin" || row.role === "moderator" || row.role === "super_admin")
         if (roleError || !canManage) {
           await supabase.auth.signOut()
           toast({ title: "This account does not have administrator access.", variant: "destructive" })
@@ -55,7 +57,7 @@ export default function Login() {
       }
 
       setToken(data.session.access_token)
-      navigate(accountType === "admin" ? "/admin" : "/")
+      navigate(isPlatformOwner ? "/super-admin/dashboard" : accountType === "admin" ? "/admin" : "/")
     } catch {
       toast({ title: 'Cannot connect to Supabase. Check your project keys.', variant: 'destructive' })
     } finally {

@@ -83,26 +83,68 @@ export type Database = {
       }
       community_settings: {
         Row: {
+          approved_at: string | null
+          approved_by_user_id: string | null
+          created_at: string
           description: string | null
           id: string
+          logo_url: string | null
           name: string
+          rejection_reason: string | null
+          requested_by_email: string | null
+          requested_by_user_id: string | null
           rules: string | null
+          status: string
+          suspended_reason: string | null
+          theme_background_color: string
+          theme_banner_color: string
+          theme_primary_color: string
+          theme_secondary_color: string
+          theme_sidebar_color: string
           updated_at: string | null
           welcome_message: string | null
         }
         Insert: {
+          approved_at?: string | null
+          approved_by_user_id?: string | null
+          created_at?: string
           description?: string | null
           id?: string
+          logo_url?: string | null
           name?: string
+          rejection_reason?: string | null
+          requested_by_email?: string | null
+          requested_by_user_id?: string | null
           rules?: string | null
+          status?: string
+          suspended_reason?: string | null
+          theme_background_color?: string
+          theme_banner_color?: string
+          theme_primary_color?: string
+          theme_secondary_color?: string
+          theme_sidebar_color?: string
           updated_at?: string | null
           welcome_message?: string | null
         }
         Update: {
+          approved_at?: string | null
+          approved_by_user_id?: string | null
+          created_at?: string
           description?: string | null
           id?: string
+          logo_url?: string | null
           name?: string
+          rejection_reason?: string | null
+          requested_by_email?: string | null
+          requested_by_user_id?: string | null
           rules?: string | null
+          status?: string
+          suspended_reason?: string | null
+          theme_background_color?: string
+          theme_banner_color?: string
+          theme_primary_color?: string
+          theme_secondary_color?: string
+          theme_sidebar_color?: string
           updated_at?: string | null
           welcome_message?: string | null
         }
@@ -469,33 +511,42 @@ export type Database = {
         Row: {
           avatar_url: string | null
           bio: string | null
+          community_id: string | null
           created_at: string | null
           display_name: string | null
+          email: string | null
           full_name: string | null
           id: string
           is_verified: boolean
+          membership_status: string
           unit_number: string | null
           updated_at: string | null
         }
         Insert: {
           avatar_url?: string | null
           bio?: string | null
+          community_id?: string | null
           created_at?: string | null
           display_name?: string | null
+          email?: string | null
           full_name?: string | null
           id: string
           is_verified?: boolean
+          membership_status?: string
           unit_number?: string | null
           updated_at?: string | null
         }
         Update: {
           avatar_url?: string | null
           bio?: string | null
+          community_id?: string | null
           created_at?: string | null
           display_name?: string | null
+          email?: string | null
           full_name?: string | null
           id?: string
           is_verified?: boolean
+          membership_status?: string
           unit_number?: string | null
           updated_at?: string | null
         }
@@ -572,7 +623,7 @@ export type Database = {
       }
     }
     Enums: {
-      app_role: "admin" | "moderator" | "user"
+      app_role: "admin" | "moderator" | "user" | "super_admin"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -700,7 +751,7 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
-      app_role: ["admin", "moderator", "user"],
+      app_role: ["admin", "moderator", "user", "super_admin"],
     },
   },
 } as const

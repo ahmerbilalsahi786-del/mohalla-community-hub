@@ -1,7 +1,7 @@
 import { type ComponentType } from 'react'
 import { Redirect } from 'wouter'
 import { getUser } from '@/lib/auth'
-import { canManageCommunity, useCurrentUser } from '@/hooks/use-current-user'
+import { canManageCommunity, isSuperAdmin, useCurrentUser } from '@/hooks/use-current-user'
 
 /** Wraps a page component — redirects to /login if user is not authenticated. */
 export function ProtectedRoute<P extends object>(Component: ComponentType<P>) {
@@ -9,7 +9,13 @@ export function ProtectedRoute<P extends object>(Component: ComponentType<P>) {
     const { data: user, isLoading } = useCurrentUser()
     if (isLoading) return null
     if (!user) return <Redirect to="/login" />
-    if (user.membershipStatus !== "approved" && !canManageCommunity(user.role)) {
+    if (isSuperAdmin(user.role)) {
+      return <Redirect to="/super-admin/dashboard" />
+    }
+    if (user.communityStatus !== "approved") {
+      return <Redirect to="/pending-approval" />
+    }
+    if (user.membershipStatus !== "approved") {
       return <Redirect to="/pending" />
     }
     return <Component {...props} />
@@ -35,7 +41,22 @@ export function AdminRoute<P extends object>(Component: ComponentType<P>) {
     const { data: user, isLoading } = useCurrentUser()
     if (isLoading) return null
     if (!user) return <Redirect to="/login" />
-    if (!canManageCommunity(user?.role)) {
+    if (isSuperAdmin(user.role)) {
+      return <Redirect to="/super-admin/dashboard" />
+    }
+    if (user.communityStatus !== "approved" || user.membershipStatus !== "approved" || !canManageCommunity(user?.role)) {
+      return <Redirect to="/feed" />
+    }
+    return <Component {...props} />
+  }
+}
+
+export function SuperAdminRoute<P extends object>(Component: ComponentType<P>) {
+  return function SuperAdminProtected(props: P) {
+    const { data: user, isLoading } = useCurrentUser()
+    if (isLoading) return null
+    if (!user) return <Redirect to="/login" />
+    if (!isSuperAdmin(user.role)) {
       return <Redirect to="/feed" />
     }
     return <Component {...props} />

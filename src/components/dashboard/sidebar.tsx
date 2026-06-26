@@ -3,6 +3,7 @@ import { useState } from 'react'
 import { Link, useLocation } from 'wouter'
 import { cn } from '@/lib/utils'
 import {
+  Building2,
   Home,
   Users,
   Calendar,
@@ -49,6 +50,8 @@ export function Sidebar() {
   const { data: user } = useCurrentUser()
   const logout = useLogout()
   const profileHref = `/profile/${user?.userId ?? 'me'}`
+  const logoUrl = user?.community?.logoUrl
+  const communityName = user?.community?.name ?? 'Mohalla'
   const visibleNavItems = navItems.filter((item) => item.href !== '/admin' || canManageCommunity(user?.role))
 
   const activeItem =
@@ -58,7 +61,7 @@ export function Sidebar() {
   return (
     <aside
       className={cn(
-        'relative flex h-screen shrink-0 flex-col bg-sidebar text-sidebar-foreground transition-all duration-300 ease-in-out sticky top-0 self-start overflow-hidden',
+        'relative flex h-screen shrink-0 flex-col bg-[var(--community-sidebar)] text-[var(--community-sidebar-foreground)] transition-all duration-300 ease-in-out sticky top-0 self-start overflow-hidden',
         'hidden md:flex',
         collapsed ? 'w-20' : 'w-64'
       )}
@@ -68,18 +71,22 @@ export function Sidebar() {
       <div className="absolute -left-10 bottom-40 h-32 w-32 rounded-full bg-accent/10 blur-2xl" />
 
       {/* Logo Section */}
-      <div className="flex h-16 items-center justify-between border-b border-[#f9b233]/40 bg-[#0b4f49] px-4 text-white shadow-sm">
+      <div className="flex h-16 items-center justify-between border-b border-black/10 bg-[var(--community-banner)] px-4 text-[var(--community-banner-foreground)] shadow-sm">
         <Link href="/" className="flex items-center gap-3">
-          <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-white p-0.5 shadow-sm ring-1 ring-white/70">
-            <img src="/brand/mohalla-mark.svg" alt="" className="h-full w-full rounded-[10px]" />
+          <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-white p-0.5 text-[var(--community-primary)] shadow-sm ring-1 ring-black/10">
+            {logoUrl ? (
+              <img src={logoUrl} alt="" className="h-full w-full rounded-[10px] object-cover" />
+            ) : (
+              <Building2 size={22} />
+            )}
           </span>
           {!collapsed && (
-            <span className="text-xl font-bold tracking-tight text-white">Mohalla</span>
+            <span className="truncate text-xl font-bold tracking-tight">{communityName}</span>
           )}
         </Link>
         <button
           onClick={() => setCollapsed(!collapsed)}
-          className="flex h-8 w-8 items-center justify-center rounded-lg bg-white/12 text-white/85 transition-colors hover:bg-white/20 hover:text-white"
+          className="flex h-8 w-8 items-center justify-center rounded-lg bg-black/5 transition-colors hover:bg-black/10"
         >
           {collapsed ? <ChevronRight size={16} /> : <ChevronLeft size={16} />}
         </button>

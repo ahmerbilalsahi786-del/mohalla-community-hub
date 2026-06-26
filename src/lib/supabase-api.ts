@@ -203,6 +203,12 @@ function getDemoCommunity() {
       area: "Gulberg",
       city: "Lahore",
       logoUrl: null,
+      status: "approved",
+      themePrimaryColor: "#1B5E20",
+      themeSecondaryColor: "#0288D1",
+      themeBackgroundColor: "#FAFDF8",
+      themeBannerColor: "#FFFFFF",
+      themeSidebarColor: "#FFFFFF",
       rules: "Be respectful. Keep posts relevant. Use safety alerts responsibly.",
     };
   }
@@ -223,6 +229,12 @@ function getDemoCommunity() {
     area: "Gulberg",
     city: "Lahore",
     logoUrl: null,
+    status: "approved",
+    themePrimaryColor: "#1B5E20",
+    themeSecondaryColor: "#0288D1",
+    themeBackgroundColor: "#FAFDF8",
+    themeBannerColor: "#FFFFFF",
+    themeSidebarColor: "#FFFFFF",
     rules: "Be respectful. Keep posts relevant. Use safety alerts responsibly.",
   };
 }
@@ -1239,7 +1251,13 @@ async function getCommunity() {
     name: data?.name ?? "Mohalla Community Hub",
     area: data?.description ?? "Neighbourhood",
     city: data?.welcome_message ?? "Karachi",
-    logoUrl: null,
+    logoUrl: data?.logo_url ?? null,
+    status: data?.status ?? "approved",
+    themePrimaryColor: data?.theme_primary_color ?? "#1B5E20",
+    themeSecondaryColor: data?.theme_secondary_color ?? "#0288D1",
+    themeBackgroundColor: data?.theme_background_color ?? "#FAFDF8",
+    themeBannerColor: data?.theme_banner_color ?? "#FFFFFF",
+    themeSidebarColor: data?.theme_sidebar_color ?? "#FFFFFF",
     rules: data?.rules ?? "",
   };
 }
@@ -1255,6 +1273,12 @@ async function updateCommunity(payload: JsonBody) {
       description: payload.area ?? current.area,
       welcome_message: payload.city ?? current.city,
       rules: payload.rules ?? current.rules,
+      logo_url: payload.logoUrl ?? current.logoUrl ?? null,
+      theme_primary_color: payload.themePrimaryColor ?? current.themePrimaryColor ?? "#1B5E20",
+      theme_secondary_color: payload.themeSecondaryColor ?? current.themeSecondaryColor ?? "#0288D1",
+      theme_background_color: payload.themeBackgroundColor ?? current.themeBackgroundColor ?? "#FAFDF8",
+      theme_banner_color: payload.themeBannerColor ?? current.themeBannerColor ?? "#FFFFFF",
+      theme_sidebar_color: payload.themeSidebarColor ?? current.themeSidebarColor ?? "#FFFFFF",
       updated_at: new Date().toISOString(),
     })
     .eq("id", asRowId(current.id))
@@ -1267,7 +1291,13 @@ async function updateCommunity(payload: JsonBody) {
     name: data.name,
     area: data.description ?? "",
     city: data.welcome_message ?? "",
-    logoUrl: payload.logoUrl ?? null,
+    logoUrl: data.logo_url ?? null,
+    status: data.status ?? "approved",
+    themePrimaryColor: data.theme_primary_color ?? "#1B5E20",
+    themeSecondaryColor: data.theme_secondary_color ?? "#0288D1",
+    themeBackgroundColor: data.theme_background_color ?? "#FAFDF8",
+    themeBannerColor: data.theme_banner_color ?? "#FFFFFF",
+    themeSidebarColor: data.theme_sidebar_color ?? "#FFFFFF",
     rules: data.rules ?? "",
   };
 }

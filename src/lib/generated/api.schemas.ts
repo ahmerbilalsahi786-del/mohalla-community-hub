@@ -282,6 +282,12 @@ export interface CommunitySettings {
   area: string;
   city: string;
   logoUrl?: string | null;
+  status?: string;
+  themePrimaryColor?: string | null;
+  themeSecondaryColor?: string | null;
+  themeBackgroundColor?: string | null;
+  themeBannerColor?: string | null;
+  themeSidebarColor?: string | null;
   rules: string;
 }
 
@@ -291,6 +297,11 @@ export interface CommunitySettingsInput {
   area?: string;
   city?: string;
   logoUrl?: string | null;
+  themePrimaryColor?: string | null;
+  themeSecondaryColor?: string | null;
+  themeBackgroundColor?: string | null;
+  themeBannerColor?: string | null;
+  themeSidebarColor?: string | null;
   rules?: string;
 }
 
