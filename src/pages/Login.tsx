@@ -58,8 +58,12 @@ export default function Login() {
 
       setToken(data.session.access_token)
       navigate(isPlatformOwner ? "/super-admin/dashboard" : accountType === "admin" ? "/admin" : "/")
-    } catch {
-      toast({ title: 'Cannot connect to Supabase. Check your project keys.', variant: 'destructive' })
+    } catch (error) {
+      toast({
+        title: 'Login failed',
+        description: error instanceof Error ? error.message : 'Cannot connect to Supabase. Check your project keys.',
+        variant: 'destructive',
+      })
     } finally {
       setLoading(false)
     }

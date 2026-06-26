@@ -36,3 +36,11 @@ test("production migration protects membership and upload ownership", async () =
   assert.match(migration, /admin_manage_member/i);
   assert.match(migration, /delete_my_account/i);
 });
+
+test("community approval guard allows signup requester linking", async () => {
+  const migration = await read("supabase/migrations/20260627090000_fix_signup_community_guard.sql");
+  assert.match(migration, /signup_requester_link/i);
+  assert.match(migration, /old\.requested_by_user_id is null/i);
+  assert.match(migration, /new\.requested_by_user_id is not null/i);
+  assert.match(migration, /Only the platform owner can change community approval status/i);
+});

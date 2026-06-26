@@ -92,8 +92,12 @@ export default function Register() {
 
       toast({ title: 'Account created. Check your email to confirm before signing in.' })
       navigate('/login')
-    } catch {
-      toast({ title: 'Cannot connect to Supabase. Check your project keys.', variant: 'destructive' })
+    } catch (error) {
+      toast({
+        title: 'Registration failed',
+        description: error instanceof Error ? error.message : 'Cannot connect to Supabase. Check your project keys.',
+        variant: 'destructive',
+      })
     } finally {
       setLoading(false)
     }
