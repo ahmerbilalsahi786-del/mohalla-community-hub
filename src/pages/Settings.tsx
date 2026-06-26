@@ -306,9 +306,10 @@ export default function Settings() {
             <Section title="Invite Neighbors">
               <div className="p-5">
                 <InviteTools
-                  communityName="Mohalla Community"
-                  area="DHA Phase 5"
-                  city="Karachi"
+                  communityName={user?.community?.name ?? "Mohalla Community"}
+                  communityId={user?.community?.id}
+                  area={user?.community?.area ?? "DHA Phase 5"}
+                  city={user?.community?.city ?? "Karachi"}
                   title="Invite to Your Community"
                   description="Generate a shareable invite link or open a ready-made WhatsApp invitation."
                 />

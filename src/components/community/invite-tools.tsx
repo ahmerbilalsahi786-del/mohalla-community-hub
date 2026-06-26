@@ -6,6 +6,7 @@ import { Copy, Link2, MessageCircle, Share2 } from 'lucide-react'
 
 type InviteToolsProps = {
   communityName: string
+  communityId?: string | number | null
   area?: string
   city?: string
   editableMessage?: boolean
@@ -30,6 +31,7 @@ function buildDefaultMessage(communityName: string, area?: string, city?: string
 
 export function InviteTools({
   communityName,
+  communityId,
   area,
   city,
   editableMessage = false,
@@ -51,7 +53,11 @@ export function InviteTools({
   }, [communityName, area, city])
 
   const inviteSlug = slugify(communityName || 'mohalla-community')
-  const inviteUrl = `${origin || 'http://127.0.0.1:4173'}/register?community=default&invite=${inviteSlug}`
+  const baseUrl = origin || 'http://127.0.0.1:4173'
+  const communityParam = encodeURIComponent(communityName || 'Mohalla Community')
+  const inviteUrl = communityId
+    ? `${baseUrl}/register?join=${encodeURIComponent(String(communityId))}&community=${communityParam}`
+    : `${baseUrl}/register?community=${communityParam}&invite=${inviteSlug}`
   const whatsappText = `${message}\n\nJoin here: ${inviteUrl}`
   const whatsappUrl = `https://wa.me/?text=${encodeURIComponent(whatsappText)}`
 

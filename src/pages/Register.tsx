@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { Link, useLocation } from 'wouter'
-import { Building2, Eye, EyeOff, UserPlus } from 'lucide-react'
+import { Building2, Eye, EyeOff, UserPlus, Users } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { setToken } from '@/lib/auth'
@@ -17,6 +17,10 @@ function emailRedirectTo() {
 export default function Register() {
   const [, navigate] = useLocation()
   const { toast } = useToast()
+  const joinParams = new URLSearchParams(typeof window !== 'undefined' ? window.location.search : '')
+  const joinCommunityId = joinParams.get('join')?.trim() ?? ''
+  const invitedCommunityName = joinParams.get('community')?.trim() ?? ''
+  const isMemberInvite = joinCommunityId.length > 0
   const [form, setForm] = useState({
     email: '',
     password: '',
@@ -50,10 +54,10 @@ export default function Register() {
       if (form.password !== form.confirmPassword) {
         nextErrors.confirmPassword = ['Passwords do not match']
       }
-      if (!form.communityName.trim()) {
+      if (!isMemberInvite && !form.communityName.trim()) {
         nextErrors.communityName = ['Society name is required']
       }
-      if (!form.communityCity.trim()) {
+      if (!isMemberInvite && !form.communityCity.trim()) {
         nextErrors.communityCity = ['City is required']
       }
       if (Object.keys(nextErrors).length > 0) {
@@ -61,12 +65,16 @@ export default function Register() {
         return
       }
 
-      const { data, error } = await supabase.auth.signUp({
-        email: form.email,
-        password: form.password,
-        options: {
-          emailRedirectTo: emailRedirectTo(),
-          data: {
+      const registrationData = isMemberInvite
+        ? {
+            username: form.userId,
+            full_name: form.name,
+            name: form.name,
+            unit_number: form.unitNumber,
+            registration_type: 'member',
+            join_community_id: joinCommunityId,
+          }
+        : {
             username: form.userId,
             full_name: form.name,
             name: form.name,
@@ -75,7 +83,14 @@ export default function Register() {
             community_name: form.communityName,
             community_area: form.communityArea,
             community_city: form.communityCity,
-          },
+          }
+
+      const { data, error } = await supabase.auth.signUp({
+        email: form.email,
+        password: form.password,
+        options: {
+          emailRedirectTo: emailRedirectTo(),
+          data: registrationData,
         },
       })
 
@@ -90,7 +105,11 @@ export default function Register() {
         return
       }
 
-      toast({ title: 'Account created. Check your email to confirm before signing in.' })
+      toast({
+        title: isMemberInvite
+          ? 'Join request created. Check your email to confirm before signing in.'
+          : 'Account created. Check your email to confirm before signing in.',
+      })
       navigate('/login')
     } catch (error) {
       toast({
@@ -130,22 +149,40 @@ export default function Register() {
           <div className="mx-auto mb-3 flex h-14 w-14 items-center justify-center rounded-2xl bg-primary">
             <span className="text-2xl font-bold text-primary-foreground">م</span>
           </div>
-          <h1 className="text-2xl font-bold text-foreground">Join your Mohalla</h1>
-          <p className="text-sm text-muted-foreground mt-1">Register your society for approval</p>
+          <h1 className="text-2xl font-bold text-foreground">
+            {isMemberInvite ? `Join ${invitedCommunityName || 'this Mohalla'}` : 'Join your Mohalla'}
+          </h1>
+          <p className="text-sm text-muted-foreground mt-1">
+            {isMemberInvite ? 'Create your resident account for admin approval' : 'Register your society for approval'}
+          </p>
         </div>
 
         <form onSubmit={submit} className="space-y-4">
-          <div className="rounded-xl border border-border bg-card p-4">
-            <div className="mb-3 flex items-center gap-2 text-sm font-semibold text-foreground">
-              <Building2 size={16} className="text-primary" />
-              Society details
+          {isMemberInvite ? (
+            <div className="rounded-xl border border-border bg-card p-4">
+              <div className="flex items-center gap-3">
+                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary/10">
+                  <Users size={18} className="text-primary" />
+                </div>
+                <div>
+                  <p className="text-sm font-semibold text-foreground">Resident join request</p>
+                  <p className="text-xs text-muted-foreground">{invitedCommunityName || 'Invited community'}</p>
+                </div>
+              </div>
             </div>
-            <div className="space-y-3">
-              {field('communityName', 'Society name', 'text', 'DHA Phase 5 Residents')}
-              {field('communityArea', 'Area', 'text', 'DHA Phase 5')}
-              {field('communityCity', 'City', 'text', 'Karachi')}
+          ) : (
+            <div className="rounded-xl border border-border bg-card p-4">
+              <div className="mb-3 flex items-center gap-2 text-sm font-semibold text-foreground">
+                <Building2 size={16} className="text-primary" />
+                Society details
+              </div>
+              <div className="space-y-3">
+                {field('communityName', 'Society name', 'text', 'DHA Phase 5 Residents')}
+                {field('communityArea', 'Area', 'text', 'DHA Phase 5')}
+                {field('communityCity', 'City', 'text', 'Karachi')}
+              </div>
             </div>
-          </div>
+          )}
 
           {field('name', 'Full name', 'text', 'Ahmed Khan')}
           {field('email', 'Email', 'email', 'you@example.com')}
@@ -205,7 +242,7 @@ export default function Register() {
           </div>
 
           <Button type="submit" disabled={loading} className="w-full rounded-xl bg-primary">
-            {loading ? 'Creating account…' : <><UserPlus size={16} className="mr-2" /> Create account</>}
+            {loading ? 'Creating account…' : <><UserPlus size={16} className="mr-2" /> {isMemberInvite ? 'Request to join' : 'Create account'}</>}
           </Button>
         </form>
 

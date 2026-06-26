@@ -182,6 +182,7 @@ export default function AdminCommunity() {
 
         <InviteTools
           communityName={name || 'Mohalla Community'}
+          communityId={(settings as any)?.id}
           area={area}
           city={city}
           editableMessage

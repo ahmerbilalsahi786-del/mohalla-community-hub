@@ -44,3 +44,19 @@ test("community approval guard allows signup requester linking", async () => {
   assert.match(migration, /new\.requested_by_user_id is not null/i);
   assert.match(migration, /Only the platform owner can change community approval status/i);
 });
+
+test("member invite signup joins an approved existing community", async () => {
+  const migration = await read("supabase/migrations/20260627100000_member_invite_join_flow.sql");
+  assert.match(migration, /registration_type = 'member'/i);
+  assert.match(migration, /join_community_id/i);
+  assert.match(migration, /status = 'approved'/i);
+  assert.match(migration, /'user'::public\.app_role/i);
+
+  const register = await read("src/pages/Register.tsx");
+  assert.match(register, /registration_type: 'member'/i);
+  assert.match(register, /join_community_id: joinCommunityId/i);
+  assert.match(register, /registration_type: 'community_admin'/i);
+
+  const inviteTools = await read("src/components/community/invite-tools.tsx");
+  assert.match(inviteTools, /\/register\?join=/i);
+});
