@@ -32,7 +32,7 @@ const STEPS = [
     icon: LayoutDashboard,
     title: 'Explore the community',
     description: 'Check upcoming events, active polls, and the marketplace.',
-    href: '/',
+    href: '/dashboard',
     cta: 'Go to Dashboard',
     color: 'text-green-600',
     bg: 'bg-green-500/10',

@@ -6,7 +6,7 @@ import { InstallAppButton } from '@/components/pwa/install-app'
 import { canManageCommunity, useCurrentUser, useLogout } from '@/hooks/use-current-user'
 
 const NAV = [
-  { label: 'Home',    icon: Home,          href: '/' },
+  { label: 'Home',    icon: Home,          href: '/dashboard' },
   { label: 'Feed',    icon: MessageSquare, href: '/feed' },
   { label: 'Market',  icon: ShoppingBag,   href: '/marketplace' },
   { label: 'Safety',  icon: ShieldAlert,   href: '/safety' },

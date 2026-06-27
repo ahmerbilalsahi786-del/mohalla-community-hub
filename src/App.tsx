@@ -14,6 +14,7 @@ import { useCurrentUser } from "@/hooks/use-current-user";
 import { useCommunityTheme } from "@/lib/theme";
 
 const NotFound = lazy(() => import("@/pages/not-found"));
+const Landing = lazy(() => import("@/pages/Landing"));
 const Dashboard = lazy(() => import("@/pages/Dashboard"));
 const Feed = lazy(() => import("@/pages/Feed"));
 const Marketplace = lazy(() => import("@/pages/Marketplace"));
@@ -27,6 +28,7 @@ const AdminMembers = lazy(() => import("@/pages/admin/Members"));
 const AdminPosts = lazy(() => import("@/pages/admin/Posts"));
 const AdminCommunity = lazy(() => import("@/pages/admin/Community"));
 const AdminBranding = lazy(() => import("@/pages/admin/Branding"));
+const AdminContacts = lazy(() => import("@/pages/admin/Contacts"));
 const AdminAnnouncements = lazy(() => import("@/pages/admin/Announcements"));
 const AdminModeration = lazy(() => import("@/pages/admin/Moderation"));
 const SuperAdminDashboard = lazy(() => import("@/pages/super-admin/Dashboard"));
@@ -85,6 +87,7 @@ const AAdminMembers       = AdminRoute(AdminMembers);
 const AAdminPosts         = AdminRoute(AdminPosts);
 const AAdminCommunity     = AdminRoute(AdminCommunity);
 const AAdminBranding      = AdminRoute(AdminBranding);
+const AAdminContacts      = AdminRoute(AdminContacts);
 const AAdminAnnouncements = AdminRoute(AdminAnnouncements);
 const AAdminModeration    = AdminRoute(AdminModeration);
 const SAdminDashboard     = SuperAdminRoute(SuperAdminDashboard);
@@ -102,9 +105,10 @@ function Router() {
       <Route path="/pending-approval" component={PMembershipPending} />
       <Route path="/privacy" component={Privacy} />
       <Route path="/terms" component={Terms} />
+      <Route path="/" component={Landing} />
 
       {/* Protected routes */}
-      <Route path="/" component={PDashboard} />
+      <Route path="/dashboard" component={PDashboard} />
       <Route path="/feed" component={PFeed} />
       <Route path="/marketplace" component={PMarketplace} />
       <Route path="/marketplace/:id" component={PMarketplaceListing} />
@@ -126,6 +130,7 @@ function Router() {
       <Route path="/admin/posts" component={AAdminPosts} />
       <Route path="/admin/community" component={AAdminCommunity} />
       <Route path="/admin/branding" component={AAdminBranding} />
+      <Route path="/admin/contacts" component={AAdminContacts} />
       <Route path="/admin/announcements" component={AAdminAnnouncements} />
       <Route path="/admin/moderation" component={AAdminModeration} />
 
@@ -145,6 +150,7 @@ function AppChrome() {
   const { data: user } = useCurrentUser();
   useCommunityTheme(user?.community);
   const isPublicAuth = location === "/login" || location === "/register" || location === "/reset-password" || location === "/pending" || location === "/pending-approval";
+  const isLanding = location === "/";
   const isPlatformArea = location.startsWith("/super-admin");
 
   return (
@@ -152,8 +158,8 @@ function AppChrome() {
       <Suspense fallback={<div className="flex min-h-screen items-center justify-center bg-background text-sm text-muted-foreground">Loading Mohalla...</div>}>
         <Router />
       </Suspense>
-      {isPublicAuth && <InstallAppButton variant="floating" />}
-      {!isPublicAuth && !isPlatformArea && (
+      {(isPublicAuth || isLanding) && <InstallAppButton variant="floating" />}
+      {!isPublicAuth && !isLanding && !isPlatformArea && (
         <>
           <MobileNav />
           <CommunityRulesModal />

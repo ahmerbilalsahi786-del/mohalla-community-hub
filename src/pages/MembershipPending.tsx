@@ -38,13 +38,13 @@ export default function MembershipPending() {
     await supabase.auth.refreshSession();
     const result = await refetch();
     if (result.data?.communityStatus === "approved" && result.data?.membershipStatus === "approved") {
-      navigate("/");
+      navigate("/dashboard");
     }
   };
 
   useEffect(() => {
     if (user?.communityStatus === "approved" && user?.membershipStatus === "approved") {
-      navigate("/");
+      navigate("/dashboard");
       return;
     }
 

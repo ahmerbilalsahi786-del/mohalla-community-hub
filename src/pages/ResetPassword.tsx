@@ -33,7 +33,7 @@ export default function ResetPassword() {
       return;
     }
     toast({ title: "Password updated." });
-    navigate("/");
+    navigate("/dashboard");
   };
 
   return (

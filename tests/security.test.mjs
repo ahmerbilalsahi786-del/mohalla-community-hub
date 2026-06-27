@@ -139,7 +139,7 @@ test("admin access and member management are scoped to trusted manager state", a
   const pending = await read("src/pages/MembershipPending.tsx");
   assert.match(pending, /refreshSession/);
   assert.match(pending, /refetch\(\)/);
-  assert.match(pending, /navigate\("\/"\)/);
+  assert.match(pending, /navigate\("\/dashboard"\)/);
 
   const registerPage = await read("src/pages/Register.tsx");
   assert.doesNotMatch(registerPage, /resendSignupConfirmation/);

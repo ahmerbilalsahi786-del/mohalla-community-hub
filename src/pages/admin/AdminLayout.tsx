@@ -1,7 +1,7 @@
 import { Link, useLocation } from 'wouter'
 import { Sidebar } from '@/components/dashboard/sidebar'
 import { TopNavbar } from '@/components/dashboard/top-navbar'
-import { Users, FileText, Building2, Megaphone, ShieldCheck, Flag, Palette } from 'lucide-react'
+import { Users, FileText, Building2, Megaphone, ShieldCheck, Flag, Palette, Phone } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { useQuery } from '@tanstack/react-query'
 import { supabase } from '@/integrations/supabase/client'
@@ -12,6 +12,7 @@ const TABS = [
   { label: 'Posts',         href: '/admin/posts',         icon: FileText },
   { label: 'Community',     href: '/admin/community',     icon: Building2 },
   { label: 'Branding',      href: '/admin/branding',      icon: Palette },
+  { label: 'Contacts',      href: '/admin/contacts',      icon: Phone },
   { label: 'Announcements', href: '/admin/announcements', icon: Megaphone },
   { label: 'Moderation',    href: '/admin/moderation',    icon: Flag },
 ]

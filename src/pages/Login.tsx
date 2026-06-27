@@ -26,7 +26,7 @@ export default function Login() {
 
   const enterDemo = () => {
     setDemoToken()
-    navigate('/')
+    navigate('/dashboard')
   }
 
   const submit = async (e: React.FormEvent) => {
@@ -95,7 +95,7 @@ export default function Login() {
         }
       }
 
-      navigate(isPlatformOwner ? "/super-admin/dashboard" : accountType === "admin" ? "/admin" : "/")
+      navigate(isPlatformOwner ? "/super-admin/dashboard" : accountType === "admin" ? "/admin" : "/dashboard")
     } catch (error) {
       toast({
         title: 'Login failed',

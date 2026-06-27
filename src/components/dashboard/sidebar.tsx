@@ -26,7 +26,7 @@ import { InstallAppButton } from '@/components/pwa/install-app'
 import { canManageCommunity, useCurrentUser, useLogout } from '@/hooks/use-current-user'
 
 const navItems = [
-  { name: 'Dashboard', icon: Home, href: '/', badge: null },
+  { name: 'Dashboard', icon: Home, href: '/dashboard', badge: null },
   { name: 'Community Feed', icon: MessageSquare, href: '/feed', badge: null },
   { name: 'Safety & Alerts', icon: ShieldAlert, href: '/safety', badge: null },
   { name: 'Events', icon: Calendar, href: '/events', badge: null },
@@ -55,7 +55,7 @@ export function Sidebar() {
   const visibleNavItems = navItems.filter((item) => item.href !== '/admin' || canManageCommunity(user?.role))
 
   const activeItem =
-    [...visibleNavItems, ...bottomItems].find((i) => location === i.href || (i.href !== '/' && location.startsWith(i.href)))?.name ??
+    [...visibleNavItems, ...bottomItems].find((i) => location === i.href || location.startsWith(`${i.href}/`))?.name ??
     'Dashboard'
 
   return (
@@ -72,7 +72,7 @@ export function Sidebar() {
 
       {/* Logo Section */}
       <div className="flex h-16 items-center justify-between border-b border-black/10 bg-[var(--community-banner)] px-4 text-[var(--community-banner-foreground)] shadow-sm">
-        <Link href="/" className="flex items-center gap-3">
+        <Link href="/dashboard" className="flex items-center gap-3">
           <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-white p-0.5 text-[var(--community-primary)] shadow-sm ring-1 ring-black/10">
             {logoUrl ? (
               <img src={logoUrl} alt="" className="h-full w-full rounded-[10px] object-cover" />
