@@ -3,7 +3,9 @@ import { Sidebar } from '@/components/dashboard/sidebar'
 import { TopNavbar } from '@/components/dashboard/top-navbar'
 import { Users, FileText, Building2, Megaphone, ShieldCheck, Flag, Palette } from 'lucide-react'
 import { cn } from '@/lib/utils'
-import { useAdminListMembers } from '@/lib/generated/api'
+import { useQuery } from '@tanstack/react-query'
+import { supabase } from '@/integrations/supabase/client'
+import { useCurrentUser } from '@/hooks/use-current-user'
 
 const TABS = [
   { label: 'Members',       href: '/admin/members',       icon: Users },
@@ -16,7 +18,22 @@ const TABS = [
 
 export function AdminLayout({ children }: { children: React.ReactNode }) {
   const [location] = useLocation()
-  const { data: pending = [] } = useAdminListMembers({ communityId: 'default', status: 'pending' })
+  const { data: user } = useCurrentUser()
+  const communityId = user?.community?.id
+  const { data: pendingCount = 0 } = useQuery({
+    queryKey: ['admin-members-pending-count', communityId],
+    queryFn: async () => {
+      if (!communityId) return 0
+      const { count, error } = await supabase
+        .from('profiles')
+        .select('id', { count: 'exact', head: true })
+        .eq('community_id', communityId)
+        .eq('membership_status', 'pending')
+      if (error) throw error
+      return count ?? 0
+    },
+    enabled: Boolean(communityId),
+  })
 
   return (
     <div className="flex min-h-screen bg-background">
@@ -42,7 +59,7 @@ export function AdminLayout({ children }: { children: React.ReactNode }) {
             {TABS.map((tab) => {
               const Icon = tab.icon
               const active = location === tab.href
-              const isPending = tab.href === '/admin/members' && (pending as any[]).length > 0
+              const isPending = tab.href === '/admin/members' && pendingCount > 0
               return (
                 <Link key={tab.href} href={tab.href}>
                   <div className={cn(
@@ -55,7 +72,7 @@ export function AdminLayout({ children }: { children: React.ReactNode }) {
                     {tab.label}
                     {isPending && (
                       <span className="flex h-4 w-4 items-center justify-center rounded-full bg-red-500 text-[10px] font-bold text-white">
-                        {(pending as any[]).length}
+                        {pendingCount}
                       </span>
                     )}
                   </div>

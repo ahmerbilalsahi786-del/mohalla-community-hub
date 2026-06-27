@@ -88,4 +88,13 @@ test("admin access and member management are scoped to trusted manager state", a
   assert.match(api, /eq\("community_id", communityId\)/);
   assert.match(api, /\/api\/admin\/members" && method === "GET"\) return listAdminMembers/);
   assert.match(api, /\/api\/community\/members" && method === "GET"\) return listCommunityMembers/);
+
+  const adminMembers = await read("src/pages/admin/Members.tsx");
+  assert.match(adminMembers, /loadAdminMembers/);
+  assert.match(adminMembers, /\.eq\('community_id', communityId\)/);
+  assert.match(adminMembers, /queryKey: \['admin-members', communityId\]/);
+
+  const adminLayout = await read("src/pages/admin/AdminLayout.tsx");
+  assert.match(adminLayout, /admin-members-pending-count/);
+  assert.match(adminLayout, /\.eq\('membership_status', 'pending'\)/);
 });

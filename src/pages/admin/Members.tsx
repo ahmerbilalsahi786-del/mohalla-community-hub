@@ -1,15 +1,16 @@
 import { useState } from 'react'
 import { AdminLayout } from './AdminLayout'
 import {
-  useAdminListMembers, useAdminApproveMember, useAdminRejectMember,
+  useAdminApproveMember, useAdminRejectMember,
   useAdminDeleteMember, useAdminVerifyMember, useAdminSetMemberRole,
-  getAdminListMembersQueryKey,
 } from '@/lib/generated/api'
-import { useQueryClient } from '@tanstack/react-query'
+import { useQuery, useQueryClient } from '@tanstack/react-query'
 import {
-  CheckCircle2, XCircle, Trash2, BadgeCheck, ChevronDown, UserCheck, Clock, Users
+  CheckCircle2, XCircle, Trash2, BadgeCheck, ChevronDown, Clock, Users
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
+import { supabase } from '@/integrations/supabase/client'
+import { useCurrentUser } from '@/hooks/use-current-user'
 
 type Member = {
   id: number; userId: string; name: string; unitNumber: string; phone: string;
@@ -24,6 +25,41 @@ const ROLE_COLORS: Record<string, string> = {
   user:      'bg-muted text-muted-foreground',
 }
 
+function rowId(value: string) {
+  return value as unknown as number
+}
+
+function memberName(profile: any) {
+  return profile.display_name ?? profile.full_name ?? profile.email?.split('@')[0] ?? 'Resident'
+}
+
+function toMember(profile: any): Member {
+  return {
+    id: rowId(profile.id),
+    userId: profile.id,
+    name: memberName(profile),
+    unitNumber: profile.unit_number ?? '',
+    phone: profile.private_profiles?.phone ?? profile.private_profiles?.whatsapp_number ?? '',
+    status: profile.membership_status ?? (profile.is_verified ? 'approved' : 'pending'),
+    role: profile.user_roles?.[0]?.role ?? 'user',
+    isVerified: Boolean(profile.is_verified),
+    joinDate: profile.created_at ?? new Date().toISOString(),
+    communityId: profile.community_id ?? 'default',
+  }
+}
+
+async function loadAdminMembers(communityId?: string | null) {
+  if (!communityId) return []
+  const { data, error } = await (supabase as any)
+    .from('profiles')
+    .select('*, private_profiles(phone, whatsapp_number), user_roles(role)')
+    .eq('community_id', communityId)
+    .order('created_at', { ascending: false })
+
+  if (error) throw error
+  return (data ?? []).map(toMember)
+}
+
 function timeAgo(d: string) {
   const diff = Math.floor((Date.now() - new Date(d).getTime()) / 86400000)
   if (diff === 0) return 'Today'
@@ -33,7 +69,7 @@ function timeAgo(d: string) {
 
 function MemberRow({ member, refetch }: { member: Member; refetch: () => void }) {
   const qc = useQueryClient()
-  const inv = () => { qc.invalidateQueries({ queryKey: getAdminListMembersQueryKey() }); refetch() }
+  const inv = () => { qc.invalidateQueries({ queryKey: ['admin-members'] }); refetch() }
 
   const approve = useAdminApproveMember({ mutation: { onSuccess: inv } })
   const reject  = useAdminRejectMember({ mutation: { onSuccess: inv } })
@@ -139,16 +175,21 @@ function MemberRow({ member, refetch }: { member: Member; refetch: () => void })
 
 export default function AdminMembers() {
   const [tab, setTab] = useState<'all' | 'pending' | 'approved' | 'rejected'>('all')
-  const qc = useQueryClient()
+  const { data: user } = useCurrentUser()
+  const communityId = user?.community?.id
 
-  const params = tab === 'all' ? { communityId: 'default' } : { communityId: 'default', status: tab }
-  const { data: members = [], isLoading, refetch } = useAdminListMembers(params)
+  const { data: allMembers = [], isLoading, refetch, error } = useQuery<Member[], Error>({
+    queryKey: ['admin-members', communityId],
+    queryFn: () => loadAdminMembers(communityId),
+    enabled: Boolean(communityId),
+  })
+  const members = tab === 'all' ? allMembers : allMembers.filter((member: Member) => member.status === tab)
 
   const counts = {
-    all:      (members as Member[]).length,
-    pending:  (members as Member[]).filter(m => m.status === 'pending').length,
-    approved: (members as Member[]).filter(m => m.status === 'approved').length,
-    rejected: (members as Member[]).filter(m => m.status === 'rejected').length,
+    all:      allMembers.length,
+    pending:  allMembers.filter((m: Member) => m.status === 'pending').length,
+    approved: allMembers.filter((m: Member) => m.status === 'approved').length,
+    rejected: allMembers.filter((m: Member) => m.status === 'rejected').length,
   }
 
   const TAB_LABELS: Record<string, string> = { all: 'All', pending: 'Pending', approved: 'Approved', rejected: 'Rejected' }
@@ -189,7 +230,17 @@ export default function AdminMembers() {
             <div className="space-y-3 p-6">
               {[1,2,3,4].map(i => <div key={i} className="h-12 rounded-xl bg-muted animate-pulse" />)}
             </div>
-          ) : (members as Member[]).length === 0 ? (
+          ) : error ? (
+            <div className="flex flex-col items-center justify-center py-16 text-center">
+              <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-red-500/10 mb-3">
+                <XCircle size={24} className="text-red-500" />
+              </div>
+              <p className="font-medium text-foreground">Could not load members</p>
+              <p className="max-w-md text-sm text-muted-foreground mt-1">
+                {error instanceof Error ? error.message : 'Please refresh and try again.'}
+              </p>
+            </div>
+          ) : members.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-16 text-center">
               <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-muted mb-3">
                 <Users size={24} className="text-muted-foreground" />
@@ -214,7 +265,7 @@ export default function AdminMembers() {
                   </tr>
                 </thead>
                 <tbody>
-                  {(members as Member[]).map(m => (
+                  {members.map((m: Member) => (
                     <MemberRow key={m.id} member={m} refetch={refetch} />
                   ))}
                 </tbody>
