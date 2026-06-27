@@ -7,6 +7,7 @@ import { setToken } from '@/lib/auth'
 import { useToast } from '@/hooks/use-toast'
 import { supabase } from '@/integrations/supabase/client'
 import { resendSignupConfirmation, shouldResendSignupConfirmation } from '@/lib/auth-email'
+import { inviteLoginPath, requestMemberJoin } from '@/lib/member-join'
 
 function emailRedirectTo() {
   const configuredUrl = import.meta.env.VITE_APP_URL?.trim()
@@ -40,6 +41,50 @@ export default function Register() {
 
   const set = (k: string) => (e: React.ChangeEvent<HTMLInputElement>) =>
     setForm(f => ({ ...f, [k]: e.target.value }))
+
+  const requestInviteForSignedInMember = async () => {
+    await requestMemberJoin(joinCommunityId, {
+      username: form.userId,
+      fullName: form.name,
+      unitNumber: form.unitNumber,
+    })
+    toast({
+      title: 'Join request submitted',
+      description: 'Your community administrator can now review your request.',
+    })
+    navigate('/pending-approval')
+  }
+
+  const signInExistingInviteMember = async () => {
+    const { data, error } = await supabase.auth.signInWithPassword({
+      email: form.email,
+      password: form.password,
+    })
+
+    if (error || !data.session?.access_token) {
+      if (shouldResendSignupConfirmation(error?.message)) {
+        await resendSignupConfirmation(form.email, emailRedirectTo())
+        toast({
+          title: 'Confirmation email sent',
+          description: 'Confirm your email, then sign in from the invite link to request access.',
+        })
+        navigate(inviteLoginPath(joinCommunityId, invitedCommunityName))
+        return true
+      }
+
+      toast({
+        title: 'Account already exists',
+        description: 'Sign in with this account to request joining this community.',
+        variant: 'destructive',
+      })
+      navigate(inviteLoginPath(joinCommunityId, invitedCommunityName))
+      return true
+    }
+
+    setToken(data.session.access_token)
+    await requestInviteForSignedInMember()
+    return true
+  }
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -97,6 +142,10 @@ export default function Register() {
       })
 
       if (error) {
+        if (isMemberInvite && shouldResendSignupConfirmation(error.message)) {
+          await signInExistingInviteMember()
+          return
+        }
         if (shouldResendSignupConfirmation(error.message)) {
           try {
             await resendSignupConfirmation(form.email, emailRedirectTo())
@@ -120,7 +169,16 @@ export default function Register() {
 
       if (data.session?.access_token) {
         setToken(data.session.access_token)
+        if (isMemberInvite) {
+          await requestInviteForSignedInMember()
+          return
+        }
         navigate('/pending-approval')
+        return
+      }
+
+      if (isMemberInvite && data.user && Array.isArray(data.user.identities) && data.user.identities.length === 0) {
+        await signInExistingInviteMember()
         return
       }
 
@@ -295,7 +353,7 @@ export default function Register() {
 
         <p className="mt-5 text-center text-sm text-muted-foreground">
           Already have an account?{' '}
-          <Link href="/login" className="font-semibold text-primary hover:underline">
+          <Link href={isMemberInvite ? inviteLoginPath(joinCommunityId, invitedCommunityName) : "/login"} className="font-semibold text-primary hover:underline">
             Sign in
           </Link>
         </p>

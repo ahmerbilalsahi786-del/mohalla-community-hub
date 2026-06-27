@@ -71,6 +71,34 @@ test("member invite repair migration recovers existing misplaced pending profile
   assert.match(migration, /select public\.repair_member_invite_profiles\(\)/i);
 });
 
+test("existing members can re-apply through invite links", async () => {
+  const migration = await read("supabase/migrations/20260627123000_member_join_request_rpc.sql");
+  assert.match(migration, /create or replace function public\.request_member_join/);
+  assert.match(migration, /auth\.uid\(\)/);
+  assert.match(migration, /membership_status = 'pending'/);
+  assert.match(migration, /is_verified = false/);
+  assert.match(migration, /grant execute on function public\.request_member_join\(uuid, text, text, text\) to authenticated/);
+  assert.match(migration, /create or replace function public\.my_member_status/);
+  assert.match(migration, /grant execute on function public\.my_member_status\(\) to authenticated/);
+
+  const joinHelper = await read("src/lib/member-join.ts");
+  assert.match(joinHelper, /request_member_join/);
+  assert.match(joinHelper, /inviteLoginPath/);
+  assert.match(joinHelper, /inviteRegisterPath/);
+
+  const register = await read("src/pages/Register.tsx");
+  assert.match(register, /signInExistingInviteMember/);
+  assert.match(register, /requestInviteForSignedInMember/);
+  assert.match(register, /inviteLoginPath\(joinCommunityId, invitedCommunityName\)/);
+
+  const login = await read("src/pages/Login.tsx");
+  assert.match(login, /requestMemberJoin\(joinCommunityId\)/);
+
+  const currentUser = await read("src/hooks/use-current-user.ts");
+  assert.match(currentUser, /my_member_status/);
+  assert.match(currentUser, /profileCommunityId/);
+});
+
 test("admin access and member management are scoped to trusted manager state", async () => {
   const currentUser = await read("src/hooks/use-current-user.ts");
   assert.match(currentUser, /queryKey: \["current-user", token\]/);

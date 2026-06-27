@@ -8,11 +8,16 @@ import { setDemoToken, setToken } from '@/lib/auth'
 import { useToast } from '@/hooks/use-toast'
 import { supabase } from '@/integrations/supabase/client'
 import { resendSignupConfirmation, shouldResendSignupConfirmation } from '@/lib/auth-email'
+import { inviteRegisterPath, requestMemberJoin } from '@/lib/member-join'
 
 export default function Login() {
   const [, navigate] = useLocation()
   const queryClient = useQueryClient()
   const { toast } = useToast()
+  const joinParams = new URLSearchParams(typeof window !== 'undefined' ? window.location.search : '')
+  const joinCommunityId = joinParams.get('join')?.trim() ?? ''
+  const invitedCommunityName = joinParams.get('community')?.trim() ?? ''
+  const hasMemberInvite = joinCommunityId.length > 0
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [showPw, setShowPw] = useState(false)
@@ -88,6 +93,25 @@ export default function Login() {
 
       setToken(data.session.access_token)
       queryClient.clear()
+
+      if (hasMemberInvite && accountType === "member") {
+        try {
+          await requestMemberJoin(joinCommunityId)
+          toast({
+            title: 'Join request submitted',
+            description: 'Your community administrator can now review your request.',
+          })
+          navigate("/pending-approval")
+          return
+        } catch (joinError) {
+          toast({
+            title: 'Could not submit join request',
+            description: joinError instanceof Error ? joinError.message : 'Please ask the admin for a fresh invite link.',
+            variant: 'destructive',
+          })
+        }
+      }
+
       navigate(isPlatformOwner ? "/super-admin/dashboard" : accountType === "admin" ? "/admin" : "/")
     } catch (error) {
       toast({
@@ -204,7 +228,7 @@ export default function Login() {
 
         <p className="mt-5 text-center text-sm text-muted-foreground">
           Don't have an account?{' '}
-          <Link href="/register" className="font-semibold text-primary hover:underline">
+          <Link href={hasMemberInvite ? inviteRegisterPath(joinCommunityId, invitedCommunityName) : "/register"} className="font-semibold text-primary hover:underline">
             Register
           </Link>
         </p>

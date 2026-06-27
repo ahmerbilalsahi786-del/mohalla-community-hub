@@ -62,15 +62,37 @@ async function loadCurrentUser(): Promise<CurrentUser | null> {
     return null;
   }
 
-  const [{ data: profile }, { data: roles }] = await Promise.all([
+  const [{ data: profile }, { data: roles }, { data: memberStatus }] = await Promise.all([
     supabase.from("profiles").select("*").eq("id", user.id).maybeSingle(),
     supabase.from("user_roles").select("role").eq("user_id", user.id),
+    (supabase as any).rpc("my_member_status").maybeSingle(),
   ]);
 
   const typedProfile = profile as any;
-  const { data: community } = typedProfile?.community_id
-    ? await (supabase as any).from("community_settings").select("*").eq("id", typedProfile.community_id).maybeSingle()
+  const typedStatus = memberStatus as any;
+  const profileCommunityId = typedStatus?.community_id ?? typedProfile?.community_id;
+  const { data: community } = profileCommunityId
+    ? await (supabase as any).from("community_settings").select("*").eq("id", profileCommunityId).maybeSingle()
     : { data: null };
+  const resolvedCommunity = community ?? (
+    typedStatus?.community_id
+      ? {
+          id: typedStatus.community_id,
+          name: typedStatus.community_name,
+          description: typedStatus.community_area,
+          welcome_message: typedStatus.community_city,
+          status: typedStatus.community_status,
+          logo_url: typedStatus.logo_url,
+          rejection_reason: typedStatus.rejection_reason,
+          suspended_reason: typedStatus.suspended_reason,
+          theme_primary_color: typedStatus.theme_primary_color,
+          theme_secondary_color: typedStatus.theme_secondary_color,
+          theme_background_color: typedStatus.theme_background_color,
+          theme_banner_color: typedStatus.theme_banner_color,
+          theme_sidebar_color: typedStatus.theme_sidebar_color,
+        }
+      : null
+  );
   const role =
     trustedAppRole(roles?.find((row: any) => row.role === "super_admin")?.role) ??
     trustedAppRole(roles?.find((row: any) => row.role === "admin")?.role) ??
@@ -83,6 +105,8 @@ async function loadCurrentUser(): Promise<CurrentUser | null> {
     userId: user.id,
     email: user.email ?? storedUser?.email ?? "",
     name:
+      typedStatus?.display_name ??
+      typedStatus?.full_name ??
       profile?.display_name ??
       profile?.full_name ??
       user.user_metadata?.full_name ??
@@ -90,31 +114,33 @@ async function loadCurrentUser(): Promise<CurrentUser | null> {
       storedUser?.name ??
       user.email?.split("@")[0] ??
       "Resident",
-    unitNumber: profile?.unit_number ?? user.user_metadata?.unit_number ?? storedUser?.unitNumber ?? "",
+    unitNumber: typedStatus?.unit_number ?? profile?.unit_number ?? user.user_metadata?.unit_number ?? storedUser?.unitNumber ?? "",
     role,
     membershipStatus:
-      typedProfile?.membership_status === "approved" || typedProfile?.membership_status === "rejected"
-        ? typedProfile.membership_status
+      typedStatus?.membership_status === "approved" || typedStatus?.membership_status === "rejected"
+        ? typedStatus.membership_status
+        : typedProfile?.membership_status === "approved" || typedProfile?.membership_status === "rejected"
+          ? typedProfile.membership_status
         : "pending",
     communityStatus:
-      community?.status === "approved" || community?.status === "rejected" || community?.status === "suspended"
-        ? community.status
+      resolvedCommunity?.status === "approved" || resolvedCommunity?.status === "rejected" || resolvedCommunity?.status === "suspended"
+        ? resolvedCommunity.status
         : "pending",
     avatarUrl: profile?.avatar_url ?? null,
-    community: community
+    community: resolvedCommunity
       ? {
-          id: community.id,
-          name: community.name ?? "Mohalla Community",
-          area: community.description ?? null,
-          city: community.welcome_message ?? null,
-          logoUrl: community.logo_url ?? null,
-          rejectionReason: community.rejection_reason ?? null,
-          suspendedReason: community.suspended_reason ?? null,
-          themePrimaryColor: community.theme_primary_color ?? null,
-          themeSecondaryColor: community.theme_secondary_color ?? null,
-          themeBackgroundColor: community.theme_background_color ?? null,
-          themeBannerColor: community.theme_banner_color ?? null,
-          themeSidebarColor: community.theme_sidebar_color ?? null,
+          id: resolvedCommunity.id,
+          name: resolvedCommunity.name ?? "Mohalla Community",
+          area: resolvedCommunity.description ?? null,
+          city: resolvedCommunity.welcome_message ?? null,
+          logoUrl: resolvedCommunity.logo_url ?? null,
+          rejectionReason: resolvedCommunity.rejection_reason ?? null,
+          suspendedReason: resolvedCommunity.suspended_reason ?? null,
+          themePrimaryColor: resolvedCommunity.theme_primary_color ?? null,
+          themeSecondaryColor: resolvedCommunity.theme_secondary_color ?? null,
+          themeBackgroundColor: resolvedCommunity.theme_background_color ?? null,
+          themeBannerColor: resolvedCommunity.theme_banner_color ?? null,
+          themeSidebarColor: resolvedCommunity.theme_sidebar_color ?? null,
         }
       : null,
   };
