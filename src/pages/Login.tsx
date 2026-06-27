@@ -7,7 +7,6 @@ import { Input } from '@/components/ui/input'
 import { setDemoToken, setToken } from '@/lib/auth'
 import { useToast } from '@/hooks/use-toast'
 import { supabase } from '@/integrations/supabase/client'
-import { resendSignupConfirmation, shouldResendSignupConfirmation } from '@/lib/auth-email'
 import { inviteRegisterPath, requestMemberJoin } from '@/lib/member-join'
 
 export default function Login() {
@@ -45,22 +44,6 @@ export default function Login() {
       })
 
       if (error || !data.session?.access_token) {
-        if (shouldResendSignupConfirmation(error?.message)) {
-          try {
-            await resendSignupConfirmation(email, `${window.location.origin}/login`)
-            toast({
-              title: 'Confirmation email sent',
-              description: 'Check your inbox and spam folder, then sign in again after confirming.',
-            })
-          } catch (resendError) {
-            toast({
-              title: 'Email is not confirmed',
-              description: resendError instanceof Error ? resendError.message : 'Please try again shortly.',
-              variant: 'destructive',
-            })
-          }
-          return
-        }
         toast({ title: error?.message || 'Login failed', variant: 'destructive' })
         return
       }
@@ -130,13 +113,11 @@ export default function Login() {
       return
     }
     setResetting(true)
-    const { error } = await supabase.auth.resetPasswordForEmail(email.trim(), {
-      redirectTo: `${window.location.origin}/reset-password`,
-    })
+    const error = new Error("Password reset emails are temporarily disabled.")
     setResetting(false)
     toast({
-      title: error ? error.message : "Password reset email sent.",
-      variant: error ? "destructive" : "default",
+      title: error.message,
+      variant: "destructive",
     })
   }
 

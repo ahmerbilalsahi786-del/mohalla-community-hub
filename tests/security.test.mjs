@@ -142,14 +142,13 @@ test("admin access and member management are scoped to trusted manager state", a
   assert.match(pending, /navigate\("\/"\)/);
 
   const registerPage = await read("src/pages/Register.tsx");
-  assert.match(registerPage, /resendSignupConfirmation/);
-  assert.match(registerPage, /Resend confirmation email/);
+  assert.doesNotMatch(registerPage, /resendSignupConfirmation/);
+  assert.doesNotMatch(registerPage, /Resend confirmation email/);
 
   const loginPage = await read("src/pages/Login.tsx");
-  assert.match(loginPage, /shouldResendSignupConfirmation/);
+  assert.doesNotMatch(loginPage, /shouldResendSignupConfirmation/);
 
-  const approvalEmail = await read("src/lib/approval-email.ts");
-  assert.match(approvalEmail, /functions\.invoke\("send-approval-email"/);
+  assert.doesNotMatch(adminMembers, /sendApprovalEmail/);
 
   const edgeFunction = await read("supabase/functions/send-approval-email/index.ts");
   assert.match(edgeFunction, /RESEND_API_KEY/);
