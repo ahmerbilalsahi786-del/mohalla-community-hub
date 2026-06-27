@@ -7,6 +7,7 @@ import { Input } from '@/components/ui/input'
 import { setDemoToken, setToken } from '@/lib/auth'
 import { useToast } from '@/hooks/use-toast'
 import { supabase } from '@/integrations/supabase/client'
+import { resendSignupConfirmation, shouldResendSignupConfirmation } from '@/lib/auth-email'
 
 export default function Login() {
   const [, navigate] = useLocation()
@@ -39,6 +40,22 @@ export default function Login() {
       })
 
       if (error || !data.session?.access_token) {
+        if (shouldResendSignupConfirmation(error?.message)) {
+          try {
+            await resendSignupConfirmation(email, `${window.location.origin}/login`)
+            toast({
+              title: 'Confirmation email sent',
+              description: 'Check your inbox and spam folder, then sign in again after confirming.',
+            })
+          } catch (resendError) {
+            toast({
+              title: 'Email is not confirmed',
+              description: resendError instanceof Error ? resendError.message : 'Please try again shortly.',
+              variant: 'destructive',
+            })
+          }
+          return
+        }
         toast({ title: error?.message || 'Login failed', variant: 'destructive' })
         return
       }

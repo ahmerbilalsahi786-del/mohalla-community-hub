@@ -125,7 +125,9 @@ export function useCurrentUser() {
   return useQuery({
     queryKey: ["current-user", token],
     queryFn: loadCurrentUser,
-    staleTime: 60_000,
+    staleTime: 0,
+    refetchOnMount: "always",
+    refetchOnWindowFocus: true,
   });
 }
 

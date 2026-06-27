@@ -102,8 +102,24 @@ test("admin access and member management are scoped to trusted manager state", a
   assert.match(adminLayout, /admin_list_members/);
 
   const pending = await read("src/pages/MembershipPending.tsx");
+  assert.match(pending, /refreshSession/);
   assert.match(pending, /refetch\(\)/);
   assert.match(pending, /navigate\("\/"\)/);
+
+  const registerPage = await read("src/pages/Register.tsx");
+  assert.match(registerPage, /resendSignupConfirmation/);
+  assert.match(registerPage, /Resend confirmation email/);
+
+  const loginPage = await read("src/pages/Login.tsx");
+  assert.match(loginPage, /shouldResendSignupConfirmation/);
+
+  const approvalEmail = await read("src/lib/approval-email.ts");
+  assert.match(approvalEmail, /functions\.invoke\("send-approval-email"/);
+
+  const edgeFunction = await read("supabase/functions/send-approval-email/index.ts");
+  assert.match(edgeFunction, /RESEND_API_KEY/);
+  assert.match(edgeFunction, /membership_status !== "approved"/);
+  assert.match(edgeFunction, /api\.resend\.com\/emails/);
 
   const memberListRpc = await read("supabase/migrations/20260627113000_admin_member_list_rpc.sql");
   assert.match(memberListRpc, /create or replace function public\.admin_list_members/);

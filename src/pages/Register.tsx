@@ -6,6 +6,7 @@ import { Input } from '@/components/ui/input'
 import { setToken } from '@/lib/auth'
 import { useToast } from '@/hooks/use-toast'
 import { supabase } from '@/integrations/supabase/client'
+import { resendSignupConfirmation, shouldResendSignupConfirmation } from '@/lib/auth-email'
 
 function emailRedirectTo() {
   const configuredUrl = import.meta.env.VITE_APP_URL?.trim()
@@ -34,6 +35,7 @@ export default function Register() {
   })
   const [showPw, setShowPw] = useState(false)
   const [loading, setLoading] = useState(false)
+  const [resending, setResending] = useState(false)
   const [errors, setErrors] = useState<Record<string, string[]>>({})
 
   const set = (k: string) => (e: React.ChangeEvent<HTMLInputElement>) =>
@@ -95,6 +97,23 @@ export default function Register() {
       })
 
       if (error) {
+        if (shouldResendSignupConfirmation(error.message)) {
+          try {
+            await resendSignupConfirmation(form.email, emailRedirectTo())
+            toast({
+              title: 'Confirmation email sent',
+              description: 'Check your inbox and spam folder, then sign in after confirming.',
+            })
+            navigate('/login')
+          } catch (resendError) {
+            toast({
+              title: 'Could not resend confirmation email',
+              description: resendError instanceof Error ? resendError.message : 'Please try again shortly.',
+              variant: 'destructive',
+            })
+          }
+          return
+        }
         toast({ title: error.message || 'Registration failed', variant: 'destructive' })
         return
       }
@@ -119,6 +138,25 @@ export default function Register() {
       })
     } finally {
       setLoading(false)
+    }
+  }
+
+  const resendConfirmation = async () => {
+    setResending(true)
+    try {
+      await resendSignupConfirmation(form.email, emailRedirectTo())
+      toast({
+        title: 'Confirmation email sent',
+        description: 'Check your inbox and spam folder, then sign in after confirming.',
+      })
+    } catch (error) {
+      toast({
+        title: 'Could not resend confirmation email',
+        description: error instanceof Error ? error.message : 'Please try again shortly.',
+        variant: 'destructive',
+      })
+    } finally {
+      setResending(false)
     }
   }
 
@@ -243,6 +281,15 @@ export default function Register() {
 
           <Button type="submit" disabled={loading} className="w-full rounded-xl bg-primary">
             {loading ? 'Creating account…' : <><UserPlus size={16} className="mr-2" /> {isMemberInvite ? 'Request to join' : 'Create account'}</>}
+          </Button>
+          <Button
+            type="button"
+            variant="outline"
+            disabled={loading || resending}
+            onClick={resendConfirmation}
+            className="w-full rounded-xl"
+          >
+            {resending ? 'Sending confirmation…' : 'Resend confirmation email'}
           </Button>
         </form>
 

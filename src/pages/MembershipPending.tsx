@@ -1,12 +1,13 @@
 import { useEffect } from "react";
 import { useLocation } from "wouter";
-import { Clock3, LogOut, ShieldCheck, XCircle } from "lucide-react";
+import { Clock3, LogOut, RefreshCw, ShieldCheck, XCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useCurrentUser, useLogout } from "@/hooks/use-current-user";
+import { supabase } from "@/integrations/supabase/client";
 
 export default function MembershipPending() {
   const [, navigate] = useLocation();
-  const { data: user, refetch } = useCurrentUser();
+  const { data: user, refetch, isFetching } = useCurrentUser();
   const logout = useLogout();
   const rejected = user?.membershipStatus === "rejected";
   const community = user?.community;
@@ -33,6 +34,14 @@ export default function MembershipPending() {
           ? "Your community administrator did not approve this membership. Contact them if this appears incorrect."
           : "Your account is ready. A community administrator needs to approve your membership before community content becomes available.";
 
+  const refreshStatus = async () => {
+    await supabase.auth.refreshSession();
+    const result = await refetch();
+    if (result.data?.communityStatus === "approved" && result.data?.membershipStatus === "approved") {
+      navigate("/");
+    }
+  };
+
   useEffect(() => {
     if (user?.communityStatus === "approved" && user?.membershipStatus === "approved") {
       navigate("/");
@@ -40,7 +49,7 @@ export default function MembershipPending() {
     }
 
     const timer = window.setInterval(() => {
-      refetch();
+      refreshStatus();
     }, 5000);
 
     return () => window.clearInterval(timer);
@@ -58,7 +67,11 @@ export default function MembershipPending() {
           <ShieldCheck size={14} />
           Signed in as {user?.email}
         </div>
-        <Button type="button" variant="outline" className="mt-6 w-full" onClick={logout}>
+        <Button type="button" className="mt-6 w-full" onClick={refreshStatus} disabled={isFetching}>
+          <RefreshCw size={16} className={isFetching ? "animate-spin" : ""} />
+          {isFetching ? "Checking..." : "Check approval status"}
+        </Button>
+        <Button type="button" variant="outline" className="mt-3 w-full" onClick={logout}>
           <LogOut size={16} />
           Sign out
         </Button>
