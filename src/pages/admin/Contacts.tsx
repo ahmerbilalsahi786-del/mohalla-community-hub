@@ -4,6 +4,7 @@ import { AdminLayout } from './AdminLayout'
 import { supabase } from '@/integrations/supabase/client'
 import { canManageCommunity, useCurrentUser } from '@/hooks/use-current-user'
 import { Button } from '@/components/ui/button'
+import { useToast } from '@/hooks/use-toast'
 import { cn } from '@/lib/utils'
 import {
   ArrowDown,
@@ -68,6 +69,10 @@ function labelType(type: string) {
   return type.replace(/_/g, ' ').replace(/\b\w/g, (letter) => letter.toUpperCase())
 }
 
+function normalizeType(type: string) {
+  return type.trim().toLowerCase().replace(/[^a-z0-9]+/g, '_').replace(/^_+|_+$/g, '')
+}
+
 function nextDisplayOrder(contacts: CommunityContact[], category: ContactCategory) {
   const categoryContacts = contacts.filter((contact) => contact.category === category)
   if (!categoryContacts.length) return category === 'emergency' ? 60 : 10
@@ -77,7 +82,7 @@ function nextDisplayOrder(contacts: CommunityContact[], category: ContactCategor
 function toForm(contact: CommunityContact): ContactForm {
   return {
     category: contact.category,
-    type: contact.type,
+    type: labelType(contact.type),
     name: contact.name,
     phoneNumber: contact.phone_number ?? '',
     description: contact.description ?? '',
@@ -151,11 +156,11 @@ function ContactModal({
                 list="contact-type-presets"
                 value={form.type}
                 onChange={(event) => update({ type: event.target.value })}
-                placeholder="e.g. plumber"
+                placeholder="e.g. Plumber"
                 className="w-full rounded-xl border border-border bg-muted/30 px-3 py-2.5 text-sm outline-none transition-colors focus:border-primary"
               />
               <datalist id="contact-type-presets">
-                {PRESETS.map((preset) => <option key={preset} value={preset}>{labelType(preset)}</option>)}
+                {PRESETS.map((preset) => <option key={preset} value={labelType(preset)} />)}
               </datalist>
             </div>
           </div>
@@ -220,6 +225,7 @@ function ContactModal({
 
 export default function AdminContacts() {
   const { data: user } = useCurrentUser()
+  const { toast } = useToast()
   const queryClient = useQueryClient()
   const communityId = user?.community?.id
   const canManage = canManageCommunity(user?.role)
@@ -242,15 +248,19 @@ export default function AdminContacts() {
   }, [modalOpen])
 
   const invalidate = () => queryClient.invalidateQueries({ queryKey })
+  const invalidateContacts = () => queryClient.invalidateQueries({ queryKey: ['community-contacts'] })
 
   const saveContact = useMutation({
     mutationFn: async () => {
       if (!communityId || !user?.userId) throw new Error('Community not loaded.')
+      if (!canManage) throw new Error('Only admins and moderators can manage contacts.')
       const category = form.isEmergency ? 'emergency' : form.category
+      const type = normalizeType(form.type)
+      if (!type) throw new Error('Type / label is required.')
       const payload = {
         community_id: communityId,
         category,
-        type: form.type.trim().toLowerCase().replace(/\s+/g, '_'),
+        type,
         name: form.name.trim(),
         phone_number: form.phoneNumber.trim() || null,
         description: form.description.trim() || null,
@@ -258,19 +268,30 @@ export default function AdminContacts() {
       }
 
       const request = editing
-        ? (supabase as any).from('community_contacts').update(payload).eq('id', editing.id)
+        ? (supabase as any).from('community_contacts').update(payload).eq('id', editing.id).select('id').single()
         : (supabase as any).from('community_contacts').insert({
             ...payload,
-            created_by_user_id: user.userId,
             display_order: nextDisplayOrder(contacts, category),
-          })
+          }).select('id').single()
 
-      const { error: requestError } = await request
+      const { data, error: requestError } = await request
       if (requestError) throw requestError
+      if (!data?.id) throw new Error('Contact was not saved. Please try again.')
     },
     onSuccess: () => {
-      invalidate()
+      invalidateContacts()
       setModalOpen(false)
+      toast({
+        title: editing ? 'Contact updated' : 'Contact added',
+        description: 'The dashboard widget will refresh for members.',
+      })
+    },
+    onError: (error) => {
+      toast({
+        title: 'Could not save contact',
+        description: error instanceof Error ? error.message : 'Please try again.',
+        variant: 'destructive',
+      })
     },
   })
 
@@ -318,7 +339,7 @@ export default function AdminContacts() {
         <div className="mb-5 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <div>
             <h2 className="text-xl font-bold text-foreground">Emergency & Services</h2>
-            <p className="text-sm text-muted-foreground mt-0.5">Manage the contacts members see on the Feed page.</p>
+            <p className="text-sm text-muted-foreground mt-0.5">Manage the contacts members see on the Dashboard.</p>
           </div>
           <Button onClick={openAdd} disabled={!canManage} className="gap-2 rounded-xl">
             <Plus size={15} />

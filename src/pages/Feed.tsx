@@ -1,6 +1,6 @@
 import { useState, useCallback, useRef, useEffect } from 'react'
 import { useListPosts, useCreatePost, useToggleLike, useListComments, useCreateComment, useListEvents, useListPolls } from '@/lib/generated/api'
-import { useQuery, useQueryClient } from '@tanstack/react-query'
+import { useQueryClient } from '@tanstack/react-query'
 import { getListPostsQueryKey, getListCommentsQueryKey } from '@/lib/generated/api'
 
 import { Sidebar } from '@/components/dashboard/sidebar'
@@ -9,15 +9,13 @@ import {
   Pin, Heart, MessageSquare, Plus, X, ChevronDown, ChevronUp,
   Megaphone, Shield, Search, ShoppingBag, Calendar, Users, ImagePlus, Send, Loader2,
   MapPin, BarChart2, ChevronRight, AlertTriangle, Flag, Trash2, UserX,
-  Phone, PhoneCall, ShieldAlert, Wrench, Flame, Ambulance,
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { useToast } from '@/hooks/use-toast'
 import { uploadImage } from '@/lib/cloudinary'
 import { cn } from '@/lib/utils'
 import { Link, useSearch } from 'wouter'
-import { canManageCommunity, useCurrentUser } from '@/hooks/use-current-user'
-import { supabase } from '@/integrations/supabase/client'
+import { useCurrentUser } from '@/hooks/use-current-user'
 
 type PostType = 'general' | 'announcement' | 'safety' | 'lost_found' | 'buy_sell' | 'event' | 'complaint'
 
@@ -114,186 +112,6 @@ function PollWidget() {
         )}
       </div>
     </div>
-  )
-}
-
-type CommunityContact = {
-  id: string
-  category: 'emergency' | 'services'
-  type: string
-  name: string
-  phone_number: string | null
-  display_order: number
-  is_emergency: boolean
-}
-
-const EMERGENCY_PRIORITY: Record<string, number> = {
-  ambulance: 1,
-  police: 2,
-  fire_brigade: 3,
-  fire: 3,
-  security: 4,
-  community_security: 4,
-}
-
-function contactLabel(type: string) {
-  return type.replace(/_/g, ' ').replace(/\b\w/g, (letter) => letter.toUpperCase())
-}
-
-function contactIcon(type: string, emergency: boolean) {
-  if (type.includes('ambulance')) return Ambulance
-  if (type.includes('fire')) return Flame
-  if (type.includes('police') || type.includes('security')) return Shield
-  if (emergency) return ShieldAlert
-  return Wrench
-}
-
-function cleanPhoneNumber(phone: string) {
-  return phone.replace(/[^\d+]/g, '')
-}
-
-async function loadCommunityContacts(communityId?: string) {
-  if (!communityId) return []
-  const { data, error } = await (supabase as any)
-    .from('community_contacts')
-    .select('id, category, type, name, phone_number, display_order, is_emergency')
-    .eq('community_id', communityId)
-    .order('is_emergency', { ascending: false })
-    .order('display_order', { ascending: true })
-    .order('name', { ascending: true })
-
-  if (error) throw error
-  return (data ?? []) as CommunityContact[]
-}
-
-function ContactRow({ contact, emergency }: { contact: CommunityContact; emergency: boolean }) {
-  const Icon = contactIcon(contact.type, emergency)
-  const phone = contact.phone_number?.trim()
-
-  return (
-    <div className="flex items-center gap-2 rounded-xl border border-border/60 bg-background/60 px-2.5 py-2">
-      <div className={cn('flex h-8 w-8 shrink-0 items-center justify-center rounded-lg', emergency ? 'bg-red-500/10 text-red-600' : 'bg-primary/10 text-primary')}>
-        <Icon size={15} />
-      </div>
-      <div className="min-w-0 flex-1">
-        <p className="truncate text-xs font-semibold text-foreground">{contact.name || contactLabel(contact.type)}</p>
-        <p className="truncate text-[11px] text-muted-foreground">{phone || 'Not set'}</p>
-      </div>
-      {phone ? (
-        <a
-          href={`tel:${cleanPhoneNumber(phone)}`}
-          className={cn(
-            'flex h-8 w-8 shrink-0 items-center justify-center rounded-lg transition-colors',
-            emergency ? 'bg-red-600 text-white hover:bg-red-700' : 'bg-primary text-primary-foreground hover:bg-primary/90'
-          )}
-          aria-label={`Call ${contact.name}`}
-        >
-          <PhoneCall size={14} />
-        </a>
-      ) : (
-        <span className="rounded-lg bg-muted px-2 py-1 text-[11px] font-semibold text-muted-foreground">Not set</span>
-      )}
-    </div>
-  )
-}
-
-function EmergencyServicesWidget() {
-  const { data: user } = useCurrentUser()
-  const [servicesOpen, setServicesOpen] = useState(false)
-  const [mobileOpen, setMobileOpen] = useState(true)
-  const [showAllServices, setShowAllServices] = useState(false)
-  const communityId = user?.community?.id
-  const isAdmin = canManageCommunity(user?.role)
-
-  const { data: contacts = [], isLoading } = useQuery({
-    queryKey: ['community-contacts', communityId],
-    queryFn: () => loadCommunityContacts(communityId),
-    enabled: Boolean(communityId),
-  })
-
-  const emergencyContacts = contacts
-    .filter((contact) => contact.is_emergency || contact.category === 'emergency')
-    .sort((a, b) => {
-      const priorityA = EMERGENCY_PRIORITY[a.type] ?? 99
-      const priorityB = EMERGENCY_PRIORITY[b.type] ?? 99
-      if (priorityA !== priorityB) return priorityA - priorityB
-      return (a.display_order ?? 0) - (b.display_order ?? 0)
-    })
-  const serviceContacts = contacts
-    .filter((contact) => !contact.is_emergency && contact.category === 'services')
-    .sort((a, b) => (a.display_order ?? 0) - (b.display_order ?? 0))
-  const visibleServices = showAllServices ? serviceContacts : serviceContacts.slice(0, 5)
-
-  return (
-    <section className="rounded-2xl border border-border bg-card shadow-sm">
-      <button
-        onClick={() => setMobileOpen((open) => !open)}
-        className="flex w-full items-center justify-between gap-3 border-b border-border px-3 py-3 text-left lg:cursor-default"
-      >
-        <span className="flex items-center gap-2 text-sm font-semibold text-foreground">
-          <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-red-500/10 text-red-600">
-            <Phone size={14} />
-          </span>
-          Emergency & services
-        </span>
-        <ChevronDown size={15} className={cn('text-muted-foreground transition-transform lg:hidden', mobileOpen && 'rotate-180')} />
-      </button>
-
-      <div className={cn('space-y-3 p-3', !mobileOpen && 'hidden lg:block')}>
-        <div>
-          <div className="mb-2 flex items-center justify-between">
-            <p className="text-[11px] font-bold uppercase tracking-wide text-red-600">Emergency</p>
-            <span className="h-px flex-1 bg-red-500/20 ml-2" />
-          </div>
-          <div className="space-y-2">
-            {isLoading ? (
-              [1, 2, 3].map((item) => <div key={item} className="h-12 rounded-xl bg-muted animate-pulse" />)
-            ) : emergencyContacts.length > 0 ? (
-              emergencyContacts.map((contact) => <ContactRow key={contact.id} contact={contact} emergency />)
-            ) : (
-              <p className="rounded-xl bg-muted/40 px-3 py-2 text-xs text-muted-foreground">Emergency contacts are being set up.</p>
-            )}
-          </div>
-        </div>
-
-        <div>
-          <button
-            onClick={() => setServicesOpen((open) => !open)}
-            className="mb-2 flex w-full items-center justify-between gap-2"
-          >
-            <span className="flex items-center gap-2 text-[11px] font-bold uppercase tracking-wide text-muted-foreground">
-              Services
-              <span className="h-px w-10 bg-border" />
-            </span>
-            <ChevronDown size={14} className={cn('text-muted-foreground transition-transform', servicesOpen && 'rotate-180')} />
-          </button>
-
-          {servicesOpen && (
-            <div className="space-y-2">
-              {serviceContacts.length > 0 ? (
-                <>
-                  {visibleServices.map((contact) => <ContactRow key={contact.id} contact={contact} emergency={false} />)}
-                  {serviceContacts.length > 5 && !showAllServices && (
-                    <button onClick={() => setShowAllServices(true)} className="text-xs font-semibold text-primary hover:text-primary/80">
-                      View all
-                    </button>
-                  )}
-                </>
-              ) : (
-                <div className="rounded-xl bg-muted/40 px-3 py-2">
-                  <p className="text-xs text-muted-foreground">No services added yet</p>
-                  {isAdmin && (
-                    <Link href="/admin/contacts" className="mt-1 inline-flex text-xs font-semibold text-primary hover:text-primary/80">
-                      Add contact
-                    </Link>
-                  )}
-                </div>
-              )}
-            </div>
-          )}
-        </div>
-      </div>
-    </section>
   )
 }
 
@@ -960,7 +778,7 @@ export default function Feed() {
             </div>
           </div>
 
-          <div className="mx-auto grid w-full max-w-6xl gap-4 p-3 pb-24 sm:p-6 lg:grid-cols-[minmax(0,42rem)_20rem] lg:items-end lg:justify-center">
+          <div className="mx-auto w-full max-w-3xl p-3 pb-24 sm:p-6">
             <div className="space-y-4">
               <ComplaintBar onCompose={() => openCreatePost('complaint')} />
               <EventWidget />
@@ -1015,10 +833,6 @@ export default function Feed() {
                 </>
               )}
             </div>
-
-            <aside className="lg:sticky lg:bottom-6 lg:self-end">
-              <EmergencyServicesWidget />
-            </aside>
           </div>
         </main>
       </div>

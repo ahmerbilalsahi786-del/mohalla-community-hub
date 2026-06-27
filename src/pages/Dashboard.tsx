@@ -10,6 +10,7 @@ import { CommunityChart } from '@/components/dashboard/community-chart'
 import { QuickActions } from '@/components/dashboard/quick-actions'
 import { MemberCard } from '@/components/dashboard/member-card'
 import { SafetyWidget } from '@/components/dashboard/safety-widget'
+import { EmergencyServicesWidget } from '@/components/dashboard/emergency-services-widget'
 import { canManageCommunity, useCurrentUser } from '@/hooks/use-current-user'
 import {
   useAdminGetStats,
@@ -169,6 +170,7 @@ export default function Dashboard() {
             </div>
 
             <div className="space-y-6">
+              <EmergencyServicesWidget />
               <SafetyWidget />
               <QuickActions />
               <ActivityCard activities={activities} />
