@@ -25,6 +25,13 @@ test("browser Supabase config rejects secret keys and has no hardcoded project f
     assert.match(source, /sb_secret_/);
     assert.doesNotMatch(source, /DEFAULT_SUPABASE_(URL|PUBLISHABLE_KEY)/);
   }
+  const productionEnv = await read(".env.production");
+  assert.match(productionEnv, /VITE_SUPABASE_URL=https:\/\/ytlzepxlwpzeirccwsov\.supabase\.co/);
+  assert.match(productionEnv, /VITE_SUPABASE_PUBLISHABLE_KEY=sb_publishable_/);
+  assert.doesNotMatch(productionEnv, /sb_secret_/);
+
+  const vercelIgnore = await read(".vercelignore");
+  assert.match(vercelIgnore, /!\.env\.production/);
 });
 
 test("production migration protects membership and upload ownership", async () => {

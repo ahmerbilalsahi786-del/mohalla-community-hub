@@ -33,6 +33,7 @@ scripts/node_modules
 .env
 .env.*
 !.env.example
+!.env.production
 
 # IDEs and editors
 /.idea
