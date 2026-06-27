@@ -60,3 +60,22 @@ test("member invite signup joins an approved existing community", async () => {
   const inviteTools = await read("src/components/community/invite-tools.tsx");
   assert.match(inviteTools, /\/register\?join=/i);
 });
+
+test("admin access and member management are scoped to trusted manager state", async () => {
+  const currentUser = await read("src/hooks/use-current-user.ts");
+  assert.match(currentUser, /queryKey: \["current-user", token\]/);
+  assert.match(currentUser, /trustedAppRole/);
+  assert.doesNotMatch(currentUser, /storedUser\?\.role/);
+
+  const login = await read("src/pages/Login.tsx");
+  assert.match(login, /can_manage_own_community/);
+  assert.match(login, /queryClient\.clear\(\)/);
+
+  const api = await read("src/lib/supabase-api.ts");
+  assert.match(api, /requireCommunityManager/);
+  assert.match(api, /listAdminMembers/);
+  assert.match(api, /listCommunityMembers/);
+  assert.match(api, /eq\("community_id", communityId\)/);
+  assert.match(api, /\/api\/admin\/members" && method === "GET"\) return listAdminMembers/);
+  assert.match(api, /\/api\/community\/members" && method === "GET"\) return listCommunityMembers/);
+});

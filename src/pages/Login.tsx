@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { Link, useLocation } from 'wouter'
+import { useQueryClient } from '@tanstack/react-query'
 import { Eye, EyeOff, LogIn, PlayCircle, ShieldCheck, User } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -9,6 +10,7 @@ import { supabase } from '@/integrations/supabase/client'
 
 export default function Login() {
   const [, navigate] = useLocation()
+  const queryClient = useQueryClient()
   const { toast } = useToast()
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
@@ -48,15 +50,27 @@ export default function Login() {
       const isPlatformOwner = roles?.some((row: { role: string }) => row.role === "super_admin")
 
       if (accountType === "admin") {
-        const canManage = roles?.some((row: { role: string }) => row.role === "admin" || row.role === "moderator" || row.role === "super_admin")
+        const { data: canManageOwnCommunity, error: managerError } = await (supabase as any).rpc("can_manage_own_community")
+        if (!isPlatformOwner && managerError) {
+          await supabase.auth.signOut()
+          queryClient.clear()
+          toast({ title: "Could not verify administrator access.", variant: "destructive" })
+          return
+        }
+        const canManage =
+          isPlatformOwner ||
+          (canManageOwnCommunity === true &&
+            roles?.some((row: { role: string }) => row.role === "admin" || row.role === "moderator"))
         if (roleError || !canManage) {
           await supabase.auth.signOut()
+          queryClient.clear()
           toast({ title: "This account does not have administrator access.", variant: "destructive" })
           return
         }
       }
 
       setToken(data.session.access_token)
+      queryClient.clear()
       navigate(isPlatformOwner ? "/super-admin/dashboard" : accountType === "admin" ? "/admin" : "/")
     } catch (error) {
       toast({

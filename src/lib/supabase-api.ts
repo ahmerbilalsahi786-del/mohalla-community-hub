@@ -261,14 +261,29 @@ async function requiredUserId() {
 
 async function canManageCommunity() {
   if (isDemoMode()) return true;
+  await requiredUserId();
+  const { data, error } = await (supabase as any).rpc("can_manage_own_community");
+  if (error) throw error;
+  return data === true;
+}
+
+async function currentCommunityId() {
   const userId = await requiredUserId();
   const { data, error } = await supabase
-    .from("user_roles")
-    .select("role")
-    .eq("user_id", userId)
-    .in("role", ["admin", "moderator"]);
+    .from("profiles")
+    .select("community_id")
+    .eq("id", userId)
+    .maybeSingle();
   if (error) throw error;
-  return Boolean(data?.length);
+  if (!data?.community_id) throw new Error("No community is linked to this account.");
+  return data.community_id as string;
+}
+
+async function requireCommunityManager() {
+  if (!(await canManageCommunity())) {
+    throw new Error("Administrator access required.");
+  }
+  return currentCommunityId();
 }
 
 async function resolveRequestedUserId(value?: string | null) {
@@ -1107,24 +1122,10 @@ async function saveProfile(userIdParam: string, payload: JsonBody) {
   };
 }
 
-async function listMembers(params: URLSearchParams) {
-  if (isDemoMode()) {
-    const status = params.get("status");
-    const rows = readDemoMembers();
-    return status && status !== "all" ? rows.filter((member: any) => member.status === status) : rows;
-  }
-
-  const limit = Number(params.get("limit") ?? 100);
-  const manager = await canManageCommunity();
-  const select = manager ? "*, private_profiles(*), user_roles(*)" : "*, user_roles(*)";
-  let query = extendedDb.from("profiles").select(select).limit(limit);
-  if (!manager) query = query.eq("membership_status", "approved");
-  const { data, error } = await query;
-  if (error) throw error;
-
-  const members = (data ?? []).map((profile: any) => ({
+function toMember(profile: any, manager: boolean) {
+  return {
     id: id(profile.id),
-    communityId: "default",
+    communityId: profile.community_id ?? "default",
     userId: profile.id,
     name: profileName(profile),
     unitNumber: unit(profile),
@@ -1134,7 +1135,47 @@ async function listMembers(params: URLSearchParams) {
     role: profile.user_roles?.[0]?.role ?? "user",
     isVerified: Boolean(profile.is_verified),
     joinDate: profile.created_at ?? new Date().toISOString(),
-  }));
+  };
+}
+
+async function listAdminMembers(params: URLSearchParams) {
+  if (isDemoMode()) {
+    const status = params.get("status");
+    const rows = readDemoMembers();
+    return status && status !== "all" ? rows.filter((member: any) => member.status === status) : rows;
+  }
+
+  const limit = Number(params.get("limit") ?? 100);
+  const communityId = await requireCommunityManager();
+  let query = extendedDb
+    .from("profiles")
+    .select("*, private_profiles(*), user_roles(*)")
+    .eq("community_id", communityId)
+    .limit(limit);
+  const status = params.get("status");
+  if (status && status !== "all") query = query.eq("membership_status", status);
+  const { data, error } = await query;
+  if (error) throw error;
+
+  return (data ?? []).map((profile: any) => toMember(profile, true));
+}
+
+async function listCommunityMembers(params: URLSearchParams) {
+  if (isDemoMode()) {
+    return readDemoMembers().filter((member: any) => member.status === "approved");
+  }
+
+  const limit = Number(params.get("limit") ?? 100);
+  const communityId = await currentCommunityId();
+  const { data, error } = await extendedDb
+    .from("profiles")
+    .select("*, user_roles(*)")
+    .eq("community_id", communityId)
+    .eq("membership_status", "approved")
+    .limit(limit);
+  if (error) throw error;
+
+  const members = (data ?? []).map((profile: any) => toMember(profile, false));
   const status = params.get("status");
   return status && status !== "all" ? members.filter((member: any) => member.status === status) : members;
 }
@@ -1190,7 +1231,7 @@ async function updateMember(memberId: string, action: string, payload: JsonBody 
   if (error) throw error;
   if (action === "delete") return { ok: true };
 
-  const members = await listMembers(new URLSearchParams());
+  const members = await listAdminMembers(new URLSearchParams());
   return members.find((member: any) => String(member.userId) === memberId || String(member.id) === memberId) ?? members[0];
 }
 
@@ -1243,7 +1284,8 @@ async function togglePostPin(postId: string) {
 async function getCommunity() {
   if (isDemoMode()) return getDemoCommunity();
 
-  const { data, error } = await supabase.from("community_settings").select("*").limit(1).maybeSingle();
+  const communityId = await requireCommunityManager();
+  const { data, error } = await supabase.from("community_settings").select("*").eq("id", communityId).maybeSingle();
   if (error) throw error;
   return {
     id: id(data?.id ?? "community"),
@@ -1313,11 +1355,12 @@ async function adminStats() {
     };
   }
 
+  const communityId = await requireCommunityManager();
   const [members, posts, listings, pending] = await Promise.all([
-    supabase.from("profiles").select("*", { count: "exact", head: true }),
-    supabase.from("posts").select("*", { count: "exact", head: true }).gte("created_at", new Date(new Date().getFullYear(), new Date().getMonth(), 1).toISOString()),
-    supabase.from("listings").select("*", { count: "exact", head: true }).eq("status", "available"),
-    supabase.from("profiles").select("*", { count: "exact", head: true }).eq("is_verified", false),
+    supabase.from("profiles").select("*", { count: "exact", head: true }).eq("community_id", communityId),
+    (supabase as any).from("posts").select("*", { count: "exact", head: true }).eq("community_id", communityId).gte("created_at", new Date(new Date().getFullYear(), new Date().getMonth(), 1).toISOString()),
+    (supabase as any).from("listings").select("*", { count: "exact", head: true }).eq("community_id", communityId).eq("status", "available"),
+    supabase.from("profiles").select("*", { count: "exact", head: true }).eq("community_id", communityId).eq("membership_status", "pending"),
   ]);
   return {
     totalMembers: members.count ?? 0,
@@ -1590,7 +1633,7 @@ export async function handleSupabaseApi<T = unknown>(url: string, method = "GET"
   if (/^\/api\/safety\/[^/]+\/resolve$/.test(path) && method === "PATCH") return resolveAlert(path.split("/")[3]) as T;
   if (/^\/api\/safety\/[^/]+\/comments$/.test(path) && method === "GET") return listAlertComments(path.split("/")[3]) as T;
   if (/^\/api\/safety\/[^/]+\/comments$/.test(path) && method === "POST") return createAlertComment(path.split("/")[3], payload) as T;
-  if (path === "/api/admin/members" && method === "GET") return listMembers(requestUrl.searchParams) as T;
+  if (path === "/api/admin/members" && method === "GET") return listAdminMembers(requestUrl.searchParams) as T;
   if (path === "/api/admin/members" && method === "POST") return createMember(payload) as T;
   if (/^\/api\/admin\/members\/[^/]+\/approve$/.test(path) && method === "PATCH") return updateMember(path.split("/")[4], "approve") as T;
   if (/^\/api\/admin\/members\/[^/]+\/reject$/.test(path) && method === "PATCH") return updateMember(path.split("/")[4], "reject") as T;
@@ -1614,7 +1657,7 @@ export async function handleSupabaseApi<T = unknown>(url: string, method = "GET"
   if (/^\/api\/volunteer\/[^/]+\/signup$/.test(path) && method === "POST") return toggleVolunteerSignup(path.split("/")[3]) as T;
   if (path === "/api/reports" && method === "POST") return createModerationReport(payload) as T;
   if (path === "/api/blocks" && method === "POST") return toggleUserBlock(payload) as T;
-  if (path === "/api/community/members" && method === "GET") return listMembers(requestUrl.searchParams) as T;
+  if (path === "/api/community/members" && method === "GET") return listCommunityMembers(requestUrl.searchParams) as T;
   if (path.startsWith("/api/profile/") && method === "GET") return getProfile(path.split("/").pop() ?? "") as T;
   if (path.startsWith("/api/profile/") && method === "PUT") return saveProfile(path.split("/").pop() ?? "", payload) as T;
 

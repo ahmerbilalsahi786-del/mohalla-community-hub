@@ -1,6 +1,6 @@
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useLocation } from "wouter";
-import { clearToken, getUser as getStoredUser } from "@/lib/auth";
+import { clearToken, getToken, getUser as getStoredUser } from "@/lib/auth";
 import { supabase } from "@/integrations/supabase/client";
 
 export interface CurrentUser {
@@ -26,6 +26,14 @@ export interface CurrentUser {
     themeBannerColor?: string | null;
     themeSidebarColor?: string | null;
   } | null;
+}
+
+const APP_ROLES = ["super_admin", "admin", "moderator", "user"] as const;
+
+function trustedAppRole(value: unknown) {
+  return typeof value === "string" && APP_ROLES.includes(value as (typeof APP_ROLES)[number])
+    ? value
+    : undefined;
 }
 
 async function loadCurrentUser(): Promise<CurrentUser | null> {
@@ -64,12 +72,11 @@ async function loadCurrentUser(): Promise<CurrentUser | null> {
     ? await (supabase as any).from("community_settings").select("*").eq("id", typedProfile.community_id).maybeSingle()
     : { data: null };
   const role =
-    roles?.find((row: any) => row.role === "super_admin")?.role ??
-    roles?.find((row: any) => row.role === "admin")?.role ??
-    roles?.find((row: any) => row.role === "moderator")?.role ??
-    roles?.[0]?.role ??
-    user.app_metadata?.role ??
-    storedUser?.role ??
+    trustedAppRole(roles?.find((row: any) => row.role === "super_admin")?.role) ??
+    trustedAppRole(roles?.find((row: any) => row.role === "admin")?.role) ??
+    trustedAppRole(roles?.find((row: any) => row.role === "moderator")?.role) ??
+    trustedAppRole(roles?.[0]?.role) ??
+    trustedAppRole(user.app_metadata?.role) ??
     "user";
 
   return {
@@ -114,8 +121,9 @@ async function loadCurrentUser(): Promise<CurrentUser | null> {
 }
 
 export function useCurrentUser() {
+  const token = getToken();
   return useQuery({
-    queryKey: ["current-user"],
+    queryKey: ["current-user", token],
     queryFn: loadCurrentUser,
     staleTime: 60_000,
   });
@@ -131,10 +139,12 @@ export function isSuperAdmin(role?: string | null) {
 
 export function useLogout() {
   const [, navigate] = useLocation();
+  const queryClient = useQueryClient();
 
   return async () => {
     await supabase.auth.signOut();
     clearToken();
+    queryClient.clear();
     navigate("/login");
   };
 }
