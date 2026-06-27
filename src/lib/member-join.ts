@@ -6,6 +6,13 @@ export interface MemberInviteProfile {
   unitNumber?: string;
 }
 
+export interface JoinableCommunity {
+  id: string;
+  name: string;
+  area: string;
+  city: string;
+}
+
 export function inviteLoginPath(joinCommunityId: string, invitedCommunityName?: string) {
   const params = new URLSearchParams({ join: joinCommunityId });
   if (invitedCommunityName?.trim()) params.set("community", invitedCommunityName.trim());
@@ -16,6 +23,29 @@ export function inviteRegisterPath(joinCommunityId: string, invitedCommunityName
   const params = new URLSearchParams({ join: joinCommunityId });
   if (invitedCommunityName?.trim()) params.set("community", invitedCommunityName.trim());
   return `/register?${params.toString()}`;
+}
+
+export async function searchJoinableCommunities(name?: string, area?: string, city?: string) {
+  const trimmedName = name?.trim() || null;
+  const trimmedArea = area?.trim() || null;
+  const trimmedCity = city?.trim() || null;
+
+  if (!trimmedName && !trimmedArea && !trimmedCity) return [];
+
+  const { data, error } = await (supabase as any).rpc("search_joinable_communities", {
+    search_name: trimmedName,
+    search_area: trimmedArea,
+    search_city: trimmedCity,
+  });
+
+  if (error) throw error;
+
+  return ((data ?? []) as Array<Record<string, unknown>>).map((community) => ({
+    id: String(community.id ?? ""),
+    name: String(community.name ?? ""),
+    area: String(community.area ?? ""),
+    city: String(community.city ?? ""),
+  })) as JoinableCommunity[];
 }
 
 export async function requestMemberJoin(joinCommunityId: string, profile: MemberInviteProfile = {}) {

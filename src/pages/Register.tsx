@@ -1,12 +1,46 @@
-import { useState } from 'react'
+import { startTransition, useEffect, useState, type ChangeEvent, type ComponentProps } from 'react'
 import { Link, useLocation } from 'wouter'
-import { Building2, Eye, EyeOff, UserPlus, Users } from 'lucide-react'
+import {
+  ArrowRight,
+  Building2,
+  CheckCircle2,
+  Compass,
+  Eye,
+  EyeOff,
+  LockKeyhole,
+  MapPin,
+  Search,
+  ShieldCheck,
+  Sparkles,
+  UserPlus,
+  Users,
+} from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { setToken } from '@/lib/auth'
 import { useToast } from '@/hooks/use-toast'
 import { supabase } from '@/integrations/supabase/client'
-import { inviteLoginPath, requestMemberJoin } from '@/lib/member-join'
+import {
+  type JoinableCommunity,
+  inviteLoginPath,
+  requestMemberJoin,
+  searchJoinableCommunities,
+} from '@/lib/member-join'
+
+type RegisterMode = 'create' | 'join'
+
+const CITY_OPTIONS = [
+  'Karachi',
+  'Lahore',
+  'Islamabad',
+  'Rawalpindi',
+  'Faisalabad',
+  'Multan',
+  'Peshawar',
+  'Gujranwala',
+  'Hyderabad',
+  'Sialkot',
+]
 
 function emailRedirectTo() {
   const configuredUrl = import.meta.env.VITE_APP_URL?.trim()
@@ -15,13 +49,92 @@ function emailRedirectTo() {
   return `${origin.replace(/\/$/, '')}/login`
 }
 
+function normalize(value: string) {
+  return value.trim().toLowerCase().replace(/\s+/g, ' ')
+}
+
+function bestCommunityMatch(
+  communities: JoinableCommunity[],
+  communityName: string,
+  communityArea: string,
+  communityCity: string,
+) {
+  const name = normalize(communityName)
+  const area = normalize(communityArea)
+  const city = normalize(communityCity)
+
+  return communities.find((community) => {
+    if (!name || normalize(community.name) !== name) return false
+    if (area && normalize(community.area) !== area) return false
+    if (city && normalize(community.city) !== city) return false
+    return true
+  }) ?? (communities.length === 1 ? communities[0] : null)
+}
+
+async function detectCurrentLocation() {
+  if (typeof window === 'undefined' || !navigator.geolocation) {
+    throw new Error('Location autofill is not available in this browser.')
+  }
+
+  const position = await new Promise<GeolocationPosition>((resolve, reject) => {
+    navigator.geolocation.getCurrentPosition(resolve, reject, {
+      enableHighAccuracy: false,
+      timeout: 12000,
+      maximumAge: 300000,
+    })
+  })
+
+  const reverseUrl = new URL('https://nominatim.openstreetmap.org/reverse')
+  reverseUrl.searchParams.set('format', 'jsonv2')
+  reverseUrl.searchParams.set('lat', String(position.coords.latitude))
+  reverseUrl.searchParams.set('lon', String(position.coords.longitude))
+  reverseUrl.searchParams.set('zoom', '15')
+  reverseUrl.searchParams.set('addressdetails', '1')
+
+  const response = await fetch(reverseUrl.toString(), {
+    headers: {
+      Accept: 'application/json',
+    },
+  })
+
+  if (!response.ok) {
+    throw new Error('Could not read your location details right now.')
+  }
+
+  const payload = await response.json()
+  const address = payload?.address ?? {}
+
+  return {
+    area: String(
+      address.suburb ||
+      address.neighbourhood ||
+      address.residential ||
+      address.quarter ||
+      address.city_district ||
+      address.township ||
+      address.road ||
+      '',
+    ).trim(),
+    city: String(
+      address.city ||
+      address.town ||
+      address.county ||
+      address.state_district ||
+      address.village ||
+      '',
+    ).trim(),
+  }
+}
+
 export default function Register() {
   const [, navigate] = useLocation()
   const { toast } = useToast()
   const joinParams = new URLSearchParams(typeof window !== 'undefined' ? window.location.search : '')
   const joinCommunityId = joinParams.get('join')?.trim() ?? ''
   const invitedCommunityName = joinParams.get('community')?.trim() ?? ''
+  const requestedPath = joinParams.get('path') === 'join' ? 'join' : 'create'
   const isMemberInvite = joinCommunityId.length > 0
+  const [activeMode, setActiveMode] = useState<RegisterMode>(isMemberInvite ? 'join' : requestedPath)
   const [form, setForm] = useState({
     email: '',
     password: '',
@@ -35,25 +148,177 @@ export default function Register() {
   })
   const [showPw, setShowPw] = useState(false)
   const [loading, setLoading] = useState(false)
+  const [autofillingLocation, setAutofillingLocation] = useState(false)
   const [errors, setErrors] = useState<Record<string, string[]>>({})
+  const [communityMatches, setCommunityMatches] = useState<JoinableCommunity[]>([])
+  const [selectedCommunity, setSelectedCommunity] = useState<JoinableCommunity | null>(null)
+  const [searchingCommunities, setSearchingCommunities] = useState(false)
+  const [searchMessage, setSearchMessage] = useState('')
 
-  const set = (k: string) => (e: React.ChangeEvent<HTMLInputElement>) =>
-    setForm(f => ({ ...f, [k]: e.target.value }))
+  const registerMode: RegisterMode = isMemberInvite ? 'join' : activeMode
+  const selectedJoinCommunityId = registerMode === 'join'
+    ? (isMemberInvite ? joinCommunityId : selectedCommunity?.id ?? '')
+    : ''
+  const selectedJoinCommunityName = registerMode === 'join'
+    ? (isMemberInvite
+    ? invitedCommunityName || form.communityName.trim() || 'this community'
+    : selectedCommunity?.name || form.communityName.trim() || 'this community')
+    : ''
+  const loginLink = selectedJoinCommunityId
+    ? inviteLoginPath(selectedJoinCommunityId, selectedJoinCommunityName)
+    : '/login'
 
-  const requestInviteForSignedInMember = async () => {
-    await requestMemberJoin(joinCommunityId, {
+  const set = (key: keyof typeof form) => (e: ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value
+    setForm((current) => ({ ...current, [key]: value }))
+    if (key === 'communityName' || key === 'communityArea' || key === 'communityCity') {
+      setSearchMessage('')
+      if (!value.trim() && key === 'communityName' && !isMemberInvite) {
+        setSelectedCommunity(null)
+      }
+    }
+  }
+
+  useEffect(() => {
+    if (isMemberInvite) {
+      setActiveMode('join')
+      if (invitedCommunityName && !form.communityName.trim()) {
+        setForm((current) => ({ ...current, communityName: invitedCommunityName }))
+      }
+    }
+  }, [form.communityName, invitedCommunityName, isMemberInvite])
+
+  useEffect(() => {
+    if (typeof window === 'undefined' || isMemberInvite) return
+
+    const url = new URL(window.location.href)
+    url.searchParams.set('path', activeMode)
+    window.history.replaceState(null, '', `${url.pathname}?${url.searchParams.toString()}`)
+  }, [activeMode, isMemberInvite])
+
+  useEffect(() => {
+    if (registerMode !== 'join' || isMemberInvite) {
+      setCommunityMatches([])
+      setSearchMessage('')
+      setSearchingCommunities(false)
+      return
+    }
+
+    const hasSearchInput = [
+      form.communityName.trim(),
+      form.communityArea.trim(),
+      form.communityCity.trim(),
+    ].some((value) => value.length >= 2)
+
+    if (!hasSearchInput) {
+      setCommunityMatches([])
+      setSelectedCommunity(null)
+      setSearchMessage('')
+      setSearchingCommunities(false)
+      return
+    }
+
+    let active = true
+    const timer = window.setTimeout(async () => {
+      setSearchingCommunities(true)
+      try {
+        const results = await searchJoinableCommunities(
+          form.communityName,
+          form.communityArea,
+          form.communityCity,
+        )
+
+        if (!active) return
+
+        const preferred = bestCommunityMatch(
+          results,
+          form.communityName,
+          form.communityArea,
+          form.communityCity,
+        )
+
+        startTransition(() => {
+          setCommunityMatches(results)
+          setSelectedCommunity((current) => {
+            if (preferred) return preferred
+            if (current && results.some((community) => community.id === current.id)) return current
+            return null
+          })
+        })
+
+        setSearchMessage(
+          results.length === 0
+            ? 'No approved community matched that search yet.'
+            : `${results.length} approved communit${results.length === 1 ? 'y' : 'ies'} found.`,
+        )
+      } catch (error) {
+        if (!active) return
+        setCommunityMatches([])
+        setSelectedCommunity(null)
+        setSearchMessage(error instanceof Error ? error.message : 'Could not search communities right now.')
+      } finally {
+        if (active) setSearchingCommunities(false)
+      }
+    }, 250)
+
+    return () => {
+      active = false
+      window.clearTimeout(timer)
+    }
+  }, [
+    form.communityArea,
+    form.communityCity,
+    form.communityName,
+    isMemberInvite,
+    registerMode,
+  ])
+
+  const autofillLocation = async () => {
+    setAutofillingLocation(true)
+    try {
+      const location = await detectCurrentLocation()
+      if (!location.area && !location.city) {
+        throw new Error('We found your location but could not turn it into an area and city.')
+      }
+
+      setForm((current) => ({
+        ...current,
+        communityArea: location.area || current.communityArea,
+        communityCity: location.city || current.communityCity,
+      }))
+      toast({
+        title: 'Location filled in',
+        description: [location.area, location.city].filter(Boolean).join(', ') || 'Your current area is ready.',
+      })
+    } catch (error) {
+      toast({
+        title: 'Location autofill failed',
+        description: error instanceof Error ? error.message : 'Please enter the area and city manually.',
+        variant: 'destructive',
+      })
+    } finally {
+      setAutofillingLocation(false)
+    }
+  }
+
+  const requestSignedInMemberJoin = async () => {
+    if (!selectedJoinCommunityId) {
+      throw new Error('Choose an approved community before sending the join request.')
+    }
+
+    await requestMemberJoin(selectedJoinCommunityId, {
       username: form.userId,
       fullName: form.name,
       unitNumber: form.unitNumber,
     })
     toast({
       title: 'Join request submitted',
-      description: 'Your community administrator can now review your request.',
+      description: `Your approval request has been sent to ${selectedJoinCommunityName}.`,
     })
     navigate('/pending-approval')
   }
 
-  const signInExistingInviteMember = async () => {
+  const signInExistingJoinMember = async () => {
     const { data, error } = await supabase.auth.signInWithPassword({
       email: form.email,
       password: form.password,
@@ -62,15 +327,15 @@ export default function Register() {
     if (error || !data.session?.access_token) {
       toast({
         title: 'Account already exists',
-        description: 'Sign in with this account to request joining this community.',
+        description: 'Sign in with this account to continue the join request.',
         variant: 'destructive',
       })
-      navigate(inviteLoginPath(joinCommunityId, invitedCommunityName))
+      navigate(loginLink)
       return true
     }
 
     setToken(data.session.access_token)
-    await requestInviteForSignedInMember()
+    await requestSignedInMemberJoin()
     return true
   }
 
@@ -78,6 +343,7 @@ export default function Register() {
     e.preventDefault()
     setLoading(true)
     setErrors({})
+
     try {
       const nextErrors: Record<string, string[]> = {}
       if (!/^[a-z0-9_-]+$/.test(form.userId)) {
@@ -89,25 +355,34 @@ export default function Register() {
       if (form.password !== form.confirmPassword) {
         nextErrors.confirmPassword = ['Passwords do not match']
       }
-      if (!isMemberInvite && !form.communityName.trim()) {
-        nextErrors.communityName = ['Society name is required']
+      if (!form.name.trim()) {
+        nextErrors.name = ['Full name is required']
       }
-      if (!isMemberInvite && !form.communityCity.trim()) {
-        nextErrors.communityCity = ['City is required']
+      if (!form.unitNumber.trim()) {
+        nextErrors.unitNumber = ['Unit number is required']
       }
+
+      if (registerMode === 'create') {
+        if (!form.communityName.trim()) nextErrors.communityName = ['Society name is required']
+        if (!form.communityArea.trim()) nextErrors.communityArea = ['Area is required']
+        if (!form.communityCity.trim()) nextErrors.communityCity = ['City is required']
+      } else if (!selectedJoinCommunityId) {
+        nextErrors.communityName = ['Choose a matching approved community before continuing']
+      }
+
       if (Object.keys(nextErrors).length > 0) {
         setErrors(nextErrors)
         return
       }
 
-      const registrationData = isMemberInvite
+      const registrationData = registerMode === 'join'
         ? {
             username: form.userId,
             full_name: form.name,
             name: form.name,
             unit_number: form.unitNumber,
             registration_type: 'member',
-            join_community_id: joinCommunityId,
+            join_community_id: selectedJoinCommunityId,
           }
         : {
             username: form.userId,
@@ -131,8 +406,8 @@ export default function Register() {
 
       if (error) {
         const message = error.message?.toLowerCase() ?? ''
-        if (isMemberInvite && (message.includes('already registered') || message.includes('already exists'))) {
-          await signInExistingInviteMember()
+        if (registerMode === 'join' && (message.includes('already registered') || message.includes('already exists'))) {
+          await signInExistingJoinMember()
           return
         }
         toast({ title: error.message || 'Registration failed', variant: 'destructive' })
@@ -141,25 +416,25 @@ export default function Register() {
 
       if (data.session?.access_token) {
         setToken(data.session.access_token)
-        if (isMemberInvite) {
-          await requestInviteForSignedInMember()
+        if (registerMode === 'join') {
+          await requestSignedInMemberJoin()
           return
         }
         navigate('/pending-approval')
         return
       }
 
-      if (isMemberInvite && data.user && Array.isArray(data.user.identities) && data.user.identities.length === 0) {
-        await signInExistingInviteMember()
+      if (registerMode === 'join' && data.user && Array.isArray(data.user.identities) && data.user.identities.length === 0) {
+        await signInExistingJoinMember()
         return
       }
 
       toast({
-        title: isMemberInvite
-          ? 'Join request created. Sign in to continue.'
+        title: registerMode === 'join'
+          ? 'Account created. Sign in to finish the join request.'
           : 'Account created. Sign in to continue.',
       })
-      navigate('/login')
+      navigate(loginLink)
     } catch (error) {
       toast({
         title: 'Registration failed',
@@ -171,137 +446,364 @@ export default function Register() {
     }
   }
 
-  const field = (key: string, label: string, type = 'text', placeholder = '') => (
+  const areaSuggestions = Array.from(
+    new Set(communityMatches.map((community) => community.area).filter(Boolean)),
+  )
+
+  const renderTextField = (
+    key: keyof typeof form,
+    label: string,
+    placeholder: string,
+    props: Omit<ComponentProps<typeof Input>, 'value' | 'onChange'> = {},
+  ) => (
     <div className="space-y-1.5">
-      <label className="text-sm font-medium text-foreground">{label}</label>
+      <label htmlFor={key} className="text-sm font-bold text-foreground">{label}</label>
       <Input
-        type={type === 'password' ? (showPw ? 'text' : 'password') : type}
-        value={(form as any)[key]}
+        id={key}
+        value={form[key]}
         onChange={set(key)}
         placeholder={placeholder}
         required
-        className="rounded-xl"
+        className="h-12 rounded-2xl bg-white px-4"
+        {...props}
       />
       {errors[key] && <p className="text-xs text-destructive">{errors[key][0]}</p>}
     </div>
   )
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-background p-4">
-      <div className="pointer-events-none fixed inset-0 overflow-hidden">
-        <div className="animate-blob absolute -left-32 top-1/4 h-96 w-96 rounded-full bg-primary/5 blur-3xl" />
-        <div className="animate-blob animation-delay-2000 absolute -right-32 top-1/2 h-96 w-96 rounded-full bg-accent/5 blur-3xl" />
-      </div>
+    <main className="relative min-h-screen overflow-hidden bg-gradient-to-b from-accent/25 via-background to-background">
+      <datalist id="register-city-options">
+        {CITY_OPTIONS.map((city) => <option key={city} value={city} />)}
+      </datalist>
+      <datalist id="register-area-options">
+        {areaSuggestions.map((area) => <option key={area} value={area} />)}
+      </datalist>
 
-      <div className="relative w-full max-w-sm">
-        <div className="mb-8 text-center">
-          <div className="mx-auto mb-3 flex h-14 w-14 items-center justify-center rounded-2xl bg-primary">
-            <span className="text-2xl font-bold text-primary-foreground">م</span>
-          </div>
-          <h1 className="text-2xl font-bold text-foreground">
-            {isMemberInvite ? `Join ${invitedCommunityName || 'this Mohalla'}` : 'Join your Mohalla'}
-          </h1>
-          <p className="text-sm text-muted-foreground mt-1">
-            {isMemberInvite ? 'Create your resident account for admin approval' : 'Register your society for approval'}
-          </p>
-        </div>
-
-        <form onSubmit={submit} className="space-y-4">
-          {isMemberInvite ? (
-            <div className="rounded-xl border border-border bg-card p-4">
-              <div className="flex items-center gap-3">
-                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary/10">
-                  <Users size={18} className="text-primary" />
-                </div>
-                <div>
-                  <p className="text-sm font-semibold text-foreground">Resident join request</p>
-                  <p className="text-xs text-muted-foreground">{invitedCommunityName || 'Invited community'}</p>
-                </div>
-              </div>
-            </div>
-          ) : (
-            <div className="rounded-xl border border-border bg-card p-4">
-              <div className="mb-3 flex items-center gap-2 text-sm font-semibold text-foreground">
-                <Building2 size={16} className="text-primary" />
-                Society details
-              </div>
-              <div className="space-y-3">
-                {field('communityName', 'Society name', 'text', 'DHA Phase 5 Residents')}
-                {field('communityArea', 'Area', 'text', 'DHA Phase 5')}
-                {field('communityCity', 'City', 'text', 'Karachi')}
-              </div>
-            </div>
-          )}
-
-          {field('name', 'Full name', 'text', 'Ahmed Khan')}
-          {field('email', 'Email', 'email', 'you@example.com')}
-
-          <div className="space-y-1.5">
-            <label className="text-sm font-medium text-foreground">Username</label>
-            <Input
-              type="text"
-              value={form.userId}
-              onChange={set('userId')}
-              placeholder="ahmed (lowercase, no spaces)"
-              required
-              pattern="[a-z0-9_-]+"
-              className="rounded-xl"
-            />
-            <p className="text-xs text-muted-foreground">Lowercase letters, numbers, - and _ only</p>
-            {errors.userId && <p className="text-xs text-destructive">{errors.userId[0]}</p>}
-          </div>
-
-          {field('unitNumber', 'Unit number', 'text', 'B-204')}
-
-          <div className="space-y-1.5">
-            <label className="text-sm font-medium text-foreground">Password</label>
-            <div className="relative">
-              <Input
-                type={showPw ? 'text' : 'password'}
-                value={form.password}
-                onChange={set('password')}
-                placeholder="Min 12 characters"
-                required
-                minLength={12}
-                className="rounded-xl pr-10"
-              />
-              <button
-                type="button"
-                aria-label={showPw ? "Hide password" : "Show password"}
-                onClick={() => setShowPw(!showPw)}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
-              >
-                {showPw ? <EyeOff size={16} /> : <Eye size={16} />}
-              </button>
-            </div>
-            {errors.password && <p className="text-xs text-destructive">{errors.password[0]}</p>}
-          </div>
-
-          <div className="space-y-1.5">
-            <label className="text-sm font-medium text-foreground">Confirm password</label>
-            <Input
-              type={showPw ? 'text' : 'password'}
-              value={form.confirmPassword}
-              onChange={set('confirmPassword')}
-              required
-              minLength={12}
-              className="rounded-xl"
-            />
-            {errors.confirmPassword && <p className="text-xs text-destructive">{errors.confirmPassword[0]}</p>}
-          </div>
-
-          <Button type="submit" disabled={loading} className="w-full rounded-xl bg-primary">
-            {loading ? 'Creating account…' : <><UserPlus size={16} className="mr-2" /> {isMemberInvite ? 'Request to join' : 'Create account'}</>}
-          </Button>
-        </form>
-
-        <p className="mt-5 text-center text-sm text-muted-foreground">
-          Already have an account?{' '}
-          <Link href={isMemberInvite ? inviteLoginPath(joinCommunityId, invitedCommunityName) : "/login"} className="font-semibold text-primary hover:underline">
-            Sign in
+      <div className="relative mx-auto grid min-h-screen w-full max-w-7xl items-center gap-10 px-4 py-10 sm:px-6 lg:grid-cols-[1.05fr_0.95fr] lg:px-8">
+        <section className="hidden lg:block">
+          <Link href="/" className="mb-12 inline-flex items-center gap-3">
+            <span className="flex h-11 w-11 items-center justify-center rounded-2xl bg-primary text-xl font-black text-primary-foreground shadow-lg shadow-primary/20">
+              م
+            </span>
+            <span className="font-headings text-2xl font-black text-foreground">Mohalla</span>
           </Link>
-        </p>
+
+          <div className="max-w-xl space-y-7">
+            <div className="inline-flex items-center gap-2 rounded-full border border-primary/15 bg-primary/10 px-3.5 py-1.5 text-xs font-black uppercase tracking-wide text-primary">
+              <Sparkles className="h-3.5 w-3.5" />
+              {registerMode === 'join' ? 'Fast Community Join Flow' : 'Start A New Community'}
+            </div>
+
+            <div>
+              <h1 className="font-headings text-5xl font-black leading-[1.08] text-foreground">
+                {registerMode === 'join'
+                  ? `Find your society and send the approval request in one go.`
+                  : 'Bring your society online with a cleaner, guided setup.'}
+              </h1>
+              <p className="mt-5 text-lg leading-relaxed text-muted-foreground">
+                {registerMode === 'join'
+                  ? 'Search approved communities by society name and area, create your resident account, and place the request straight into the admin approval queue.'
+                  : 'Create the community, fill the location quickly, and submit the admin account that will manage members, notices, and approvals.'}
+              </p>
+            </div>
+
+            <div className="grid max-w-lg grid-cols-2 gap-3">
+              <div className="rounded-2xl border border-border bg-white/75 p-4 shadow-sm backdrop-blur">
+                <ShieldCheck className="mb-3 h-5 w-5 text-primary" />
+                <div className="text-2xl font-black text-foreground">{registerMode === 'join' ? 'Approved' : 'Guided'}</div>
+                <p className="mt-1 text-xs font-semibold text-muted-foreground">
+                  {registerMode === 'join' ? 'Only verified communities appear here' : 'Clear sections for location, account, and access'}
+                </p>
+              </div>
+              <div className="rounded-2xl border border-border bg-white/75 p-4 shadow-sm backdrop-blur">
+                <MapPin className="mb-3 h-5 w-5 text-accent" />
+                <div className="text-2xl font-black text-foreground">Location</div>
+                <p className="mt-1 text-xs font-semibold text-muted-foreground">
+                  Autofill area and city with your current location when you want it.
+                </p>
+              </div>
+            </div>
+
+            <div className="glass max-w-lg rounded-3xl p-5 shadow-xl">
+              <div className="flex items-start gap-3">
+                <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-emerald-50 text-emerald-600">
+                  <CheckCircle2 className="h-5 w-5" />
+                </span>
+                <div>
+                  <p className="text-sm font-black text-foreground">
+                    {registerMode === 'join' ? 'Admin approval stays automatic' : 'Platform approval stays intact'}
+                  </p>
+                  <p className="mt-1 text-sm leading-relaxed text-muted-foreground">
+                    {registerMode === 'join'
+                      ? 'Once the resident account is created, Mohalla places the request under the selected community for the admin to review.'
+                      : 'Community admins still go through the existing approval path, only with a much smoother form.'}
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section className="mx-auto w-full max-w-xl">
+          <div className="mb-7 text-center lg:hidden">
+            <Link href="/" className="inline-flex items-center gap-2.5">
+              <span className="flex h-11 w-11 items-center justify-center rounded-2xl bg-primary text-xl font-black text-primary-foreground">
+                م
+              </span>
+              <span className="font-headings text-2xl font-black text-foreground">Mohalla</span>
+            </Link>
+          </div>
+
+          <div className="rounded-[2rem] border border-border bg-white/90 p-5 shadow-2xl shadow-primary/5 backdrop-blur-xl sm:p-7">
+            <div className="mb-7 text-center">
+              <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-primary/10 text-primary">
+                {registerMode === 'join' ? <Users className="h-7 w-7" /> : <LockKeyhole className="h-7 w-7" />}
+              </div>
+              <h2 className="font-headings text-3xl font-black text-foreground">
+                {registerMode === 'join'
+                  ? (isMemberInvite ? `Join ${selectedJoinCommunityName}` : 'Join Existing Community')
+                  : 'Create Your Community'}
+              </h2>
+              <p className="mt-2 text-sm text-muted-foreground">
+                {registerMode === 'join'
+                  ? (isMemberInvite
+                    ? 'Create your resident account and send it for admin approval.'
+                    : 'Search your approved society, then create the resident account that goes into admin review.')
+                  : 'Set up the admin account for your society and send the community for platform approval.'}
+              </p>
+            </div>
+
+            {!isMemberInvite && (
+              <div className="mb-6 grid grid-cols-2 gap-1.5 rounded-2xl border border-border bg-muted/50 p-1.5">
+                <button
+                  type="button"
+                  onClick={() => setActiveMode('create')}
+                  className={`flex h-11 items-center justify-center gap-2 rounded-xl px-3 text-sm font-black transition-all ${
+                    activeMode === 'create' ? 'bg-white text-primary shadow-sm' : 'text-muted-foreground hover:text-foreground'
+                  }`}
+                >
+                  <Building2 size={15} /> Create
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setActiveMode('join')}
+                  className={`flex h-11 items-center justify-center gap-2 rounded-xl px-3 text-sm font-black transition-all ${
+                    activeMode === 'join' ? 'bg-white text-primary shadow-sm' : 'text-muted-foreground hover:text-foreground'
+                  }`}
+                >
+                  <Search size={15} /> Join Existing
+                </button>
+              </div>
+            )}
+
+            <form onSubmit={submit} className="space-y-6">
+              <div className="rounded-3xl border border-border bg-muted/30 p-4 sm:p-5">
+                <div className="mb-4 flex items-center justify-between gap-3">
+                  <div>
+                    <p className="text-sm font-black text-foreground">
+                      {registerMode === 'join' ? 'Community Match' : 'Community Details'}
+                    </p>
+                    <p className="text-xs text-muted-foreground">
+                      {registerMode === 'join'
+                        ? 'Use the same society name and area your admin approved.'
+                        : 'Area and city can be filled automatically if you allow location access.'}
+                    </p>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={autofillLocation}
+                    disabled={autofillingLocation}
+                    className="inline-flex h-10 items-center gap-2 rounded-2xl border border-border bg-white px-3 text-xs font-black text-foreground transition-colors hover:bg-muted disabled:opacity-60"
+                  >
+                    <Compass size={14} className={autofillingLocation ? 'animate-spin' : ''} />
+                    {autofillingLocation ? 'Finding...' : 'Use My Location'}
+                  </button>
+                </div>
+
+                {registerMode === 'join' && isMemberInvite ? (
+                  <div className="rounded-2xl border border-primary/15 bg-white p-4 shadow-sm">
+                    <div className="flex items-start gap-3">
+                      <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-primary/10 text-primary">
+                        <Users size={18} />
+                      </div>
+                      <div>
+                        <p className="text-sm font-black text-foreground">Invited Community</p>
+                        <p className="mt-1 text-sm text-muted-foreground">{selectedJoinCommunityName}</p>
+                        <p className="mt-1 text-xs text-muted-foreground">
+                          Your account will go straight into this community’s admin approval queue.
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="grid gap-4 sm:grid-cols-2">
+                    <div className="sm:col-span-2">
+                      {renderTextField(
+                        'communityName',
+                        registerMode === 'join' ? 'Society Name' : 'Society Name',
+                        registerMode === 'join' ? 'Askari 11, DHA Phase 6, Bahria Town...' : 'DHA Phase 5 Residents',
+                      )}
+                    </div>
+                    {renderTextField(
+                      'communityArea',
+                      'Area',
+                      registerMode === 'join' ? 'Bedian Road, Gulberg, G-11...' : 'DHA Phase 5',
+                      { list: registerMode === 'join' ? 'register-area-options' : undefined },
+                    )}
+                    {renderTextField(
+                      'communityCity',
+                      'City',
+                      'Karachi',
+                      { list: 'register-city-options', required: registerMode === 'create' },
+                    )}
+                  </div>
+                )}
+
+                {registerMode === 'join' && !isMemberInvite && (
+                  <div className="mt-4 space-y-3">
+                    <div className="flex items-center justify-between">
+                      <p className="text-xs font-black uppercase tracking-wide text-muted-foreground">Approved Matches</p>
+                      <p className="text-xs text-muted-foreground">
+                        {searchingCommunities ? 'Searching...' : searchMessage}
+                      </p>
+                    </div>
+
+                    {communityMatches.length > 0 ? (
+                      <div className="space-y-2">
+                        {communityMatches.map((community) => {
+                          const isSelected = selectedCommunity?.id === community.id
+                          return (
+                            <button
+                              key={community.id}
+                              type="button"
+                              onClick={() => setSelectedCommunity(community)}
+                              className={`flex w-full items-start justify-between rounded-2xl border px-4 py-3 text-left transition-all ${
+                                isSelected
+                                  ? 'border-primary bg-primary/5 shadow-sm'
+                                  : 'border-border bg-white hover:border-primary/30 hover:bg-muted/20'
+                              }`}
+                            >
+                              <div>
+                                <p className="text-sm font-black text-foreground">{community.name}</p>
+                                <p className="mt-1 text-xs text-muted-foreground">
+                                  {[community.area, community.city].filter(Boolean).join(', ') || 'Location available after approval'}
+                                </p>
+                              </div>
+                              {isSelected && (
+                                <span className="rounded-full bg-primary/10 px-2 py-1 text-[11px] font-black text-primary">
+                                  Selected
+                                </span>
+                              )}
+                            </button>
+                          )
+                        })}
+                      </div>
+                    ) : (
+                      <div className="rounded-2xl border border-dashed border-border bg-white/70 p-4 text-sm text-muted-foreground">
+                        Search with the society name and area to see approved communities you can join.
+                      </div>
+                    )}
+                  </div>
+                )}
+              </div>
+
+              <div className="rounded-3xl border border-border bg-white p-4 sm:p-5">
+                <div className="mb-4">
+                  <p className="text-sm font-black text-foreground">Account Details</p>
+                  <p className="text-xs text-muted-foreground">
+                    {registerMode === 'join'
+                      ? 'These details help the admin verify who is requesting access.'
+                      : 'This account becomes the first admin for the new community.'}
+                  </p>
+                </div>
+
+                <div className="grid gap-4 sm:grid-cols-2">
+                  <div className="sm:col-span-2">
+                    {renderTextField('name', 'Full Name', 'Ahmed Khan')}
+                  </div>
+                  {renderTextField('email', 'Email', 'you@example.com', { type: 'email' })}
+                  {renderTextField('unitNumber', 'Unit Number', 'B-204')}
+
+                  <div className="space-y-1.5 sm:col-span-2">
+                    <label htmlFor="userId" className="text-sm font-bold text-foreground">Username</label>
+                    <Input
+                      id="userId"
+                      type="text"
+                      value={form.userId}
+                      onChange={set('userId')}
+                      placeholder="ahmed_khan"
+                      required
+                      pattern="[a-z0-9_-]+"
+                      className="h-12 rounded-2xl bg-white px-4"
+                    />
+                    <p className="text-xs text-muted-foreground">Lowercase letters, numbers, - and _ only</p>
+                    {errors.userId && <p className="text-xs text-destructive">{errors.userId[0]}</p>}
+                  </div>
+
+                  <div className="space-y-1.5">
+                    <label htmlFor="password" className="text-sm font-bold text-foreground">Password</label>
+                    <div className="relative">
+                      <Input
+                        id="password"
+                        type={showPw ? 'text' : 'password'}
+                        value={form.password}
+                        onChange={set('password')}
+                        placeholder="Minimum 12 characters"
+                        required
+                        minLength={12}
+                        className="h-12 rounded-2xl bg-white px-4 pr-11"
+                      />
+                      <button
+                        type="button"
+                        aria-label={showPw ? 'Hide password' : 'Show password'}
+                        onClick={() => setShowPw(!showPw)}
+                        className="absolute right-4 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                      >
+                        {showPw ? <EyeOff size={17} /> : <Eye size={17} />}
+                      </button>
+                    </div>
+                    {errors.password && <p className="text-xs text-destructive">{errors.password[0]}</p>}
+                  </div>
+
+                  <div className="space-y-1.5">
+                    <label htmlFor="confirmPassword" className="text-sm font-bold text-foreground">Confirm Password</label>
+                    <Input
+                      id="confirmPassword"
+                      type={showPw ? 'text' : 'password'}
+                      value={form.confirmPassword}
+                      onChange={set('confirmPassword')}
+                      placeholder="Repeat your password"
+                      required
+                      minLength={12}
+                      className="h-12 rounded-2xl bg-white px-4"
+                    />
+                    {errors.confirmPassword && <p className="text-xs text-destructive">{errors.confirmPassword[0]}</p>}
+                  </div>
+                </div>
+              </div>
+
+              <Button type="submit" disabled={loading} size="lg" className="h-12 w-full rounded-2xl font-black shadow-lg shadow-primary/20">
+                {loading
+                  ? 'Creating account...'
+                  : <>
+                      <UserPlus size={17} />
+                      {registerMode === 'join' ? 'Create Account And Send Approval Request' : 'Create Community Account'}
+                    </>}
+              </Button>
+            </form>
+
+            <div className="mt-6 border-t border-border pt-5 text-center">
+              <p className="text-sm text-muted-foreground">
+                Already have an account?{' '}
+                <Link href={loginLink} className="inline-flex items-center gap-1 font-black text-primary hover:underline">
+                  Sign In <ArrowRight size={14} />
+                </Link>
+              </p>
+            </div>
+          </div>
+        </section>
       </div>
-    </div>
+    </main>
   )
 }

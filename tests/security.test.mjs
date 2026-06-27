@@ -61,7 +61,7 @@ test("member invite signup joins an approved existing community", async () => {
 
   const register = await read("src/pages/Register.tsx");
   assert.match(register, /registration_type: 'member'/i);
-  assert.match(register, /join_community_id: joinCommunityId/i);
+  assert.match(register, /join_community_id: selectedJoinCommunityId/i);
   assert.match(register, /registration_type: 'community_admin'/i);
 
   const inviteTools = await read("src/components/community/invite-tools.tsx");
@@ -90,13 +90,15 @@ test("existing members can re-apply through invite links", async () => {
 
   const joinHelper = await read("src/lib/member-join.ts");
   assert.match(joinHelper, /request_member_join/);
+  assert.match(joinHelper, /search_joinable_communities/);
   assert.match(joinHelper, /inviteLoginPath/);
   assert.match(joinHelper, /inviteRegisterPath/);
 
   const register = await read("src/pages/Register.tsx");
-  assert.match(register, /signInExistingInviteMember/);
-  assert.match(register, /requestInviteForSignedInMember/);
-  assert.match(register, /inviteLoginPath\(joinCommunityId, invitedCommunityName\)/);
+  assert.match(register, /signInExistingJoinMember/);
+  assert.match(register, /requestSignedInMemberJoin/);
+  assert.match(register, /searchJoinableCommunities/);
+  assert.match(register, /Create Account And Send Approval Request/);
 
   const login = await read("src/pages/Login.tsx");
   assert.match(login, /requestMemberJoin\(joinCommunityId\)/);
@@ -160,4 +162,9 @@ test("admin access and member management are scoped to trusted manager state", a
   assert.match(memberListRpc, /public\.can_manage_own_community\(\)/);
   assert.match(memberListRpc, /p\.community_id = actor_community/);
   assert.match(memberListRpc, /grant execute on function public\.admin_list_members\(text\) to authenticated/);
+
+  const joinSearchRpc = await read("supabase/migrations/20260627224500_search_joinable_communities.sql");
+  assert.match(joinSearchRpc, /create or replace function public\.search_joinable_communities/);
+  assert.match(joinSearchRpc, /c\.status = 'approved'/);
+  assert.match(joinSearchRpc, /grant execute on function public\.search_joinable_communities\(text, text, text\) to anon, authenticated/);
 });
