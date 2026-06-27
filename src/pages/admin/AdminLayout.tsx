@@ -24,13 +24,10 @@ export function AdminLayout({ children }: { children: React.ReactNode }) {
     queryKey: ['admin-members-pending-count', communityId],
     queryFn: async () => {
       if (!communityId) return 0
-      const { count, error } = await supabase
-        .from('profiles')
-        .select('id', { count: 'exact', head: true })
-        .eq('community_id', communityId)
-        .eq('membership_status', 'pending')
+      const { data, error } = await (supabase as any)
+        .rpc('admin_list_members', { requested_status: 'pending' })
       if (error) throw error
-      return count ?? 0
+      return data?.length ?? 0
     },
     enabled: Boolean(communityId),
   })

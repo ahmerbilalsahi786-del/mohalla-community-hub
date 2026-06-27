@@ -91,10 +91,16 @@ test("admin access and member management are scoped to trusted manager state", a
 
   const adminMembers = await read("src/pages/admin/Members.tsx");
   assert.match(adminMembers, /loadAdminMembers/);
-  assert.match(adminMembers, /\.eq\('community_id', communityId\)/);
+  assert.match(adminMembers, /admin_list_members/);
   assert.match(adminMembers, /queryKey: \['admin-members', communityId\]/);
 
   const adminLayout = await read("src/pages/admin/AdminLayout.tsx");
   assert.match(adminLayout, /admin-members-pending-count/);
-  assert.match(adminLayout, /\.eq\('membership_status', 'pending'\)/);
+  assert.match(adminLayout, /admin_list_members/);
+
+  const memberListRpc = await read("supabase/migrations/20260627113000_admin_member_list_rpc.sql");
+  assert.match(memberListRpc, /create or replace function public\.admin_list_members/);
+  assert.match(memberListRpc, /public\.can_manage_own_community\(\)/);
+  assert.match(memberListRpc, /p\.community_id = actor_community/);
+  assert.match(memberListRpc, /grant execute on function public\.admin_list_members\(text\) to authenticated/);
 });

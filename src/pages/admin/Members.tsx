@@ -39,9 +39,9 @@ function toMember(profile: any): Member {
     userId: profile.id,
     name: memberName(profile),
     unitNumber: profile.unit_number ?? '',
-    phone: profile.private_profiles?.phone ?? profile.private_profiles?.whatsapp_number ?? '',
+    phone: profile.phone ?? profile.whatsapp_number ?? '',
     status: profile.membership_status ?? (profile.is_verified ? 'approved' : 'pending'),
-    role: profile.user_roles?.[0]?.role ?? 'user',
+    role: profile.role ?? 'user',
     isVerified: Boolean(profile.is_verified),
     joinDate: profile.created_at ?? new Date().toISOString(),
     communityId: profile.community_id ?? 'default',
@@ -50,11 +50,7 @@ function toMember(profile: any): Member {
 
 async function loadAdminMembers(communityId?: string | null) {
   if (!communityId) return []
-  const { data, error } = await (supabase as any)
-    .from('profiles')
-    .select('*, private_profiles(phone, whatsapp_number), user_roles(role)')
-    .eq('community_id', communityId)
-    .order('created_at', { ascending: false })
+  const { data, error } = await (supabase as any).rpc('admin_list_members', { requested_status: null })
 
   if (error) throw error
   return (data ?? []).map(toMember)
