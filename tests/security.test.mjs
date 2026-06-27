@@ -61,6 +61,16 @@ test("member invite signup joins an approved existing community", async () => {
   assert.match(inviteTools, /\/register\?join=/i);
 });
 
+test("member invite repair migration recovers existing misplaced pending profiles", async () => {
+  const migration = await read("supabase/migrations/20260627110000_repair_member_invite_profiles.sql");
+  assert.match(migration, /repair_member_invite_profiles/i);
+  assert.match(migration, /auth\.users/i);
+  assert.match(migration, /raw_user_meta_data->>'join_community_id'/i);
+  assert.match(migration, /membership_status = 'pending'/i);
+  assert.match(migration, /is_verified = false/i);
+  assert.match(migration, /select public\.repair_member_invite_profiles\(\)/i);
+});
+
 test("admin access and member management are scoped to trusted manager state", async () => {
   const currentUser = await read("src/hooks/use-current-user.ts");
   assert.match(currentUser, /queryKey: \["current-user", token\]/);
