@@ -1,9 +1,12 @@
+import { useEffect } from "react";
+import { useLocation } from "wouter";
 import { Clock3, LogOut, ShieldCheck, XCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useCurrentUser, useLogout } from "@/hooks/use-current-user";
 
 export default function MembershipPending() {
-  const { data: user } = useCurrentUser();
+  const [, navigate] = useLocation();
+  const { data: user, refetch } = useCurrentUser();
   const logout = useLogout();
   const rejected = user?.membershipStatus === "rejected";
   const community = user?.community;
@@ -29,6 +32,19 @@ export default function MembershipPending() {
         : rejected
           ? "Your community administrator did not approve this membership. Contact them if this appears incorrect."
           : "Your account is ready. A community administrator needs to approve your membership before community content becomes available.";
+
+  useEffect(() => {
+    if (user?.communityStatus === "approved" && user?.membershipStatus === "approved") {
+      navigate("/");
+      return;
+    }
+
+    const timer = window.setInterval(() => {
+      refetch();
+    }, 5000);
+
+    return () => window.clearInterval(timer);
+  }, [navigate, refetch, user?.communityStatus, user?.membershipStatus]);
 
   return (
     <main className="flex min-h-screen items-center justify-center bg-background p-4">

@@ -92,11 +92,18 @@ test("admin access and member management are scoped to trusted manager state", a
   const adminMembers = await read("src/pages/admin/Members.tsx");
   assert.match(adminMembers, /loadAdminMembers/);
   assert.match(adminMembers, /admin_list_members/);
+  assert.match(adminMembers, /admin_manage_member/);
+  assert.match(adminMembers, /setQueriesData<Member\[]>/);
   assert.match(adminMembers, /queryKey: \['admin-members', communityId\]/);
+  assert.match(adminMembers, /titleCaseWord\(member\.role\)/);
 
   const adminLayout = await read("src/pages/admin/AdminLayout.tsx");
   assert.match(adminLayout, /admin-members-pending-count/);
   assert.match(adminLayout, /admin_list_members/);
+
+  const pending = await read("src/pages/MembershipPending.tsx");
+  assert.match(pending, /refetch\(\)/);
+  assert.match(pending, /navigate\("\/"\)/);
 
   const memberListRpc = await read("supabase/migrations/20260627113000_admin_member_list_rpc.sql");
   assert.match(memberListRpc, /create or replace function public\.admin_list_members/);

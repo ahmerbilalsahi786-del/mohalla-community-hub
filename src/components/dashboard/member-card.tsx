@@ -1,5 +1,6 @@
 import { Link } from 'wouter'
 import { cn } from '@/lib/utils'
+import { titleCaseWords } from '@/lib/format-label'
 
 interface Member {
   id: string
@@ -57,7 +58,7 @@ export function MemberCard({ members }: MemberCardProps) {
             {/* Info */}
             <div className="flex-1 min-w-0">
               <h4 className="truncate font-semibold text-card-foreground">{member.name}</h4>
-              <p className="text-sm text-muted-foreground">{member.role}</p>
+              <p className="text-sm text-muted-foreground">{titleCaseWords(member.role)}</p>
               {member.mutualConnections && (
                 <p className="text-xs text-muted-foreground">
                   {member.mutualConnections} mutual connections

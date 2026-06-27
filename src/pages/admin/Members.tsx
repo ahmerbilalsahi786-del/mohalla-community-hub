@@ -1,9 +1,6 @@
 import { useState } from 'react'
 import { AdminLayout } from './AdminLayout'
-import {
-  useAdminApproveMember, useAdminRejectMember,
-  useAdminDeleteMember, useAdminVerifyMember, useAdminSetMemberRole,
-} from '@/lib/generated/api'
+import { useAdminDeleteMember, useAdminVerifyMember, useAdminSetMemberRole } from '@/lib/generated/api'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import {
   CheckCircle2, XCircle, Trash2, BadgeCheck, ChevronDown, Clock, Users
@@ -11,6 +8,8 @@ import {
 import { cn } from '@/lib/utils'
 import { supabase } from '@/integrations/supabase/client'
 import { useCurrentUser } from '@/hooks/use-current-user'
+import { useToast } from '@/hooks/use-toast'
+import { titleCaseWord } from '@/lib/format-label'
 
 type Member = {
   id: number; userId: string; name: string; unitNumber: string; phone: string;
@@ -65,13 +64,41 @@ function timeAgo(d: string) {
 
 function MemberRow({ member, refetch }: { member: Member; refetch: () => void }) {
   const qc = useQueryClient()
-  const inv = () => { qc.invalidateQueries({ queryKey: ['admin-members'] }); refetch() }
+  const { toast } = useToast()
+  const inv = () => {
+    qc.invalidateQueries({ queryKey: ['admin-members'] })
+    qc.invalidateQueries({ queryKey: ['admin-members-pending-count'] })
+    refetch()
+  }
 
-  const approve = useAdminApproveMember({ mutation: { onSuccess: inv } })
-  const reject  = useAdminRejectMember({ mutation: { onSuccess: inv } })
   const del     = useAdminDeleteMember({ mutation: { onSuccess: inv } })
   const verify  = useAdminVerifyMember({ mutation: { onSuccess: inv } })
   const setRole = useAdminSetMemberRole({ mutation: { onSuccess: inv } })
+
+  const updateMembership = async (status: 'approved' | 'rejected') => {
+    qc.setQueriesData<Member[]>({ queryKey: ['admin-members'] }, (current) =>
+      current?.map((item) =>
+        item.userId === member.userId
+          ? { ...item, status, isVerified: status === 'approved' }
+          : item
+      )
+    )
+
+    const { error } = await (supabase as any).rpc('admin_manage_member', {
+      target_user: member.userId,
+      requested_action: status === 'approved' ? 'approve' : 'reject',
+      requested_role: null,
+    })
+
+    if (error) {
+      await refetch()
+      toast({ title: error.message || `Could not ${status === 'approved' ? 'approve' : 'reject'} member.`, variant: 'destructive' })
+      return
+    }
+
+    toast({ title: status === 'approved' ? 'Member approved' : 'Member rejected' })
+    inv()
+  }
 
   return (
     <tr className="border-b border-border hover:bg-muted/30 transition-colors">
@@ -94,7 +121,7 @@ function MemberRow({ member, refetch }: { member: Member; refetch: () => void })
       <td className="px-4 py-3 text-sm text-muted-foreground">{timeAgo(member.joinDate)}</td>
       <td className="px-4 py-3">
         <span className={cn('rounded-full px-2 py-0.5 text-xs font-semibold', ROLE_COLORS[member.role] || ROLE_COLORS.user)}>
-          {member.role}
+          {titleCaseWord(member.role)}
         </span>
       </td>
       <td className="px-4 py-3">
@@ -117,13 +144,13 @@ function MemberRow({ member, refetch }: { member: Member; refetch: () => void })
           {member.status === 'pending' && (
             <>
               <button
-                onClick={() => approve.mutate({ memberId: member.id })}
+                onClick={() => updateMembership('approved')}
                 className="flex items-center gap-1 rounded-lg bg-green-500/10 px-2 py-1 text-xs font-medium text-green-700 hover:bg-green-500/20 transition-colors"
               >
                 <CheckCircle2 size={12} /> Approve
               </button>
               <button
-                onClick={() => reject.mutate({ memberId: member.id })}
+                onClick={() => updateMembership('rejected')}
                 className="flex items-center gap-1 rounded-lg bg-red-500/10 px-2 py-1 text-xs font-medium text-red-600 hover:bg-red-500/20 transition-colors"
               >
                 <XCircle size={12} /> Reject
@@ -151,7 +178,7 @@ function MemberRow({ member, refetch }: { member: Member; refetch: () => void })
                   onChange={e => setRole.mutate({ memberId: member.id, data: { role: e.target.value } })}
                   className="appearance-none rounded-lg border border-border bg-background px-2 py-1 pr-6 text-xs text-foreground focus:outline-none focus:border-primary cursor-pointer"
                 >
-                  {ROLE_OPTIONS.map(r => <option key={r} value={r}>{r}</option>)}
+                  {ROLE_OPTIONS.map(r => <option key={r} value={r}>{titleCaseWord(r)}</option>)}
                 </select>
                 <ChevronDown size={10} className="pointer-events-none absolute right-1.5 top-1/2 -translate-y-1/2 text-muted-foreground" />
               </div>
