@@ -84,46 +84,61 @@ async function detectCurrentLocation() {
     })
   })
 
-  const reverseUrl = new URL('https://nominatim.openstreetmap.org/reverse')
-  reverseUrl.searchParams.set('format', 'jsonv2')
-  reverseUrl.searchParams.set('lat', String(position.coords.latitude))
-  reverseUrl.searchParams.set('lon', String(position.coords.longitude))
-  reverseUrl.searchParams.set('zoom', '15')
-  reverseUrl.searchParams.set('addressdetails', '1')
+  const latitude = position.coords.latitude
+  const longitude = position.coords.longitude
+  const lookupUrls = [
+    `https://api-bdc.net/data/reverse-geocode-client?latitude=${encodeURIComponent(String(latitude))}&longitude=${encodeURIComponent(String(longitude))}&localityLanguage=en`,
+    `https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${encodeURIComponent(String(latitude))}&lon=${encodeURIComponent(String(longitude))}&zoom=15&addressdetails=1`,
+  ]
 
-  const response = await fetch(reverseUrl.toString(), {
-    headers: {
-      Accept: 'application/json',
-    },
-  })
-
-  if (!response.ok) {
-    throw new Error('Could not read your location details right now.')
+  const extractLocation = (payload: any) => {
+    const address = payload?.address ?? payload?.localityInfo?.administrative ?? {}
+    return {
+      area: String(
+        payload?.locality ||
+        payload?.principalSubdivision ||
+        address.suburb ||
+        address.neighbourhood ||
+        address.residential ||
+        address.quarter ||
+        address.city_district ||
+        address.township ||
+        address.road ||
+        '',
+      ).trim(),
+      city: String(
+        payload?.city ||
+        payload?.locality ||
+        payload?.principalSubdivision ||
+        address.city ||
+        address.town ||
+        address.county ||
+        address.state_district ||
+        address.village ||
+        '',
+      ).trim(),
+    }
   }
 
-  const payload = await response.json()
-  const address = payload?.address ?? {}
+  let lastError: Error | null = null
+  for (const url of lookupUrls) {
+    try {
+      const response = await fetch(url, {
+        headers: {
+          Accept: 'application/json',
+        },
+      })
+      if (!response.ok) continue
 
-  return {
-    area: String(
-      address.suburb ||
-      address.neighbourhood ||
-      address.residential ||
-      address.quarter ||
-      address.city_district ||
-      address.township ||
-      address.road ||
-      '',
-    ).trim(),
-    city: String(
-      address.city ||
-      address.town ||
-      address.county ||
-      address.state_district ||
-      address.village ||
-      '',
-    ).trim(),
+      const payload = await response.json()
+      const location = extractLocation(payload)
+      if (location.area || location.city) return location
+    } catch (error) {
+      lastError = error instanceof Error ? error : new Error('Reverse geocoding failed.')
+    }
   }
+
+  throw lastError ?? new Error('Could not read your location details right now.')
 }
 
 export default function Register() {
