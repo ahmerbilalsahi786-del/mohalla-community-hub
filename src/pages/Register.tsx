@@ -1,4 +1,4 @@
-import { startTransition, useEffect, useState, type ChangeEvent, type ComponentProps } from 'react'
+import { startTransition, useEffect, useRef, useState, type ChangeEvent, type ComponentProps } from 'react'
 import { Link, useLocation } from 'wouter'
 import {
   ArrowRight,
@@ -47,28 +47,6 @@ function emailRedirectTo() {
   const origin = configuredUrl || window.location.origin
 
   return `${origin.replace(/\/$/, '')}/login`
-}
-
-function normalize(value: string) {
-  return value.trim().toLowerCase().replace(/\s+/g, ' ')
-}
-
-function bestCommunityMatch(
-  communities: JoinableCommunity[],
-  communityName: string,
-  communityArea: string,
-  communityCity: string,
-) {
-  const name = normalize(communityName)
-  const area = normalize(communityArea)
-  const city = normalize(communityCity)
-
-  return communities.find((community) => {
-    if (!name || normalize(community.name) !== name) return false
-    if (area && normalize(community.area) !== area) return false
-    if (city && normalize(community.city) !== city) return false
-    return true
-  }) ?? (communities.length === 1 ? communities[0] : null)
 }
 
 function extractLocation(payload: any) {
@@ -208,6 +186,7 @@ export default function Register() {
   const [selectedCommunity, setSelectedCommunity] = useState<JoinableCommunity | null>(null)
   const [searchingCommunities, setSearchingCommunities] = useState(false)
   const [searchMessage, setSearchMessage] = useState('')
+  const personalInfoRef = useRef<HTMLDivElement | null>(null)
 
   const registerMode: RegisterMode = isMemberInvite ? 'join' : activeMode
   const selectedJoinCommunityId = registerMode === 'join'
@@ -226,11 +205,25 @@ export default function Register() {
     const value = e.target.value
     setForm((current) => ({ ...current, [key]: value }))
     if (key === 'communityName' || key === 'communityArea' || key === 'communityCity') {
+      if (!isMemberInvite) setSelectedCommunity(null)
       setSearchMessage('')
-      if (!value.trim() && key === 'communityName' && !isMemberInvite) {
-        setSelectedCommunity(null)
-      }
     }
+  }
+
+  const chooseCommunity = (community: JoinableCommunity) => {
+    setSelectedCommunity(community)
+    setForm((current) => ({
+      ...current,
+      communityName: community.name,
+      communityArea: community.area || current.communityArea,
+      communityCity: community.city || current.communityCity,
+    }))
+    setSearchMessage(`${community.name} selected. Continue with your personal information.`)
+
+    window.setTimeout(() => {
+      personalInfoRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+      personalInfoRef.current?.querySelector<HTMLInputElement>('#name')?.focus({ preventScroll: true })
+    }, 75)
   }
 
   useEffect(() => {
@@ -284,17 +277,9 @@ export default function Register() {
 
         if (!active) return
 
-        const preferred = bestCommunityMatch(
-          results,
-          form.communityName,
-          form.communityArea,
-          form.communityCity,
-        )
-
         startTransition(() => {
           setCommunityMatches(results)
           setSelectedCommunity((current) => {
-            if (preferred) return preferred
             if (current && results.some((community) => community.id === current.id)) return current
             return null
           })
@@ -660,19 +645,21 @@ export default function Register() {
                     </p>
                     <p className="text-xs text-muted-foreground">
                       {registerMode === 'join'
-                        ? 'Use the same society name and area your admin approved.'
+                        ? 'Select your approved society, then continue with your personal details.'
                         : 'Area and city can be filled automatically if you allow location access.'}
                     </p>
                   </div>
-                  <button
-                    type="button"
-                    onClick={autofillLocation}
-                    disabled={autofillingLocation}
-                    className="inline-flex h-10 items-center gap-2 rounded-2xl border border-border bg-white px-3 text-xs font-black text-foreground transition-colors hover:bg-muted disabled:opacity-60"
-                  >
-                    <Compass size={14} className={autofillingLocation ? 'animate-spin' : ''} />
-                    {autofillingLocation ? 'Finding...' : 'Use My Location'}
-                  </button>
+                  {registerMode === 'create' && (
+                    <button
+                      type="button"
+                      onClick={autofillLocation}
+                      disabled={autofillingLocation}
+                      className="inline-flex h-10 items-center gap-2 rounded-2xl border border-border bg-white px-3 text-xs font-black text-foreground transition-colors hover:bg-muted disabled:opacity-60"
+                    >
+                      <Compass size={14} className={autofillingLocation ? 'animate-spin' : ''} />
+                      {autofillingLocation ? 'Finding...' : 'Use My Location'}
+                    </button>
+                  )}
                 </div>
 
                 {registerMode === 'join' && isMemberInvite ? (
@@ -690,6 +677,35 @@ export default function Register() {
                       </div>
                     </div>
                   </div>
+                ) : registerMode === 'join' && selectedCommunity ? (
+                  <div className="rounded-2xl border border-primary/20 bg-white p-4 shadow-sm">
+                    <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+                      <div className="flex items-start gap-3">
+                        <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-primary/10 text-primary">
+                          <CheckCircle2 size={19} />
+                        </div>
+                        <div>
+                          <p className="text-sm font-black text-foreground">{selectedCommunity.name}</p>
+                          <p className="mt-1 text-xs text-muted-foreground">
+                            {[selectedCommunity.area, selectedCommunity.city].filter(Boolean).join(', ') || 'Approved community selected'}
+                          </p>
+                          <p className="mt-1 text-xs text-muted-foreground">
+                            Your request will go directly to this society admin after account creation.
+                          </p>
+                        </div>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setSelectedCommunity(null)
+                          setSearchMessage('Choose your society from the approved matches.')
+                        }}
+                        className="inline-flex h-10 items-center justify-center rounded-2xl border border-border bg-white px-3 text-xs font-black text-foreground transition-colors hover:bg-muted"
+                      >
+                        Change Society
+                      </button>
+                    </div>
+                  </div>
                 ) : (
                   <div className="grid gap-4 sm:grid-cols-2">
                     <div className="sm:col-span-2">
@@ -699,22 +715,25 @@ export default function Register() {
                         registerMode === 'join' ? 'Askari 11, DHA Phase 6, Bahria Town...' : 'DHA Phase 5 Residents',
                       )}
                     </div>
-                    {renderTextField(
-                      'communityArea',
-                      'Area',
-                      registerMode === 'join' ? 'Bedian Road, Gulberg, G-11...' : 'DHA Phase 5',
-                      { list: registerMode === 'join' ? 'register-area-options' : undefined },
-                    )}
-                    {renderTextField(
-                      'communityCity',
-                      'City',
-                      'Karachi',
-                      { list: 'register-city-options', required: registerMode === 'create' },
+                    {registerMode === 'create' && (
+                      <>
+                        {renderTextField(
+                          'communityArea',
+                          'Area',
+                          'DHA Phase 5',
+                        )}
+                        {renderTextField(
+                          'communityCity',
+                          'City',
+                          'Karachi',
+                          { list: 'register-city-options', required: true },
+                        )}
+                      </>
                     )}
                   </div>
                 )}
 
-                {registerMode === 'join' && !isMemberInvite && (
+                {registerMode === 'join' && !isMemberInvite && !selectedCommunity && (
                   <div className="mt-4 space-y-3">
                     <div className="flex items-center justify-between">
                       <p className="text-xs font-black uppercase tracking-wide text-muted-foreground">Approved Matches</p>
@@ -726,17 +745,12 @@ export default function Register() {
                     {communityMatches.length > 0 ? (
                       <div className="space-y-2">
                         {communityMatches.map((community) => {
-                          const isSelected = selectedCommunity?.id === community.id
                           return (
                             <button
                               key={community.id}
                               type="button"
-                              onClick={() => setSelectedCommunity(community)}
-                              className={`flex w-full items-start justify-between rounded-2xl border px-4 py-3 text-left transition-all ${
-                                isSelected
-                                  ? 'border-primary bg-primary/5 shadow-sm'
-                                  : 'border-border bg-white hover:border-primary/30 hover:bg-muted/20'
-                              }`}
+                              onClick={() => chooseCommunity(community)}
+                              className="flex w-full items-start justify-between rounded-2xl border border-border bg-white px-4 py-3 text-left transition-all hover:border-primary/30 hover:bg-muted/20"
                             >
                               <div>
                                 <p className="text-sm font-black text-foreground">{community.name}</p>
@@ -744,25 +758,20 @@ export default function Register() {
                                   {[community.area, community.city].filter(Boolean).join(', ') || 'Location available after approval'}
                                 </p>
                               </div>
-                              {isSelected && (
-                                <span className="rounded-full bg-primary/10 px-2 py-1 text-[11px] font-black text-primary">
-                                  Selected
-                                </span>
-                              )}
                             </button>
                           )
                         })}
                       </div>
                     ) : (
                       <div className="rounded-2xl border border-dashed border-border bg-white/70 p-4 text-sm text-muted-foreground">
-                        Search with the society name and area to see approved communities you can join.
+                        Search with the society name to see approved communities you can join.
                       </div>
                     )}
                   </div>
                 )}
               </div>
 
-              <div className="rounded-3xl border border-border bg-white p-4 sm:p-5">
+              <div ref={personalInfoRef} className="rounded-3xl border border-border bg-white p-4 sm:p-5">
                 <div className="mb-4">
                   <p className="text-sm font-black text-foreground">Account Details</p>
                   <p className="text-xs text-muted-foreground">

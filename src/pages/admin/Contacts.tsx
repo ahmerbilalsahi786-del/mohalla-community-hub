@@ -261,24 +261,30 @@ export default function AdminContacts() {
     mutationFn: async () => {
       if (!communityId || !user?.userId) throw new Error('Community not loaded.')
       if (!canManage) throw new Error('Only admins and moderators can manage contacts.')
+      const { data: authData, error: authError } = await supabase.auth.getUser()
+      if (authError) throw authError
+      const actorId = authData.user?.id
+      if (!actorId) throw new Error('Sign in again before saving contacts.')
       const category = form.isEmergency ? 'emergency' : form.category
       const type = normalizeType(form.type)
       if (!type) throw new Error('Type / label is required.')
+      const name = form.name.trim()
+      if (!name) throw new Error('Contact name is required.')
       const payload = {
         community_id: communityId,
         category,
         type,
-        name: form.name.trim(),
+        name,
         phone_number: form.phoneNumber.trim() || null,
         description: form.description.trim() || null,
         is_emergency: form.isEmergency || category === 'emergency',
-        created_by_user_id: user.userId,
       }
 
       const request = editing
         ? (supabase as any).from('community_contacts').update(payload).eq('id', editing.id).select('id').single()
         : (supabase as any).from('community_contacts').insert({
             ...payload,
+            created_by_user_id: actorId,
             display_order: nextDisplayOrder(contacts, category),
           }).select('id').single()
 
