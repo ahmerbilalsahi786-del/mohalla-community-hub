@@ -26,6 +26,7 @@ import {
   requestMemberJoin,
   searchJoinableCommunities,
 } from '@/lib/member-join'
+import { reverseGeocodeParts } from '@/lib/geocode'
 
 type RegisterMode = 'create' | 'join'
 
@@ -49,39 +50,6 @@ function emailRedirectTo() {
   return `${origin.replace(/\/$/, '')}/login`
 }
 
-function extractLocation(payload: any) {
-  const address = payload?.address ?? payload?.localityInfo?.administrative ?? {}
-  return {
-    area: String(
-      payload?.area ||
-      payload?.locality ||
-      payload?.district ||
-      payload?.suburb ||
-      payload?.principalSubdivision ||
-      address.suburb ||
-      address.neighbourhood ||
-      address.residential ||
-      address.quarter ||
-      address.city_district ||
-      address.township ||
-      address.road ||
-      '',
-    ).trim(),
-    city: String(
-      payload?.city ||
-      payload?.locality ||
-      payload?.principalSubdivision ||
-      payload?.county ||
-      address.city ||
-      address.town ||
-      address.county ||
-      address.state_district ||
-      address.village ||
-      '',
-    ).trim(),
-  }
-}
-
 function geolocationErrorMessage(error: unknown) {
   if (error && typeof error === 'object' && 'code' in error && typeof error.code === 'number') {
     switch (error.code) {
@@ -103,41 +71,6 @@ function geolocationErrorMessage(error: unknown) {
   return 'Could not read your location details right now.'
 }
 
-async function reverseGeocode(latitude: number, longitude: number) {
-  const query = new URLSearchParams({
-    latitude: String(latitude),
-    longitude: String(longitude),
-  })
-
-  const lookupUrls = [
-    `/api/reverse-geocode?${query.toString()}`,
-    `https://api-bdc.net/data/reverse-geocode-client?latitude=${encodeURIComponent(String(latitude))}&longitude=${encodeURIComponent(String(longitude))}&localityLanguage=en`,
-  ]
-
-  let lastError: Error | null = null
-  for (const url of lookupUrls) {
-    try {
-      const response = await fetch(url, {
-        headers: {
-          Accept: 'application/json',
-        },
-      })
-
-      if (!response.ok) {
-        throw new Error(`Lookup request failed with status ${response.status}.`)
-      }
-
-      const payload = await response.json()
-      const location = extractLocation(payload)
-      if (location.area || location.city) return location
-    } catch (error) {
-      lastError = error instanceof Error ? error : new Error('Reverse geocoding failed.')
-    }
-  }
-
-  throw lastError ?? new Error('Could not read your location details right now.')
-}
-
 async function detectCurrentLocation() {
   if (typeof window === 'undefined' || !navigator.geolocation) {
     throw new Error('Location autofill is not available in this browser.')
@@ -152,7 +85,9 @@ async function detectCurrentLocation() {
       })
     })
 
-    return reverseGeocode(position.coords.latitude, position.coords.longitude)
+    const location = await reverseGeocodeParts(position.coords.latitude, position.coords.longitude)
+    if (location.area || location.city) return location
+    throw new Error('We found your location but could not turn it into an area and city.')
   } catch (error) {
     throw new Error(geolocationErrorMessage(error))
   }
