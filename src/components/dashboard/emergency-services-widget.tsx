@@ -5,11 +5,13 @@ import {
   Ambulance,
   ChevronDown,
   Flame,
+  MapPin,
   Phone,
   PhoneCall,
   Shield,
   ShieldAlert,
   Wrench,
+  Stethoscope,
 } from 'lucide-react'
 import { canManageCommunity, useCurrentUser } from '@/hooks/use-current-user'
 import { supabase } from '@/integrations/supabase/client'
@@ -17,10 +19,12 @@ import { cn } from '@/lib/utils'
 
 type CommunityContact = {
   id: string
-  category: 'emergency' | 'services'
+  category: 'emergency' | 'services' | 'medical'
   type: string
   name: string
   phone_number: string | null
+  latitude: number | null
+  longitude: number | null
   display_order: number
   is_emergency: boolean
 }
@@ -40,6 +44,7 @@ function contactLabel(type: string) {
 
 function contactIcon(type: string, emergency: boolean) {
   if (type.includes('ambulance')) return Ambulance
+  if (type.includes('hospital') || type.includes('clinic') || type.includes('doctor') || type.includes('medical')) return Stethoscope
   if (type.includes('fire')) return Flame
   if (type.includes('police') || type.includes('security')) return Shield
   if (emergency) return ShieldAlert
@@ -54,7 +59,7 @@ async function loadCommunityContacts(communityId?: string) {
   if (!communityId) return []
   const { data, error } = await (supabase as any)
     .from('community_contacts')
-    .select('id, category, type, name, phone_number, display_order, is_emergency')
+    .select('id, category, type, name, phone_number, latitude, longitude, display_order, is_emergency')
     .eq('community_id', communityId)
     .order('is_emergency', { ascending: false })
     .order('display_order', { ascending: true })
@@ -67,6 +72,7 @@ async function loadCommunityContacts(communityId?: string) {
 function ContactRow({ contact, emergency }: { contact: CommunityContact; emergency: boolean }) {
   const Icon = contactIcon(contact.type, emergency)
   const phone = contact.phone_number?.trim()
+  const hasMap = contact.latitude != null && contact.longitude != null
 
   return (
     <div className="flex items-center gap-2.5 rounded-xl border border-border/60 bg-background/60 px-3 py-2.5">
@@ -75,8 +81,32 @@ function ContactRow({ contact, emergency }: { contact: CommunityContact; emergen
       </div>
       <div className="min-w-0 flex-1">
         <p className="truncate text-sm font-semibold text-foreground">{contact.name || contactLabel(contact.type)}</p>
-        <p className="truncate text-xs text-muted-foreground">{phone || 'Not set'}</p>
+        <p className="flex items-center gap-1.5 truncate text-xs text-muted-foreground">
+          <span className="truncate">{phone || 'Not set'}</span>
+          {hasMap && (
+            <a
+              href={`https://www.google.com/maps?q=${contact.latitude},${contact.longitude}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              title="Open in Maps"
+              className="inline-flex shrink-0 items-center text-primary hover:text-primary/80"
+            >
+              <MapPin size={12} />
+            </a>
+          )}
+        </p>
       </div>
+      {hasMap && (
+        <a
+          href={`https://www.google.com/maps?q=${contact.latitude},${contact.longitude}`}
+          target="_blank"
+          rel="noopener noreferrer"
+          aria-label={`Open map for ${contact.name}`}
+          className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-muted text-muted-foreground transition-colors hover:bg-primary/10 hover:text-primary"
+        >
+          <MapPin size={15} />
+        </a>
+      )}
       {phone ? (
         <a
           href={`tel:${cleanPhoneNumber(phone)}`}
@@ -110,7 +140,7 @@ export function EmergencyServicesWidget() {
   })
 
   const emergencyContacts = contacts
-    .filter((contact) => contact.is_emergency || contact.category === 'emergency')
+    .filter((contact) => contact.is_emergency || contact.category === 'emergency' || contact.category === 'medical')
     .sort((a, b) => {
       const priorityA = EMERGENCY_PRIORITY[a.type] ?? 99
       const priorityB = EMERGENCY_PRIORITY[b.type] ?? 99

@@ -17,9 +17,11 @@ import {
   Trash2,
   Wrench,
   X,
+  Stethoscope,
 } from 'lucide-react'
+import LocationPicker, { type PickedLocation } from '@/components/location-picker'
 
-type ContactCategory = 'emergency' | 'services'
+type ContactCategory = 'emergency' | 'services' | 'medical'
 
 type CommunityContact = {
   id: string
@@ -29,6 +31,8 @@ type CommunityContact = {
   name: string
   phone_number: string | null
   description: string | null
+  latitude: number | null
+  longitude: number | null
   display_order: number
   is_emergency: boolean
   created_by_user_id: string | null
@@ -41,6 +45,8 @@ type ContactForm = {
   name: string
   phoneNumber: string
   description: string
+  latitude: number | null
+  longitude: number | null
   isEmergency: boolean
 }
 
@@ -50,6 +56,8 @@ const EMPTY_FORM: ContactForm = {
   name: '',
   phoneNumber: '',
   description: '',
+  latitude: null,
+  longitude: null,
   isEmergency: false,
 }
 
@@ -58,6 +66,9 @@ const PRESETS = [
   'police',
   'fire_brigade',
   'security',
+  'hospital',
+  'clinic',
+  'doctor',
   'electrician',
   'plumber',
   'gas',
@@ -86,8 +97,22 @@ function toForm(contact: CommunityContact): ContactForm {
     name: contact.name,
     phoneNumber: contact.phone_number ?? '',
     description: contact.description ?? '',
+    latitude: contact.latitude ?? null,
+    longitude: contact.longitude ?? null,
     isEmergency: contact.is_emergency,
   }
+}
+
+function categoryLabel(category: ContactCategory, isEmergency: boolean) {
+  if (category === 'medical') return 'Medical'
+  if (isEmergency || category === 'emergency') return 'Emergency'
+  return 'Service'
+}
+
+function categoryBadgeClass(category: ContactCategory, isEmergency: boolean) {
+  if (category === 'medical') return 'bg-rose-500/10 text-rose-600'
+  if (isEmergency || category === 'emergency') return 'bg-red-500/10 text-red-600'
+  return 'bg-muted text-muted-foreground'
 }
 
 async function loadContacts(communityId?: string) {
@@ -153,6 +178,7 @@ function ContactModal({
                 className="w-full rounded-xl border border-border bg-muted/30 px-3 py-2.5 text-sm outline-none transition-colors focus:border-primary"
               >
                 <option value="emergency">Emergency</option>
+                <option value="medical">Medical</option>
                 <option value="services">Service</option>
               </select>
             </div>
@@ -211,6 +237,22 @@ function ContactModal({
               className="h-4 w-4 accent-primary"
             />
           </label>
+
+          {(form.category === 'emergency' || form.category === 'medical' || form.isEmergency) && (
+            <div>
+              <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-muted-foreground">Map Tag (optional)</label>
+              <LocationPicker
+                compact
+                initialLat={form.latitude}
+                initialLng={form.longitude}
+                onSelect={(data: PickedLocation) => update({
+                  latitude: data.latitude,
+                  longitude: data.longitude,
+                  description: form.description.trim() ? form.description : data.address,
+                })}
+              />
+            </div>
+          )}
         </div>
 
         <div className="flex justify-end gap-2 border-t border-border bg-muted/20 px-5 py-4">
@@ -277,6 +319,8 @@ export default function AdminContacts() {
         name,
         phone_number: form.phoneNumber.trim() || null,
         description: form.description.trim() || null,
+        latitude: form.latitude,
+        longitude: form.longitude,
         is_emergency: form.isEmergency || category === 'emergency',
       }
 
@@ -397,8 +441,8 @@ export default function AdminContacts() {
                     <tr key={contact.id} className="border-b border-border transition-colors hover:bg-muted/20">
                       <td className="px-4 py-3">
                         <div className="flex items-center gap-2">
-                          <div className={cn('flex h-8 w-8 items-center justify-center rounded-xl', contact.is_emergency ? 'bg-red-500/10 text-red-600' : 'bg-primary/10 text-primary')}>
-                            {contact.is_emergency ? <ShieldAlert size={16} /> : <Wrench size={16} />}
+                          <div className={cn('flex h-8 w-8 items-center justify-center rounded-xl', contact.category === 'medical' ? 'bg-rose-500/10 text-rose-600' : contact.is_emergency ? 'bg-red-500/10 text-red-600' : 'bg-primary/10 text-primary')}>
+                            {contact.category === 'medical' ? <Stethoscope size={16} /> : contact.is_emergency ? <ShieldAlert size={16} /> : <Wrench size={16} />}
                           </div>
                           <div>
                             <p className="text-sm font-semibold text-foreground">{contact.name}</p>
@@ -407,8 +451,8 @@ export default function AdminContacts() {
                         </div>
                       </td>
                       <td className="px-4 py-3">
-                        <span className={cn('rounded-full px-2 py-0.5 text-xs font-semibold', contact.is_emergency ? 'bg-red-500/10 text-red-600' : 'bg-muted text-muted-foreground')}>
-                          {contact.is_emergency ? 'Emergency' : 'Service'}
+                        <span className={cn('rounded-full px-2 py-0.5 text-xs font-semibold', categoryBadgeClass(contact.category, contact.is_emergency))}>
+                          {categoryLabel(contact.category, contact.is_emergency)}
                         </span>
                       </td>
                       <td className="px-4 py-3 text-sm text-foreground">{contact.phone_number || 'Not set'}</td>

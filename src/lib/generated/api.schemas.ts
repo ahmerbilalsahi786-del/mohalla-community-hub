@@ -162,6 +162,8 @@ export interface Event {
   date: string;
   time: string;
   location: string;
+  latitude?: number | null;
+  longitude?: number | null;
   imageUrl?: string | null;
   rsvpCount: number;
   createdAt: string;
@@ -177,6 +179,8 @@ export interface EventInput {
   date: string;
   time?: string;
   location?: string;
+  latitude?: number | null;
+  longitude?: number | null;
   imageUrl?: string | null;
 }
 

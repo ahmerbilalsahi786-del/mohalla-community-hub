@@ -419,6 +419,8 @@ function createDemoEvent(payload: JsonBody) {
     event_date: payload.date,
     event_time: payload.time ?? "",
     location: payload.location ?? "",
+    latitude: payload.latitude ?? null,
+    longitude: payload.longitude ?? null,
     image_url: payload.imageUrl ?? null,
     rsvp_count: 0,
     created_at: now,
@@ -502,6 +504,8 @@ function toEvent(row: any, profile?: any, myStatus: string | null = null) {
     date: row.event_date,
     time: row.event_time ?? "",
     location: row.location ?? "",
+    latitude: row.latitude ?? null,
+    longitude: row.longitude ?? null,
     imageUrl: row.image_url,
     rsvpCount: row.rsvp_count ?? 0,
     myStatus,
@@ -871,7 +875,7 @@ async function createEvent(payload: JsonBody) {
   if (isDemoMode()) return createDemoEvent(payload);
 
   const userId = await requiredUserId();
-  const { data, error } = await supabase
+  const { data, error } = await (supabase as any)
     .from("events")
     .insert({
       user_id: userId,
@@ -880,6 +884,8 @@ async function createEvent(payload: JsonBody) {
       event_date: payload.date,
       event_time: payload.time ?? null,
       location: payload.location ?? null,
+      latitude: payload.latitude ?? null,
+      longitude: payload.longitude ?? null,
       image_url: payload.imageUrl ?? null,
     })
     .select("*")

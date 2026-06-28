@@ -9,6 +9,7 @@ import { getUser } from '@/lib/auth'
 import { canManageCommunity, useCurrentUser } from '@/hooks/use-current-user'
 import { useToast } from '@/hooks/use-toast'
 import { cn } from '@/lib/utils'
+import LocationPicker, { type PickedLocation } from '@/components/location-picker'
 
 type PlaceRow = {
   id: string
@@ -18,6 +19,8 @@ type PlaceRow = {
   location: string | null
   hours: string | null
   phone: string | null
+  latitude: number | null
+  longitude: number | null
   is_active: boolean
   created_by: string | null
   created_at: string
@@ -30,6 +33,8 @@ type PlaceForm = {
   location: string
   hours: string
   phone: string
+  latitude: number | null
+  longitude: number | null
 }
 
 const PLACE_CATEGORIES = ['Essentials', 'Green Spaces', 'Shopping & Food', 'Health & Education', 'Other']
@@ -41,6 +46,8 @@ const EMPTY_FORM: PlaceForm = {
   location: '',
   hours: '',
   phone: '',
+  latitude: null,
+  longitude: null,
 }
 
 const DEMO_PLACES = [
@@ -118,6 +125,8 @@ function toForm(place: PlaceRow): PlaceForm {
     location: place.location || '',
     hours: place.hours || '',
     phone: place.phone || '',
+    latitude: place.latitude ?? null,
+    longitude: place.longitude ?? null,
   }
 }
 
@@ -221,6 +230,20 @@ function PlaceModal({
               />
             </div>
           </div>
+
+          <div>
+            <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-muted-foreground">Map Tag (optional)</label>
+            <LocationPicker
+              compact
+              initialLat={form.latitude}
+              initialLng={form.longitude}
+              onSelect={(data: PickedLocation) => update({
+                latitude: data.latitude,
+                longitude: data.longitude,
+                location: form.location.trim() ? form.location : data.address,
+              })}
+            />
+          </div>
         </div>
 
         <div className="flex justify-end gap-2 border-t border-border bg-muted/20 px-5 py-4">
@@ -275,6 +298,8 @@ export default function Places() {
         location: form.location.trim() || null,
         hours: form.hours.trim() || null,
         phone: form.phone.trim() || null,
+        latitude: form.latitude,
+        longitude: form.longitude,
         created_by: user.userId,
         updated_at: new Date().toISOString(),
       }
@@ -401,12 +426,25 @@ export default function Places() {
                                 <span className={cn('rounded-full px-2.5 py-0.5 text-xs font-semibold', tagCls)}>
                                   {place.tag}
                                 </span>
-                                {canEdit && !demo && 'record' in place && (
-                                  <span className="inline-flex items-center gap-1 text-xs font-semibold text-primary">
-                                    <Edit2 size={12} />
-                                    Edit
-                                  </span>
-                                )}
+                                <span className="inline-flex items-center gap-2">
+                                  {(!canEdit || demo) && place.record?.latitude != null && place.record?.longitude != null && (
+                                    <a
+                                      href={`https://www.google.com/maps?q=${place.record.latitude},${place.record.longitude}`}
+                                      target="_blank"
+                                      rel="noopener noreferrer"
+                                      className="inline-flex items-center gap-1 text-xs font-semibold text-primary"
+                                    >
+                                      <MapPin size={12} />
+                                      Map
+                                    </a>
+                                  )}
+                                  {canEdit && !demo && 'record' in place && (
+                                    <span className="inline-flex items-center gap-1 text-xs font-semibold text-primary">
+                                      <Edit2 size={12} />
+                                      Edit
+                                    </span>
+                                  )}
+                                </span>
                               </div>
                             </>
                           )

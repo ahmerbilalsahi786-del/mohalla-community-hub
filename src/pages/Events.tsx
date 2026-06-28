@@ -14,12 +14,14 @@ import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
 import { useToast } from '@/hooks/use-toast'
 import { uploadImage } from '@/lib/cloudinary'
+import LocationPicker, { type PickedLocation } from '@/components/location-picker'
 
 type EventItem = {
   id: number; title: string; description: string; date: string; time: string;
   location: string; imageUrl?: string | null; rsvpCount: number; createdAt: string;
   userName: string; unitNumber: string; userId: string;
   myStatus?: string | null;
+  latitude?: number | null; longitude?: number | null;
 }
 
 const RSVP_OPTIONS = [
@@ -86,7 +88,18 @@ function EventCard({ event, isPast }: { event: EventItem; isPast?: boolean }) {
           {event.location && (
             <div className="flex items-center gap-2 text-sm text-muted-foreground">
               <MapPin size={13} className="shrink-0" />
-              <span>{event.location}</span>
+              {event.latitude != null && event.longitude != null ? (
+                <a
+                  href={`https://www.google.com/maps?q=${event.latitude},${event.longitude}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="truncate hover:text-primary"
+                >
+                  {event.location}
+                </a>
+              ) : (
+                <span>{event.location}</span>
+              )}
             </div>
           )}
           <div className="flex items-center gap-2 text-sm text-muted-foreground">
@@ -135,6 +148,7 @@ function CreateEventModal({ onClose }: { onClose: () => void }) {
   const [date, setDate]         = useState('')
   const [time, setTime]         = useState('')
   const [location, setLocation] = useState('')
+  const [pickedLocation, setPickedLocation] = useState<PickedLocation | null>(null)
   const [imageUrl, setImageUrl] = useState<string | undefined>()
   const [uploading, setUploading] = useState(false)
   const { toast } = useToast()
@@ -234,12 +248,34 @@ function CreateEventModal({ onClose }: { onClose: () => void }) {
                 className="flex-1 rounded-xl border border-border bg-muted/30 px-4 py-2.5 text-sm focus:outline-none focus:border-primary transition-colors" />
             </div>
           </div>
+
+          <div>
+            <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-1.5 block">Map Tag (optional)</label>
+            <LocationPicker
+              compact
+              onSelect={(data) => {
+                setPickedLocation(data)
+                if (!location.trim() && data.address) setLocation(data.address)
+              }}
+            />
+          </div>
         </div>
 
         <div className="flex shrink-0 items-center justify-end gap-2 border-t border-border bg-muted/20 px-4 py-3 sm:px-5 sm:py-4">
           <Button variant="ghost" onClick={onClose} className="rounded-xl">Cancel</Button>
           <Button
-            onClick={() => create.mutate({ data: { title: title.trim(), description, date, time, location, imageUrl } })}
+            onClick={() => create.mutate({
+              data: {
+                title: title.trim(),
+                description,
+                date,
+                time,
+                location,
+                latitude: pickedLocation?.latitude ?? null,
+                longitude: pickedLocation?.longitude ?? null,
+                imageUrl,
+              },
+            })}
             disabled={!title.trim() || !date || create.isPending}
             className="rounded-xl gap-2"
           >

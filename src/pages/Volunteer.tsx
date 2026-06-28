@@ -9,6 +9,7 @@ import { getUser } from '@/lib/auth'
 import { supabase } from '@/integrations/supabase/client'
 import { canManageCommunity, useCurrentUser } from '@/hooks/use-current-user'
 import { useToast } from '@/hooks/use-toast'
+import LocationPicker, { type PickedLocation } from '@/components/location-picker'
 
 type Opportunity = {
   id: string
@@ -17,6 +18,8 @@ type Opportunity = {
   category: string
   schedule: string
   location: string | null
+  latitude?: number | null
+  longitude?: number | null
   capacity: number | null
   is_active: boolean
   joinedCount: number
@@ -29,6 +32,8 @@ type OpportunityForm = {
   category: string
   schedule: string
   location: string
+  latitude: number | null
+  longitude: number | null
   capacity: string
 }
 
@@ -38,6 +43,8 @@ const EMPTY_FORM: OpportunityForm = {
   category: 'Community',
   schedule: '',
   location: '',
+  latitude: null,
+  longitude: null,
   capacity: '',
 }
 
@@ -107,6 +114,8 @@ function toForm(opportunity: Opportunity): OpportunityForm {
     category: opportunity.category,
     schedule: opportunity.schedule,
     location: opportunity.location ?? '',
+    latitude: opportunity.latitude ?? null,
+    longitude: opportunity.longitude ?? null,
     capacity: opportunity.capacity ? String(opportunity.capacity) : '',
   }
 }
@@ -212,6 +221,20 @@ function OpportunityModal({
               />
             </div>
           </div>
+
+          <div>
+            <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-muted-foreground">Map Tag (optional)</label>
+            <LocationPicker
+              compact
+              initialLat={form.latitude}
+              initialLng={form.longitude}
+              onSelect={(data: PickedLocation) => update({
+                latitude: data.latitude,
+                longitude: data.longitude,
+                location: form.location.trim() ? form.location : data.address,
+              })}
+            />
+          </div>
         </div>
 
         <div className="flex justify-end gap-2 border-t border-border bg-muted/20 px-5 py-4">
@@ -267,6 +290,8 @@ export default function Volunteer() {
         category: row.category,
         schedule: row.schedule,
         location: row.location ?? null,
+        latitude: row.latitude ?? null,
+        longitude: row.longitude ?? null,
         capacity: row.capacity ?? null,
         is_active: row.is_active,
         joinedCount: row.volunteer_signups?.length ?? 0,
@@ -286,6 +311,8 @@ export default function Volunteer() {
         category: form.category.trim() || 'Community',
         schedule: form.schedule.trim(),
         location: form.location.trim() || null,
+        latitude: form.latitude,
+        longitude: form.longitude,
         capacity: form.capacity.trim() ? Number(form.capacity) : null,
         created_by: user.userId,
         updated_at: new Date().toISOString(),
@@ -440,7 +467,20 @@ export default function Volunteer() {
                         <div className="mt-3 flex flex-wrap items-center gap-4 text-xs text-muted-foreground">
                           <span className="flex items-center gap-1"><Clock size={12} /> {opp.schedule}</span>
                           <span className="flex items-center gap-1"><Users size={12} /> {opp.joinedCount}/{opp.capacity ?? '∞'} signed up</span>
-                          {opp.location && <span className="flex items-center gap-1"><MapPin size={12} /> {opp.location}</span>}
+                          {opp.location && (
+                            opp.latitude != null && opp.longitude != null ? (
+                              <a
+                                href={`https://www.google.com/maps?q=${opp.latitude},${opp.longitude}`}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="flex items-center gap-1 hover:text-primary"
+                              >
+                                <MapPin size={12} /> {opp.location}
+                              </a>
+                            ) : (
+                              <span className="flex items-center gap-1"><MapPin size={12} /> {opp.location}</span>
+                            )
+                          )}
                         </div>
                         <div className="mt-3 h-1.5 w-full overflow-hidden rounded-full bg-muted">
                           <div className="h-full rounded-full bg-primary transition-all" style={{ width: `${pct}%` }} />
