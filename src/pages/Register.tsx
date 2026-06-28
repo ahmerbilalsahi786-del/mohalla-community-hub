@@ -434,6 +434,7 @@ export default function Register() {
       <label htmlFor={key} className="text-sm font-bold text-foreground">{label}</label>
       <Input
         id={key}
+        name={String(key)}
         value={form[key]}
         onChange={set(key)}
         placeholder={placeholder}
@@ -718,20 +719,25 @@ export default function Register() {
 
                 <div className="grid gap-4 sm:grid-cols-2">
                   <div className="sm:col-span-2">
-                    {renderTextField('name', 'Full Name', 'Ahmed Khan')}
+                    {renderTextField('name', 'Full Name', 'Ahmed Khan', { autoComplete: 'name' })}
                   </div>
-                  {renderTextField('email', 'Email', 'you@example.com', { type: 'email' })}
-                  {renderTextField('unitNumber', 'Unit Number', 'B-204')}
+                  {renderTextField('email', 'Email', 'you@example.com', { type: 'email', autoComplete: 'email', name: 'email' })}
+                  {renderTextField('unitNumber', 'Unit Number', 'B-204', { autoComplete: 'address-line2', name: 'unit-number' })}
 
                   <div className="space-y-1.5 sm:col-span-2">
                     <label htmlFor="userId" className="text-sm font-bold text-foreground">Username</label>
                     <Input
                       id="userId"
+                      name="mohalla-username"
                       type="text"
                       value={form.userId}
                       onChange={set('userId')}
                       placeholder="ahmed_khan"
                       required
+                      autoComplete="off"
+                      autoCapitalize="none"
+                      autoCorrect="off"
+                      spellCheck={false}
                       pattern="[a-z0-9_-]+"
                       className="h-12 rounded-2xl bg-white px-4"
                     />
@@ -750,6 +756,8 @@ export default function Register() {
                         placeholder="Minimum 12 characters"
                         required
                         minLength={12}
+                        autoComplete="new-password"
+                        name="new-password"
                         className="h-12 rounded-2xl bg-white px-4 pr-11"
                       />
                       <button
@@ -774,6 +782,8 @@ export default function Register() {
                       placeholder="Repeat your password"
                       required
                       minLength={12}
+                      autoComplete="new-password"
+                      name="confirm-password"
                       className="h-12 rounded-2xl bg-white px-4"
                     />
                     {errors.confirmPassword && <p className="text-xs text-destructive">{errors.confirmPassword[0]}</p>}
