@@ -25,14 +25,14 @@ const typeColors = {
 
 export function ActivityCard({ activities }: ActivityCardProps) {
   return (
-    <div className="relative overflow-hidden rounded-2xl border border-border bg-card shadow-sm">
+    <div className="portal-panel relative overflow-hidden rounded-[1.9rem]">
       {/* Header */}
-      <div className="flex items-center justify-between border-b border-border px-6 py-4">
+      <div className="flex items-center justify-between border-b portal-soft-rule px-6 py-5">
         <div>
-          <h3 className="text-lg font-bold text-card-foreground">Recent Activity</h3>
+          <h3 className="portal-section-title text-lg text-card-foreground">Recent Activity</h3>
           <p className="text-sm text-muted-foreground">What&apos;s happening in your mohalla</p>
         </div>
-        <Link href="/feed" className="text-sm font-medium text-primary hover:text-primary/80">
+        <Link href="/feed" className="text-sm font-black text-primary hover:text-primary/80">
           View all
         </Link>
       </div>
@@ -44,11 +44,11 @@ export function ActivityCard({ activities }: ActivityCardProps) {
         ) : activities.map((activity) => (
           <div
             key={activity.id}
-            className="flex items-start gap-4 p-4 transition-colors hover:bg-muted/30"
+            className="flex items-start gap-4 p-4 transition-colors hover:bg-muted/40"
           >
             {/* Avatar */}
             <div className="relative shrink-0">
-              <div className="h-10 w-10 rounded-full bg-gradient-to-br from-primary/60 to-accent/60" />
+              <div className="h-10 w-10 rounded-full bg-gradient-to-br from-primary/65 via-accent/70 to-chart-3/70 shadow-md shadow-black/8" />
               <div
                 className={cn(
                   'absolute -bottom-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full text-xs',

@@ -123,13 +123,19 @@ function ContactModal({
 
   return (
     <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/40 p-3 sm:items-center">
-      <div className="w-full max-w-lg overflow-hidden rounded-2xl border border-border bg-card shadow-xl">
+      <form
+        onSubmit={(event) => {
+          event.preventDefault()
+          onSubmit()
+        }}
+        className="w-full max-w-lg overflow-hidden rounded-2xl border border-border bg-card shadow-xl"
+      >
         <div className="flex items-center justify-between border-b border-border px-5 py-4">
           <div>
             <h3 className="font-semibold text-foreground">{title}</h3>
             <p className="text-xs text-muted-foreground">Only admins and moderators can edit these contacts.</p>
           </div>
-          <button onClick={onClose} className="rounded-lg p-1 text-muted-foreground hover:bg-muted hover:text-foreground">
+          <button type="button" onClick={onClose} className="rounded-lg p-1 text-muted-foreground hover:bg-muted hover:text-foreground">
             <X size={18} />
           </button>
         </div>
@@ -208,9 +214,9 @@ function ContactModal({
         </div>
 
         <div className="flex justify-end gap-2 border-t border-border bg-muted/20 px-5 py-4">
-          <Button variant="ghost" onClick={onClose} className="rounded-xl">Cancel</Button>
+          <Button type="button" variant="ghost" onClick={onClose} className="rounded-xl">Cancel</Button>
           <Button
-            onClick={onSubmit}
+            type="submit"
             disabled={saving || !form.name.trim() || !form.type.trim()}
             className="gap-2 rounded-xl"
           >
@@ -218,7 +224,7 @@ function ContactModal({
             Save contact
           </Button>
         </div>
-      </div>
+      </form>
     </div>
   )
 }
@@ -247,8 +253,9 @@ export default function AdminContacts() {
     }
   }, [modalOpen])
 
-  const invalidate = () => queryClient.invalidateQueries({ queryKey })
-  const invalidateContacts = () => queryClient.invalidateQueries({ queryKey: ['community-contacts'] })
+  const invalidate = async () => {
+    await queryClient.invalidateQueries({ queryKey })
+  }
 
   const saveContact = useMutation({
     mutationFn: async () => {
@@ -265,6 +272,7 @@ export default function AdminContacts() {
         phone_number: form.phoneNumber.trim() || null,
         description: form.description.trim() || null,
         is_emergency: form.isEmergency || category === 'emergency',
+        created_by_user_id: user.userId,
       }
 
       const request = editing
@@ -278,8 +286,8 @@ export default function AdminContacts() {
       if (requestError) throw requestError
       if (!data?.id) throw new Error('Contact was not saved. Please try again.')
     },
-    onSuccess: () => {
-      invalidateContacts()
+    onSuccess: async () => {
+      await invalidate()
       setModalOpen(false)
       toast({
         title: editing ? 'Contact updated' : 'Contact added',
@@ -287,6 +295,7 @@ export default function AdminContacts() {
       })
     },
     onError: (error) => {
+      console.error('Failed to save community contact', error)
       toast({
         title: 'Could not save contact',
         description: error instanceof Error ? error.message : 'Please try again.',
@@ -300,7 +309,7 @@ export default function AdminContacts() {
       const { error: requestError } = await (supabase as any).from('community_contacts').delete().eq('id', contact.id)
       if (requestError) throw requestError
     },
-    onSuccess: invalidate,
+    onSuccess: () => void invalidate(),
   })
 
   const reorderContact = useMutation({
@@ -318,7 +327,7 @@ export default function AdminContacts() {
       ])
       if (firstError || secondError) throw firstError ?? secondError
     },
-    onSuccess: invalidate,
+    onSuccess: () => void invalidate(),
   })
 
   const openAdd = () => {

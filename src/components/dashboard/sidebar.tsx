@@ -61,19 +61,18 @@ export function Sidebar() {
   return (
     <aside
       className={cn(
-        'relative flex h-screen shrink-0 flex-col bg-[var(--community-sidebar)] text-[var(--community-sidebar-foreground)] transition-all duration-300 ease-in-out sticky top-0 self-start overflow-hidden',
+        'portal-panel sticky top-0 relative flex h-screen shrink-0 flex-col overflow-hidden border-r border-border/60 bg-[color-mix(in_oklch,var(--community-sidebar)_88%,var(--background)_12%)] text-[var(--community-sidebar-foreground)] transition-all duration-300 ease-in-out self-start',
         'hidden md:flex',
         collapsed ? 'w-20' : 'w-64'
       )}
     >
-      {/* Decorative blob */}
-      <div className="absolute -right-20 top-20 h-40 w-40 rounded-full bg-sidebar-primary/10 blur-3xl" />
-      <div className="absolute -left-10 bottom-40 h-32 w-32 rounded-full bg-accent/10 blur-2xl" />
+      <div className="absolute inset-x-0 top-0 h-36 bg-gradient-to-b from-background/10 to-transparent" />
+      <div className="absolute inset-x-4 top-24 h-px bg-border/20" />
 
       {/* Logo Section */}
-      <div className="flex h-16 items-center justify-between border-b border-black/10 bg-[var(--community-banner)] px-4 text-[var(--community-banner-foreground)] shadow-sm">
+      <div className="flex h-20 items-center justify-between border-b border-border/10 bg-[color-mix(in_oklch,var(--community-banner)_88%,var(--background)_12%)] px-4 text-[var(--community-banner-foreground)] shadow-sm">
         <Link href="/dashboard" className="flex items-center gap-3">
-          <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-white p-0.5 text-[var(--community-primary)] shadow-sm ring-1 ring-black/10">
+          <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-background/80 p-0.5 text-[var(--community-primary)] shadow-sm ring-1 ring-border/70">
             {logoUrl ? (
               <img src={logoUrl} alt="" className="h-full w-full rounded-[10px] object-cover" />
             ) : (
@@ -81,20 +80,23 @@ export function Sidebar() {
             )}
           </span>
           {!collapsed && (
-            <span className="truncate text-xl font-bold tracking-tight">{communityName}</span>
+            <div className="min-w-0">
+              <span className="brand-wordmark block truncate text-lg tracking-tight">{communityName}</span>
+              <span className="text-xs text-[var(--community-banner-foreground)]/70">Neighborhood Portal</span>
+            </div>
           )}
         </Link>
         <button
           onClick={() => setCollapsed(!collapsed)}
-          className="flex h-8 w-8 items-center justify-center rounded-lg bg-black/5 transition-colors hover:bg-black/10"
+          className="flex h-9 w-9 items-center justify-center rounded-xl bg-black/8 transition-colors hover:bg-black/14"
         >
           {collapsed ? <ChevronRight size={16} /> : <ChevronLeft size={16} />}
         </button>
       </div>
 
       {/* Main Navigation */}
-      <nav className="flex-1 space-y-1 overflow-y-auto p-3">
-        <div className={cn('mb-2 px-3 text-xs font-semibold uppercase tracking-wider text-sidebar-foreground/50', collapsed && 'sr-only')}>
+      <nav className="flex-1 space-y-1 overflow-y-auto p-3 pt-4">
+        <div className={cn('mb-3 px-3 text-[11px] font-black uppercase tracking-[0.18em] text-sidebar-foreground/45', collapsed && 'sr-only')}>
           Main Menu
         </div>
         {visibleNavItems.map((item) => (
@@ -102,14 +104,14 @@ export function Sidebar() {
             key={item.name}
             href={item.href}
             className={cn(
-              'group relative flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-all duration-200',
+              'group relative flex items-center gap-3 rounded-2xl px-3 py-3 text-sm font-medium transition-all duration-200',
               activeItem === item.name
-                ? 'bg-sidebar-accent text-sidebar-accent-foreground shadow-sm'
-                : 'text-sidebar-foreground/70 hover:bg-sidebar-accent/50 hover:text-sidebar-foreground'
+                ? 'bg-background/14 text-sidebar-accent-foreground shadow-lg shadow-black/10'
+                : 'text-sidebar-foreground/72 hover:bg-background/8 hover:text-sidebar-foreground'
             )}
           >
             {activeItem === item.name && (
-              <div className="absolute left-0 top-1/2 h-6 w-1 -translate-y-1/2 rounded-r-full bg-sidebar-primary" />
+              <div className="absolute left-0 top-1/2 h-7 w-1 -translate-y-1/2 rounded-r-full bg-sidebar-primary" />
             )}
             <item.icon size={20} className={cn(
               'shrink-0 transition-colors',
@@ -120,10 +122,10 @@ export function Sidebar() {
                 <span className="flex-1">{item.name}</span>
                 {item.badge && (
                   <span className={cn(
-                    'rounded-full px-2 py-0.5 text-xs font-semibold',
+                    'rounded-full px-2 py-0.5 text-[11px] font-black',
                     item.badge === 'New' 
                       ? 'bg-sidebar-primary text-sidebar-primary-foreground'
-                      : 'bg-sidebar-accent text-sidebar-accent-foreground'
+                      : 'bg-background/12 text-sidebar-accent-foreground'
                   )}>
                     {item.badge}
                   </span>
@@ -135,17 +137,17 @@ export function Sidebar() {
       </nav>
 
       {/* Bottom Navigation */}
-      <div className="border-t border-sidebar-border p-3">
+      <div className="border-t border-border/10 p-3">
         <InstallAppButton collapsed={collapsed} className="mb-1" />
         {bottomItems.map((item) => (
           <Link
             key={item.name}
             href={item.href}
             className={cn(
-              'group flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-all duration-200',
+              'group flex items-center gap-3 rounded-2xl px-3 py-3 text-sm font-medium transition-all duration-200',
               activeItem === item.name
-                ? 'bg-sidebar-accent text-sidebar-accent-foreground'
-                : 'text-sidebar-foreground/70 hover:bg-sidebar-accent/50 hover:text-sidebar-foreground'
+                ? 'bg-background/14 text-sidebar-accent-foreground'
+                : 'text-sidebar-foreground/72 hover:bg-background/8 hover:text-sidebar-foreground'
             )}
           >
             <item.icon size={20} className="shrink-0" />
@@ -164,11 +166,11 @@ export function Sidebar() {
       </div>
 
       {/* User Profile */}
-      <div className="border-t border-sidebar-border p-3">
+      <div className="border-t border-border/10 p-3">
         <Link
           href={profileHref}
           className={cn(
-            'flex items-center gap-3 rounded-xl bg-sidebar-accent/30 p-3 transition-colors hover:bg-sidebar-accent/60',
+            'flex items-center gap-3 rounded-2xl bg-background/10 p-3 transition-colors hover:bg-background/14',
             collapsed && 'justify-center'
           )}
         >
@@ -176,7 +178,7 @@ export function Sidebar() {
             {user?.avatarUrl ? (
               <img src={user.avatarUrl} alt="" className="h-10 w-10 rounded-full object-cover" />
             ) : (
-              <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-br from-sidebar-primary to-accent text-sm font-bold text-white">
+              <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-br from-sidebar-primary to-accent text-sm font-bold text-white shadow-md shadow-black/10">
                 {(user?.name ?? 'R').slice(0, 1).toUpperCase()}
               </div>
             )}
@@ -195,7 +197,7 @@ export function Sidebar() {
           type="button"
           onClick={logout}
           className={cn(
-            'mt-2 flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-sidebar-foreground/70 transition-colors hover:bg-sidebar-accent/50 hover:text-sidebar-foreground',
+            'mt-2 flex w-full items-center gap-3 rounded-2xl px-3 py-3 text-sm font-medium text-sidebar-foreground/72 transition-colors hover:bg-background/8 hover:text-sidebar-foreground',
             collapsed && 'justify-center'
           )}
         >

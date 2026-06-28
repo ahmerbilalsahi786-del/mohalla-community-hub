@@ -1,8 +1,7 @@
 import {
-  Bar,
-  BarChart,
-  Cell,
   CartesianGrid,
+  Line,
+  LineChart,
   ResponsiveContainer,
   Tooltip,
   XAxis,
@@ -27,15 +26,15 @@ export function CommunityChart() {
   ]
 
   return (
-    <div className="overflow-hidden rounded-2xl border border-border bg-card p-6 shadow-sm">
+    <div className="portal-panel overflow-hidden rounded-[1.9rem] p-6">
       <div className="mb-6">
-        <h3 className="text-lg font-bold text-card-foreground">Community Overview</h3>
-        <p className="text-sm text-muted-foreground">Current data from your mohalla</p>
+        <h3 className="portal-section-title text-lg text-card-foreground">Community Overview</h3>
+        <p className="text-sm text-muted-foreground">A live read of momentum across your mohalla</p>
       </div>
 
       <div className="h-64">
         <ResponsiveContainer width="100%" height="100%">
-          <BarChart data={data}>
+          <LineChart data={data}>
             <CartesianGrid strokeDasharray="3 3" stroke="currentColor" className="text-border" vertical={false} />
             <XAxis
               dataKey="name"
@@ -54,19 +53,24 @@ export function CommunityChart() {
               axisLine={false}
             />
             <Tooltip
-              cursor={{ fill: 'hsl(var(--muted))', opacity: 0.35 }}
+              cursor={{ fill: 'var(--muted)', opacity: 0.35 }}
               contentStyle={{
-                backgroundColor: 'hsl(var(--card))',
-                border: '1px solid hsl(var(--border))',
-                borderRadius: '8px',
+                backgroundColor: 'var(--popover)',
+                border: '1px solid var(--border)',
+                borderRadius: '16px',
+                color: 'var(--foreground)',
+                boxShadow: '0 18px 48px rgba(15, 23, 42, 0.08)',
               }}
             />
-            <Bar dataKey="total" radius={[6, 6, 0, 0]}>
-              {data.map((entry) => (
-                <Cell key={entry.name} fill={entry.fill} />
-              ))}
-            </Bar>
-          </BarChart>
+            <Line
+              type="monotone"
+              dataKey="total"
+              stroke="var(--chart-1)"
+              strokeWidth={3}
+              dot={{ r: 4, fill: 'var(--chart-1)' }}
+              activeDot={{ r: 6 }}
+            />
+          </LineChart>
         </ResponsiveContainer>
       </div>
     </div>

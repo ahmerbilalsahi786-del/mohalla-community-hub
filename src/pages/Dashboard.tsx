@@ -1,8 +1,7 @@
 import { Link } from 'wouter'
 import { formatDistanceToNow } from 'date-fns'
-import { Calendar, MessageSquare, ShoppingBag, TrendingUp, UserCheck, Users } from 'lucide-react'
-import { Sidebar } from '@/components/dashboard/sidebar'
-import { TopNavbar } from '@/components/dashboard/top-navbar'
+import { ArrowRight, Calendar, MessageSquare, ShoppingBag, Sparkles, TrendingUp, UserCheck, Users } from 'lucide-react'
+import { DashboardShell } from '@/components/dashboard/dashboard-shell'
 import { StatCard } from '@/components/dashboard/stat-card'
 import { ActivityCard } from '@/components/dashboard/activity-card'
 import { EventCard } from '@/components/dashboard/event-card'
@@ -39,6 +38,10 @@ export default function Dashboard() {
   const members = (memberData as any[]).slice(0, 4)
   const isManager = canManageCommunity(user?.role)
   const firstName = user?.name?.split(/\s+/)[0] || 'Neighbor'
+  const communityName = user?.community?.name ?? 'your mohalla'
+  const summaryLine = isManager
+    ? `${stats.pendingMembers} approvals waiting, ${stats.postsThisMonth} fresh updates, and ${upcomingEvents.length} events on deck.`
+    : `${upcomingEvents.length} events, ${stats.activeListings} active listings, and ${stats.postsThisMonth} new conversations this month.`
 
   const statCards = [
     {
@@ -47,6 +50,7 @@ export default function Dashboard() {
       description: 'registered residents',
       icon: Users,
       iconColor: 'bg-primary/10 text-primary',
+      href: '/community',
     },
     {
       title: 'Upcoming Events',
@@ -54,6 +58,7 @@ export default function Dashboard() {
       description: 'scheduled now',
       icon: Calendar,
       iconColor: 'bg-accent/10 text-accent',
+      href: '/events',
     },
     {
       title: 'Posts This Month',
@@ -61,6 +66,7 @@ export default function Dashboard() {
       description: 'community updates',
       icon: MessageSquare,
       iconColor: 'bg-amber-500/10 text-amber-600',
+      href: '/feed',
     },
     isManager
       ? {
@@ -69,6 +75,7 @@ export default function Dashboard() {
           description: 'members to review',
           icon: UserCheck,
           iconColor: 'bg-pink-500/10 text-pink-600',
+          href: '/admin/members',
         }
       : {
           title: 'Active Listings',
@@ -76,6 +83,7 @@ export default function Dashboard() {
           description: 'marketplace items',
           icon: ShoppingBag,
           iconColor: 'bg-pink-500/10 text-pink-600',
+          href: '/marketplace',
         },
   ]
 
@@ -108,83 +116,122 @@ export default function Dashboard() {
   }))
 
   return (
-    <div className="flex h-screen overflow-hidden bg-background">
-      <Sidebar />
-
-      <div className="relative flex h-screen min-w-0 flex-1 flex-col overflow-hidden">
-        <TopNavbar />
-
-        <main className="min-h-0 flex-1 overflow-y-auto p-3 pb-24 sm:p-6">
-          <div className="mb-8">
-            <div className="flex items-start gap-3 sm:items-center">
-              <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-primary/10">
-                <TrendingUp className="h-6 w-6 text-primary" />
+    <DashboardShell>
+      <div className="space-y-6">
+        <section className="portal-panel overflow-hidden rounded-[2rem] p-5 sm:p-7">
+          <div className="grid gap-6 lg:grid-cols-[1.15fr_0.85fr] lg:items-end">
+            <div className="space-y-5">
+              <div className="portal-chip w-fit text-primary">
+                <Sparkles className="h-3.5 w-3.5" />
+                Live Community Snapshot
               </div>
-              <div>
-                <h2 className="text-xl font-bold text-foreground sm:text-2xl">Assalam-o-Alaikum, {firstName}!</h2>
-                <p className="text-muted-foreground">
-                  {isManager ? 'Here is the latest community overview' : 'Here is what is happening in your mohalla'}
+              <div className="space-y-3">
+                <h2 className="portal-section-title text-3xl leading-tight text-foreground sm:text-4xl">
+                  Assalam-o-Alaikum, {firstName}. {communityName} feels active today.
+                </h2>
+                <p className="max-w-2xl text-base leading-relaxed text-muted-foreground">
+                  {summaryLine}
                 </p>
+              </div>
+
+              <div className="flex flex-wrap items-center gap-3">
+              <Link href="/feed?compose=1" className="inline-flex items-center gap-2 rounded-2xl bg-primary px-4 py-3 text-sm font-black text-primary-foreground shadow-lg shadow-primary/20 transition-opacity hover:opacity-90">
+                Share update <ArrowRight size={16} />
+              </Link>
+                <Link href={isManager ? '/admin/members' : '/events'} className="inline-flex items-center gap-2 rounded-2xl border portal-soft-rule bg-card/80 px-4 py-3 text-sm font-black text-foreground transition-colors hover:bg-card">
+                  {isManager ? 'Review approvals' : 'See upcoming events'}
+                </Link>
+              </div>
+            </div>
+
+            <div className="grid gap-3 sm:grid-cols-3 lg:grid-cols-1">
+              <div className="rounded-[1.4rem] border portal-soft-rule bg-card/80 p-4">
+                <div className="mb-3 flex h-11 w-11 items-center justify-center rounded-2xl bg-primary/10 text-primary">
+                  <TrendingUp className="h-5 w-5" />
+                </div>
+                <p className="text-xs font-black uppercase tracking-[0.14em] text-muted-foreground">Pulse</p>
+                <p className="mt-2 text-2xl font-black text-foreground">{stats.postsThisMonth}</p>
+                <p className="mt-1 text-sm text-muted-foreground">posts and announcements this month</p>
+              </div>
+              <div className="rounded-[1.4rem] border portal-soft-rule bg-card/80 p-4">
+                <div className="mb-3 flex h-11 w-11 items-center justify-center rounded-2xl bg-accent/10 text-accent">
+                  <Calendar className="h-5 w-5" />
+                </div>
+                <p className="text-xs font-black uppercase tracking-[0.14em] text-muted-foreground">Calendar</p>
+                <p className="mt-2 text-2xl font-black text-foreground">{upcomingEvents.length}</p>
+                <p className="mt-1 text-sm text-muted-foreground">upcoming neighborhood moments</p>
+              </div>
+              <div className="rounded-[1.4rem] border portal-soft-rule bg-card/80 p-4">
+                <div className="mb-3 flex h-11 w-11 items-center justify-center rounded-2xl bg-amber-500/10 text-amber-600">
+                  <Users className="h-5 w-5" />
+                </div>
+                <p className="text-xs font-black uppercase tracking-[0.14em] text-muted-foreground">Residents</p>
+                <p className="mt-2 text-2xl font-black text-foreground">{stats.totalMembers}</p>
+                <p className="mt-1 text-sm text-muted-foreground">verified members connected</p>
               </div>
             </div>
           </div>
+        </section>
 
-          <div className="mb-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-            {statCards.map((stat) => (
-              <StatCard key={stat.title} {...stat} />
-            ))}
-          </div>
+        <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+          {statCards.map((stat) => (
+            <StatCard key={stat.title} {...stat} />
+          ))}
+        </div>
 
-          <div className="grid gap-6 lg:grid-cols-3">
-            <div className="space-y-6 lg:col-span-2">
-              <CommunityChart />
+        <div className="grid gap-6 xl:grid-cols-[minmax(0,1.65fr)_minmax(340px,0.95fr)]">
+          <div className="space-y-6">
+            <CommunityChart />
 
-              <div>
-                <div className="mb-4 flex items-center justify-between">
-                  <h3 className="text-lg font-bold text-foreground">Upcoming Events</h3>
-                  <Link href="/events" className="text-sm font-medium text-primary hover:text-primary/80">
-                    View all
-                  </Link>
+            <section className="portal-panel rounded-[1.9rem] p-5 sm:p-6">
+              <div className="mb-5 flex items-center justify-between">
+                <div>
+                  <h3 className="portal-section-title text-xl text-foreground">Upcoming Events</h3>
+                  <p className="text-sm text-muted-foreground">What the neighborhood is gathering around next</p>
                 </div>
-                {featuredEvents.length > 0 ? (
-                  <div className="grid gap-4 sm:grid-cols-2">
-                    {events.slice(0, 2).map((event) => (
-                      <EventCard key={event.id} event={event} />
-                    ))}
-                  </div>
-                ) : (
-                  <div className="rounded-xl border border-dashed border-border p-8 text-center text-sm text-muted-foreground">
-                    No upcoming events have been scheduled.
-                  </div>
-                )}
+                <Link href="/events" className="text-sm font-black text-primary hover:text-primary/80">
+                  View all
+                </Link>
               </div>
+              {featuredEvents.length > 0 ? (
+                <div className="grid gap-4 lg:grid-cols-2">
+                  {events.slice(0, 2).map((event) => (
+                    <EventCard key={event.id} event={event} />
+                  ))}
+                </div>
+              ) : (
+                <div className="rounded-[1.4rem] border border-dashed portal-soft-rule bg-card/70 p-8 text-center text-sm text-muted-foreground">
+                  No upcoming events have been scheduled.
+                </div>
+              )}
+            </section>
 
-              {compactEvents.length > 0 && (
+            {compactEvents.length > 0 && (
+              <section className="portal-panel rounded-[1.9rem] p-5 sm:p-6">
+                <div className="mb-4 flex items-center justify-between">
+                  <div>
+                    <h4 className="portal-section-title text-lg text-foreground">More On The Calendar</h4>
+                    <p className="text-sm text-muted-foreground">Additional events residents can join soon</p>
+                  </div>
+                </div>
                 <div className="space-y-3">
-                  <h4 className="font-semibold text-foreground">More Upcoming</h4>
                   {events.slice(2).map((event) => (
                     <EventCard key={event.id} event={event} variant="compact" />
                   ))}
                 </div>
-              )}
-            </div>
-
-            <div className="space-y-6">
-              <EmergencyServicesWidget />
-              <SafetyWidget />
-              <QuickActions />
-              <ActivityCard activities={activities} />
-              <MemberCard members={activeMembers} />
-            </div>
+              </section>
+            )}
           </div>
-        </main>
 
-        <footer className="hidden border-t border-border bg-muted/20 px-6 py-4 md:block">
-          <p className="text-center text-xs text-muted-foreground">
-            © {new Date().getFullYear()} Mohalla
-          </p>
-        </footer>
+          <div className="space-y-6">
+            <EmergencyServicesWidget />
+            <SafetyWidget />
+            <QuickActions />
+            <ActivityCard activities={activities} />
+            <MemberCard members={activeMembers} />
+          </div>
+        </div>
       </div>
-    </div>
+    </DashboardShell>
   )
 }

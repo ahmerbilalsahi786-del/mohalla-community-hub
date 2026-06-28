@@ -51,13 +51,10 @@ export function QuickActions() {
   const [, navigate] = useLocation()
 
   return (
-    <div className="relative overflow-hidden rounded-2xl border border-border bg-card p-6 shadow-sm">
-      {/* Decorative blob */}
-      <div className="absolute -right-12 -top-12 h-24 w-24 rounded-full bg-accent/5 blur-2xl" />
-
+    <div className="portal-panel relative overflow-hidden rounded-[1.9rem] p-6">
       <div className="relative">
-        <h3 className="text-lg font-bold text-card-foreground">Quick Actions</h3>
-        <p className="text-sm text-muted-foreground">What would you like to do?</p>
+        <h3 className="portal-section-title text-lg text-card-foreground">Quick Actions</h3>
+        <p className="text-sm text-muted-foreground">Jump into the next thing your neighborhood needs.</p>
 
         <div className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-3">
           {actions.map((action) => (
@@ -65,7 +62,7 @@ export function QuickActions() {
               key={action.name}
               onClick={() => navigate(action.href)}
               className={cn(
-                'group flex flex-col items-center gap-2 rounded-xl p-4 text-center transition-all duration-200',
+                'group flex min-h-28 flex-col items-center gap-2 rounded-[1.4rem] border border-transparent p-4 text-center transition-all duration-200 hover:-translate-y-0.5 hover:border-border hover:shadow-lg',
                 action.color
               )}
             >
@@ -74,8 +71,8 @@ export function QuickActions() {
                 className="transition-transform duration-200 group-hover:scale-110"
               />
               <div>
-                <p className="text-sm font-semibold">{action.name}</p>
-                <p className="text-xs opacity-70">{action.description}</p>
+                <p className="text-sm font-black leading-tight">{action.name}</p>
+                <p className="text-xs leading-tight opacity-70">{action.description}</p>
               </div>
             </button>
           ))}
