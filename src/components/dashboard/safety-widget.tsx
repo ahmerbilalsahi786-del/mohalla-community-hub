@@ -33,7 +33,7 @@ export function SafetyWidget() {
 
   return (
     <Link href="/safety">
-      <div className="group cursor-pointer rounded-2xl border border-border bg-card p-4 shadow-sm hover:shadow-md transition-shadow">
+      <div className="portal-panel group cursor-pointer rounded-2xl p-4 transition-shadow hover:shadow-md">
         <div className="flex items-center justify-between mb-3">
           <div className="flex items-center gap-2">
             <div className={cn(

@@ -80,7 +80,7 @@ export function NotificationBell() {
         type="button"
         aria-label="Notifications"
         onClick={() => { setOpen(o => !o); if (!open) fetchNotifs() }}
-        className="relative flex h-10 w-10 items-center justify-center rounded-xl bg-muted/50 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+        className="relative flex h-10 w-10 items-center justify-center rounded-xl border portal-soft-rule bg-card/90 text-muted-foreground transition-colors hover:bg-card hover:text-foreground"
       >
         <Bell size={20} />
         {unread > 0 && (

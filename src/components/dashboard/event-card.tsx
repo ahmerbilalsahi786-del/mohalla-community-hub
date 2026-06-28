@@ -31,7 +31,7 @@ const categoryColors: Record<string, string> = {
 export function EventCard({ event, variant = 'default' }: EventCardProps) {
   if (variant === 'compact') {
     return (
-      <div className="group flex items-center gap-4 rounded-xl border border-border bg-card p-4 transition-all hover:border-primary/30 hover:shadow-sm">
+      <div className="group flex items-center gap-4 rounded-xl border portal-soft-rule bg-card/90 p-4 transition-all hover:border-primary/30 hover:shadow-sm">
         {/* Date Badge */}
         <div className="flex h-14 w-14 shrink-0 flex-col items-center justify-center rounded-xl bg-primary/10">
           <span className="text-xs font-medium text-primary">
@@ -43,12 +43,12 @@ export function EventCard({ event, variant = 'default' }: EventCardProps) {
         </div>
 
         {/* Content */}
-        <div className="flex-1 min-w-0">
+        <div className="min-w-0 flex-1">
           <h4 className="truncate font-semibold text-card-foreground">{event.title}</h4>
-          <div className="mt-1 flex items-center gap-3 text-xs text-muted-foreground">
-            <span className="flex items-center gap-1">
+          <div className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-muted-foreground">
+            <span className="flex min-w-0 items-center gap-1">
               <MapPin size={12} />
-              {event.location}
+              <span className="truncate">{event.location}</span>
             </span>
             <span className="flex items-center gap-1">
               <Users size={12} />
@@ -69,20 +69,9 @@ export function EventCard({ event, variant = 'default' }: EventCardProps) {
   }
 
   return (
-    <div className="group relative overflow-hidden rounded-2xl border border-border bg-card shadow-sm transition-all duration-300 hover:shadow-lg hover:shadow-primary/10">
-      {/* Decorative Elements */}
-      <div className="absolute -right-16 -top-16 h-32 w-32 rounded-full bg-primary/5 transition-transform duration-500 group-hover:scale-150" />
-      <div className="absolute -bottom-8 -left-8 h-24 w-24 rounded-full bg-accent/5 transition-transform duration-500 group-hover:scale-125" />
-
+    <div className="portal-panel group relative overflow-hidden rounded-2xl transition-all duration-300 hover:shadow-lg hover:shadow-primary/10">
       {/* Image/Banner */}
       <div className="relative h-32 bg-gradient-to-br from-primary/20 via-accent/10 to-primary/5">
-        <div className="absolute inset-0 opacity-30">
-          <div className="absolute top-4 left-8 h-6 w-6 rounded-full bg-primary/20" />
-          <div className="absolute top-8 right-12 h-4 w-4 rounded-full bg-accent/20" />
-          <div className="absolute bottom-6 left-1/3 h-3 w-3 rounded-full bg-primary/15" />
-          <div className="absolute top-12 left-1/2 h-5 w-5 rounded-full bg-accent/15" />
-        </div>
-        
         {/* Category Badge */}
         <div className="absolute left-4 top-4">
           <span className={cn(
@@ -106,7 +95,7 @@ export function EventCard({ event, variant = 'default' }: EventCardProps) {
 
       {/* Content */}
       <div className="relative p-6 pt-8">
-        <h3 className="text-lg font-bold text-card-foreground">{event.title}</h3>
+        <h3 className="break-words text-lg font-bold text-card-foreground">{event.title}</h3>
         <p className="mt-2 line-clamp-2 text-sm text-muted-foreground">{event.description}</p>
 
         {/* Meta Info */}
@@ -115,9 +104,9 @@ export function EventCard({ event, variant = 'default' }: EventCardProps) {
             <Calendar size={14} className="text-primary" />
             <span>{event.time}</span>
           </div>
-          <div className="flex items-center gap-1.5">
+          <div className="flex min-w-0 items-center gap-1.5">
             <MapPin size={14} className="text-accent" />
-            <span>{event.location}</span>
+            <span className="truncate">{event.location}</span>
           </div>
           <div className="flex items-center gap-1.5">
             <Users size={14} className="text-primary" />

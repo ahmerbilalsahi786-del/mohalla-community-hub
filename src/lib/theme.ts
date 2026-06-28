@@ -50,10 +50,29 @@ export function useCommunityTheme(community: CommunityTheme | null | undefined) 
     root.style.setProperty("--community-secondary-foreground", foregroundFor(secondary));
     root.style.setProperty("--community-banner-foreground", foregroundFor(banner));
     root.style.setProperty("--community-sidebar-foreground", foregroundFor(sidebar));
-    root.style.setProperty("--primary", primary);
-    root.style.setProperty("--accent", secondary);
-    root.style.setProperty("--background", background);
-    root.style.setProperty("--primary-foreground", foregroundFor(primary));
-    root.style.setProperty("--accent-foreground", foregroundFor(secondary));
+
+    const applySemanticTheme = () => {
+      if (root.classList.contains("dark")) {
+        root.style.removeProperty("--primary");
+        root.style.removeProperty("--accent");
+        root.style.removeProperty("--background");
+        root.style.removeProperty("--primary-foreground");
+        root.style.removeProperty("--accent-foreground");
+        return;
+      }
+
+      root.style.setProperty("--primary", primary);
+      root.style.setProperty("--accent", secondary);
+      root.style.setProperty("--background", background);
+      root.style.setProperty("--primary-foreground", foregroundFor(primary));
+      root.style.setProperty("--accent-foreground", foregroundFor(secondary));
+    };
+
+    applySemanticTheme();
+
+    const observer = new MutationObserver(applySemanticTheme);
+    observer.observe(root, { attributes: true, attributeFilter: ["class"] });
+
+    return () => observer.disconnect();
   }, [community]);
 }

@@ -51,7 +51,6 @@ export function Sidebar() {
   const logout = useLogout()
   const profileHref = `/profile/${user?.userId ?? 'me'}`
   const logoUrl = user?.community?.logoUrl
-  const communityName = user?.community?.name ?? 'Mohalla'
   const visibleNavItems = navItems.filter((item) => item.href !== '/admin' || canManageCommunity(user?.role))
 
   const activeItem =
@@ -61,18 +60,15 @@ export function Sidebar() {
   return (
     <aside
       className={cn(
-        'portal-panel sticky top-0 relative flex h-screen shrink-0 flex-col overflow-hidden border-r border-border/60 bg-[color-mix(in_oklch,var(--community-sidebar)_88%,var(--background)_12%)] text-[var(--community-sidebar-foreground)] transition-all duration-300 ease-in-out self-start',
+        'sticky top-0 relative flex h-dvh shrink-0 flex-col overflow-hidden border-r border-sidebar-border bg-sidebar text-sidebar-foreground shadow-[12px_0_36px_rgba(15,23,42,0.04)] transition-all duration-300 ease-in-out self-start',
         'hidden md:flex',
-        collapsed ? 'w-20' : 'w-64'
+        collapsed ? 'w-20' : 'w-[17rem]'
       )}
     >
-      <div className="absolute inset-x-0 top-0 h-36 bg-gradient-to-b from-background/10 to-transparent" />
-      <div className="absolute inset-x-4 top-24 h-px bg-border/20" />
-
       {/* Logo Section */}
-      <div className="flex h-20 items-center justify-between border-b border-border/10 bg-[color-mix(in_oklch,var(--community-banner)_88%,var(--background)_12%)] px-4 text-[var(--community-banner-foreground)] shadow-sm">
-        <Link href="/dashboard" className="flex items-center gap-3">
-          <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-background/80 p-0.5 text-[var(--community-primary)] shadow-sm ring-1 ring-border/70">
+      <div className="flex min-h-20 items-center justify-between border-b border-sidebar-border bg-card/92 px-4 shadow-sm">
+        <Link href="/dashboard" className="flex min-w-0 items-center gap-3">
+          <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-primary/10 p-0.5 text-primary shadow-sm ring-1 ring-primary/15">
             {logoUrl ? (
               <img src={logoUrl} alt="" className="h-full w-full rounded-[10px] object-cover" />
             ) : (
@@ -81,22 +77,23 @@ export function Sidebar() {
           </span>
           {!collapsed && (
             <div className="min-w-0">
-              <span className="brand-wordmark block truncate text-lg tracking-tight">{communityName}</span>
-              <span className="text-xs text-[var(--community-banner-foreground)]/70">Neighborhood Portal</span>
+              <span className="brand-wordmark block truncate text-xl">Mohalla</span>
+              <span className="text-xs font-semibold text-muted-foreground">Neighborhood Portal</span>
             </div>
           )}
         </Link>
         <button
           onClick={() => setCollapsed(!collapsed)}
-          className="flex h-9 w-9 items-center justify-center rounded-xl bg-black/8 transition-colors hover:bg-black/14"
+          className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border border-sidebar-border bg-background/80 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+          aria-label={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
         >
           {collapsed ? <ChevronRight size={16} /> : <ChevronLeft size={16} />}
         </button>
       </div>
 
       {/* Main Navigation */}
-      <nav className="flex-1 space-y-1 overflow-y-auto p-3 pt-4">
-        <div className={cn('mb-3 px-3 text-[11px] font-black uppercase tracking-[0.18em] text-sidebar-foreground/45', collapsed && 'sr-only')}>
+      <nav className="flex-1 space-y-1 overflow-y-auto px-3 py-4">
+        <div className={cn('mb-3 px-3 text-[11px] font-black uppercase text-muted-foreground', collapsed && 'sr-only')}>
           Main Menu
         </div>
         {visibleNavItems.map((item) => (
@@ -104,28 +101,28 @@ export function Sidebar() {
             key={item.name}
             href={item.href}
             className={cn(
-              'group relative flex items-center gap-3 rounded-2xl px-3 py-3 text-sm font-medium transition-all duration-200',
+              'group relative flex min-h-11 items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-bold transition-all duration-200',
               activeItem === item.name
-                ? 'bg-background/14 text-sidebar-accent-foreground shadow-lg shadow-black/10'
-                : 'text-sidebar-foreground/72 hover:bg-background/8 hover:text-sidebar-foreground'
+                ? 'bg-primary text-primary-foreground shadow-lg shadow-primary/15'
+                : 'text-muted-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground'
             )}
           >
             {activeItem === item.name && (
-              <div className="absolute left-0 top-1/2 h-7 w-1 -translate-y-1/2 rounded-r-full bg-sidebar-primary" />
+              <div className="absolute left-0 top-1/2 h-6 w-1 -translate-y-1/2 rounded-r-full bg-accent" />
             )}
             <item.icon size={20} className={cn(
               'shrink-0 transition-colors',
-              activeItem === item.name ? 'text-sidebar-primary' : 'text-sidebar-foreground/60 group-hover:text-sidebar-foreground'
+              activeItem === item.name ? 'text-primary-foreground' : 'text-muted-foreground group-hover:text-sidebar-accent-foreground'
             )} />
             {!collapsed && (
               <>
-                <span className="flex-1">{item.name}</span>
+                <span className="min-w-0 flex-1 truncate">{item.name}</span>
                 {item.badge && (
                   <span className={cn(
-                    'rounded-full px-2 py-0.5 text-[11px] font-black',
+                    'shrink-0 rounded-full px-2 py-0.5 text-[11px] font-black',
                     item.badge === 'New' 
-                      ? 'bg-sidebar-primary text-sidebar-primary-foreground'
-                      : 'bg-background/12 text-sidebar-accent-foreground'
+                      ? 'bg-accent text-accent-foreground'
+                      : 'bg-background/20 text-primary-foreground'
                   )}>
                     {item.badge}
                   </span>
@@ -137,17 +134,17 @@ export function Sidebar() {
       </nav>
 
       {/* Bottom Navigation */}
-      <div className="border-t border-border/10 p-3">
+      <div className="border-t border-sidebar-border p-3">
         <InstallAppButton collapsed={collapsed} className="mb-1" />
         {bottomItems.map((item) => (
           <Link
             key={item.name}
             href={item.href}
             className={cn(
-              'group flex items-center gap-3 rounded-2xl px-3 py-3 text-sm font-medium transition-all duration-200',
+              'group flex min-h-11 items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-bold transition-all duration-200',
               activeItem === item.name
-                ? 'bg-background/14 text-sidebar-accent-foreground'
-                : 'text-sidebar-foreground/72 hover:bg-background/8 hover:text-sidebar-foreground'
+                ? 'bg-sidebar-accent text-sidebar-accent-foreground'
+                : 'text-muted-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground'
             )}
           >
             <item.icon size={20} className="shrink-0" />
@@ -166,11 +163,11 @@ export function Sidebar() {
       </div>
 
       {/* User Profile */}
-      <div className="border-t border-border/10 p-3">
+      <div className="border-t border-sidebar-border p-3">
         <Link
           href={profileHref}
           className={cn(
-            'flex items-center gap-3 rounded-2xl bg-background/10 p-3 transition-colors hover:bg-background/14',
+            'flex items-center gap-3 rounded-xl border border-sidebar-border bg-background/75 p-3 transition-colors hover:bg-background',
             collapsed && 'justify-center'
           )}
         >
@@ -178,16 +175,16 @@ export function Sidebar() {
             {user?.avatarUrl ? (
               <img src={user.avatarUrl} alt="" className="h-10 w-10 rounded-full object-cover" />
             ) : (
-              <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-br from-sidebar-primary to-accent text-sm font-bold text-white shadow-md shadow-black/10">
+              <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary text-sm font-bold text-primary-foreground shadow-md shadow-primary/15">
                 {(user?.name ?? 'R').slice(0, 1).toUpperCase()}
               </div>
             )}
-            <div className="absolute -bottom-0.5 -right-0.5 h-3 w-3 rounded-full border-2 border-sidebar bg-green-500" />
+            <div className="absolute -bottom-0.5 -right-0.5 h-3 w-3 rounded-full border-2 border-card bg-green-500" />
           </div>
           {!collapsed && (
             <div className="min-w-0 flex-1 overflow-hidden">
               <p className="truncate text-sm font-semibold">{user?.name ?? 'Resident'}</p>
-              <p className="truncate text-xs text-sidebar-foreground/60">
+              <p className="truncate text-xs text-muted-foreground">
                 {user?.unitNumber ? `${user.unitNumber} · ` : ''}{canManageCommunity(user?.role) ? 'Admin' : 'Member'}
               </p>
             </div>
@@ -197,7 +194,7 @@ export function Sidebar() {
           type="button"
           onClick={logout}
           className={cn(
-            'mt-2 flex w-full items-center gap-3 rounded-2xl px-3 py-3 text-sm font-medium text-sidebar-foreground/72 transition-colors hover:bg-background/8 hover:text-sidebar-foreground',
+            'mt-2 flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-bold text-muted-foreground transition-colors hover:bg-sidebar-accent hover:text-sidebar-accent-foreground',
             collapsed && 'justify-center'
           )}
         >

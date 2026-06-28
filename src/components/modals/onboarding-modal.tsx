@@ -42,6 +42,7 @@ const STEPS = [
 export function OnboardingModal() {
   const [show, setShow] = useState(false)
   const [done, setDone] = useState<string[]>([])
+  const [expanded, setExpanded] = useState(false)
 
   useEffect(() => {
     const raw = localStorage.getItem(STORAGE_KEY)
@@ -74,17 +75,26 @@ export function OnboardingModal() {
   const allDone = completed >= total
 
   return (
-    <div className="fixed bottom-20 right-4 z-50 w-80 rounded-2xl border border-border bg-card shadow-2xl overflow-hidden md:bottom-6 md:right-6">
+    <div className="fixed bottom-5 right-5 z-50 hidden w-[min(22rem,calc(100vw-1.5rem))] overflow-hidden rounded-2xl border portal-soft-rule bg-card shadow-2xl shadow-black/10 md:block">
       {/* Header */}
-      <div className="flex items-start justify-between px-4 py-3.5 border-b border-border bg-muted/30">
-        <div>
+      <div className="flex items-start justify-between gap-3 border-b portal-soft-rule bg-muted/25 px-4 py-3.5">
+        <button type="button" onClick={() => setExpanded((open) => !open)} className="min-w-0 flex-1 text-left">
           <p className="font-semibold text-sm text-foreground">
-            {allDone ? '🎉 You\'re all set!' : 'Welcome to Mohalla!'}
+            {allDone ? 'All set' : 'Setup Guide'}
           </p>
           <p className="text-xs text-muted-foreground mt-0.5">
             {allDone ? 'Enjoy your community hub' : `${completed} of ${total} steps complete`}
           </p>
-        </div>
+        </button>
+        {!expanded && !allDone && (
+          <button
+            type="button"
+            onClick={() => setExpanded(true)}
+            className="mt-0.5 rounded-lg bg-primary px-2.5 py-1.5 text-xs font-bold text-primary-foreground"
+          >
+            View
+          </button>
+        )}
         <button onClick={dismiss} className="flex h-6 w-6 items-center justify-center rounded-lg hover:bg-muted text-muted-foreground shrink-0 mt-0.5">
           <X size={14} />
         </button>
@@ -99,6 +109,7 @@ export function OnboardingModal() {
       </div>
 
       {/* Steps */}
+      {expanded && (
       <div className="divide-y divide-border">
         {STEPS.map((step) => {
           const isDone = done.includes(step.id)
@@ -137,8 +148,9 @@ export function OnboardingModal() {
           )
         })}
       </div>
+      )}
 
-      {allDone && (
+      {expanded && allDone && (
         <div className="px-4 py-3 border-t border-border">
           <Button onClick={dismiss} className="w-full rounded-xl text-sm">
             Got it, close

@@ -123,10 +123,10 @@ export function EmergencyServicesWidget() {
   const visibleServices = showAllServices ? serviceContacts : serviceContacts.slice(0, 5)
 
   return (
-    <section className="rounded-3xl border border-border bg-card shadow-sm">
+    <section className="portal-panel overflow-hidden rounded-2xl">
       <button
         onClick={() => setMobileOpen((open) => !open)}
-        className="flex w-full items-center justify-between gap-3 border-b border-border px-4 py-4 text-left lg:cursor-default"
+        className="flex w-full items-center justify-between gap-3 border-b portal-soft-rule px-4 py-4 text-left lg:cursor-default"
       >
         <span className="flex items-center gap-2 text-base font-semibold text-foreground">
           <span className="flex h-8 w-8 items-center justify-center rounded-xl bg-red-500/10 text-red-600">

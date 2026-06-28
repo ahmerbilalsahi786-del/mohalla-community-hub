@@ -26,10 +26,12 @@ export function CommunityChart() {
   ]
 
   return (
-    <div className="portal-panel overflow-hidden rounded-[1.9rem] p-6">
-      <div className="mb-6">
+    <div className="portal-panel overflow-hidden rounded-2xl p-5 sm:p-6">
+      <div className="mb-6 flex flex-wrap items-start justify-between gap-3">
+        <div>
         <h3 className="portal-section-title text-lg text-card-foreground">Community Overview</h3>
         <p className="text-sm text-muted-foreground">A live read of momentum across your mohalla</p>
+        </div>
       </div>
 
       <div className="h-64">

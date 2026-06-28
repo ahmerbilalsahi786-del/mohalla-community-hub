@@ -25,14 +25,14 @@ const typeColors = {
 
 export function ActivityCard({ activities }: ActivityCardProps) {
   return (
-    <div className="portal-panel relative overflow-hidden rounded-[1.9rem]">
+    <div className="portal-panel relative overflow-hidden rounded-2xl">
       {/* Header */}
-      <div className="flex items-center justify-between border-b portal-soft-rule px-6 py-5">
-        <div>
+      <div className="flex items-center justify-between gap-3 border-b portal-soft-rule px-5 py-4">
+        <div className="min-w-0">
           <h3 className="portal-section-title text-lg text-card-foreground">Recent Activity</h3>
           <p className="text-sm text-muted-foreground">What&apos;s happening in your mohalla</p>
         </div>
-        <Link href="/feed" className="text-sm font-black text-primary hover:text-primary/80">
+        <Link href="/feed" className="shrink-0 text-sm font-black text-primary hover:text-primary/80">
           View all
         </Link>
       </div>
@@ -44,7 +44,7 @@ export function ActivityCard({ activities }: ActivityCardProps) {
         ) : activities.map((activity) => (
           <div
             key={activity.id}
-            className="flex items-start gap-4 p-4 transition-colors hover:bg-muted/40"
+            className="flex items-start gap-3 p-4 transition-colors hover:bg-muted/40"
           >
             {/* Avatar */}
             <div className="relative shrink-0">
@@ -64,8 +64,8 @@ export function ActivityCard({ activities }: ActivityCardProps) {
             </div>
 
             {/* Content */}
-            <div className="flex-1 min-w-0">
-              <p className="text-sm text-card-foreground">
+            <div className="min-w-0 flex-1">
+              <p className="break-words text-sm leading-relaxed text-card-foreground">
                 <span className="font-semibold">{activity.user}</span>{' '}
                 <span className="text-muted-foreground">{activity.action}</span>{' '}
                 <span className="font-medium text-primary">{activity.target}</span>

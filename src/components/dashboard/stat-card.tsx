@@ -24,12 +24,12 @@ export function StatCard({
   href,
 }: StatCardProps) {
   const content = (
-    <div className={cn('portal-panel group relative overflow-hidden rounded-[1.7rem] p-5 transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[0_24px_60px_rgba(15,23,42,0.08)]', href && 'cursor-pointer')}>
+    <div className={cn('portal-panel group relative min-h-[150px] overflow-hidden rounded-2xl p-5 transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[0_24px_60px_rgba(15,23,42,0.08)]', href && 'cursor-pointer')}>
       <div className="absolute inset-x-5 top-0 h-px bg-gradient-to-r from-transparent via-background/80 to-transparent" />
       <div className="relative flex items-start justify-between gap-3">
         <div className="min-w-0 flex-1">
-          <p className="text-xs font-black uppercase tracking-[0.14em] text-muted-foreground">{title}</p>
-          <p className="mt-3 truncate text-3xl font-black tracking-tight text-card-foreground">{value}</p>
+          <p className="text-xs font-black uppercase text-muted-foreground">{title}</p>
+          <p className="mt-3 break-words text-3xl font-black tracking-tight text-card-foreground">{value}</p>
           {change && (
             <div className="mt-2 flex flex-wrap items-center gap-1">
               <span
@@ -49,7 +49,7 @@ export function StatCard({
             <p className="mt-2 text-sm text-muted-foreground">{description}</p>
           )}
         </div>
-        <div className={cn('flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl shadow-sm', iconColor)}>
+        <div className={cn('flex h-12 w-12 shrink-0 items-center justify-center rounded-xl shadow-sm', iconColor)}>
           <Icon size={24} />
         </div>
       </div>

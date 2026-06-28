@@ -18,17 +18,14 @@ interface MemberCardProps {
 
 export function MemberCard({ members }: MemberCardProps) {
   return (
-    <div className="relative overflow-hidden rounded-2xl border border-border bg-card shadow-sm">
-      {/* Decorative blob */}
-      <div className="absolute -left-16 -top-16 h-32 w-32 rounded-full bg-primary/5 blur-3xl" />
-
+    <div className="portal-panel relative overflow-hidden rounded-2xl">
       {/* Header */}
-      <div className="flex items-center justify-between border-b border-border px-6 py-4">
-        <div>
-          <h3 className="text-lg font-bold text-card-foreground">Community Members</h3>
+      <div className="flex items-center justify-between gap-3 border-b portal-soft-rule px-5 py-4">
+        <div className="min-w-0">
+          <h3 className="portal-section-title text-lg text-card-foreground">Community Members</h3>
           <p className="text-sm text-muted-foreground">People in your mohalla</p>
         </div>
-        <Link href="/community" className="text-sm font-medium text-primary hover:text-primary/80">
+        <Link href="/community" className="shrink-0 text-sm font-black text-primary hover:text-primary/80">
           See all
         </Link>
       </div>
@@ -41,7 +38,7 @@ export function MemberCard({ members }: MemberCardProps) {
           <Link
             key={member.id}
             href={member.href}
-            className="flex items-center gap-4 p-4 transition-colors hover:bg-muted/30"
+            className="flex items-center gap-3 p-4 transition-colors hover:bg-muted/30"
           >
             {/* Avatar */}
             <div className="relative">
@@ -56,7 +53,7 @@ export function MemberCard({ members }: MemberCardProps) {
             </div>
 
             {/* Info */}
-            <div className="flex-1 min-w-0">
+            <div className="min-w-0 flex-1">
               <h4 className="truncate font-semibold text-card-foreground">{member.name}</h4>
               <p className="text-sm text-muted-foreground">{titleCaseWords(member.role)}</p>
               {member.mutualConnections && (

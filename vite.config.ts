@@ -3,6 +3,7 @@ import react from '@vitejs/plugin-react'
 import tailwindcss from '@tailwindcss/vite'
 import { sentryVitePlugin } from '@sentry/vite-plugin'
 import path from 'path'
+import { lookupLocationFromCoordinates } from './api/_reverse-geocode.js'
 
 function resolveSupabaseUrl(value?: string) {
   const candidate = value?.trim()
@@ -62,6 +63,47 @@ function resolveApiBaseUrl(value?: string) {
   }
 }
 
+function reverseGeocodeDevApi() {
+  return {
+    name: 'mohalla-reverse-geocode-dev-api',
+    configureServer(server: any) {
+      server.middlewares.use('/api/reverse-geocode', async (req: any, res: any, next: any) => {
+        if (req.method !== 'GET') {
+          res.statusCode = 405
+          res.setHeader('Allow', 'GET')
+          res.setHeader('Content-Type', 'application/json; charset=utf-8')
+          res.end(JSON.stringify({ error: 'Method not allowed.' }))
+          return
+        }
+
+        try {
+          const requestUrl = new URL(req.url ?? '', 'http://localhost')
+          const latitude = Number(requestUrl.searchParams.get('latitude'))
+          const longitude = Number(requestUrl.searchParams.get('longitude'))
+
+          if (!Number.isFinite(latitude) || !Number.isFinite(longitude)) {
+            res.statusCode = 400
+            res.setHeader('Content-Type', 'application/json; charset=utf-8')
+            res.end(JSON.stringify({ error: 'Latitude and longitude are required.' }))
+            return
+          }
+
+          const location = await lookupLocationFromCoordinates(latitude, longitude)
+          res.statusCode = 200
+          res.setHeader('Content-Type', 'application/json; charset=utf-8')
+          res.end(JSON.stringify(location))
+        } catch (error) {
+          res.statusCode = 502
+          res.setHeader('Content-Type', 'application/json; charset=utf-8')
+          res.end(JSON.stringify({
+            error: error instanceof Error ? error.message : 'Could not read your location details right now.',
+          }))
+        }
+      })
+    },
+  }
+}
+
 export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, process.cwd(), "")
   const supabaseUrl = resolveSupabaseUrl(env.VITE_SUPABASE_URL || env.SUPABASE_URL)
@@ -77,6 +119,7 @@ export default defineConfig(({ mode }) => {
   const plugins = [
     react(),
     tailwindcss(),
+    reverseGeocodeDevApi(),
     ...(shouldUploadSentrySourceMaps
       ? [
           sentryVitePlugin({

@@ -71,54 +71,70 @@ function bestCommunityMatch(
   }) ?? (communities.length === 1 ? communities[0] : null)
 }
 
-async function detectCurrentLocation() {
-  if (typeof window === 'undefined' || !navigator.geolocation) {
-    throw new Error('Location autofill is not available in this browser.')
+function extractLocation(payload: any) {
+  const address = payload?.address ?? payload?.localityInfo?.administrative ?? {}
+  return {
+    area: String(
+      payload?.area ||
+      payload?.locality ||
+      payload?.district ||
+      payload?.suburb ||
+      payload?.principalSubdivision ||
+      address.suburb ||
+      address.neighbourhood ||
+      address.residential ||
+      address.quarter ||
+      address.city_district ||
+      address.township ||
+      address.road ||
+      '',
+    ).trim(),
+    city: String(
+      payload?.city ||
+      payload?.locality ||
+      payload?.principalSubdivision ||
+      payload?.county ||
+      address.city ||
+      address.town ||
+      address.county ||
+      address.state_district ||
+      address.village ||
+      '',
+    ).trim(),
   }
+}
 
-  const position = await new Promise<GeolocationPosition>((resolve, reject) => {
-    navigator.geolocation.getCurrentPosition(resolve, reject, {
-      enableHighAccuracy: false,
-      timeout: 12000,
-      maximumAge: 300000,
-    })
-  })
-
-  const latitude = position.coords.latitude
-  const longitude = position.coords.longitude
-  const lookupUrls = [
-    `https://api-bdc.net/data/reverse-geocode-client?latitude=${encodeURIComponent(String(latitude))}&longitude=${encodeURIComponent(String(longitude))}&localityLanguage=en`,
-    `https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${encodeURIComponent(String(latitude))}&lon=${encodeURIComponent(String(longitude))}&zoom=15&addressdetails=1`,
-  ]
-
-  const extractLocation = (payload: any) => {
-    const address = payload?.address ?? payload?.localityInfo?.administrative ?? {}
-    return {
-      area: String(
-        payload?.locality ||
-        payload?.principalSubdivision ||
-        address.suburb ||
-        address.neighbourhood ||
-        address.residential ||
-        address.quarter ||
-        address.city_district ||
-        address.township ||
-        address.road ||
-        '',
-      ).trim(),
-      city: String(
-        payload?.city ||
-        payload?.locality ||
-        payload?.principalSubdivision ||
-        address.city ||
-        address.town ||
-        address.county ||
-        address.state_district ||
-        address.village ||
-        '',
-      ).trim(),
+function geolocationErrorMessage(error: unknown) {
+  if (error && typeof error === 'object' && 'code' in error && typeof error.code === 'number') {
+    switch (error.code) {
+      case 1:
+        return 'Location access was blocked. Please allow location access and try again.'
+      case 2:
+        return 'Your location could not be detected right now. Please try again in a moment.'
+      case 3:
+        return 'Location detection took too long. Please try again.'
+      default:
+        break
     }
   }
+
+  if (error instanceof Error && error.message.trim()) {
+    return error.message
+  }
+
+  return 'Could not read your location details right now.'
+}
+
+async function reverseGeocode(latitude: number, longitude: number) {
+  const query = new URLSearchParams({
+    latitude: String(latitude),
+    longitude: String(longitude),
+  })
+
+  const lookupUrls = [
+    `/api/reverse-geocode?${query.toString()}`,
+    `https://api-bdc.net/data/reverse-geocode-client?latitude=${encodeURIComponent(String(latitude))}&longitude=${encodeURIComponent(String(longitude))}&localityLanguage=en`,
+  ]
 
   let lastError: Error | null = null
   for (const url of lookupUrls) {
@@ -128,7 +144,10 @@ async function detectCurrentLocation() {
           Accept: 'application/json',
         },
       })
-      if (!response.ok) continue
+
+      if (!response.ok) {
+        throw new Error(`Lookup request failed with status ${response.status}.`)
+      }
 
       const payload = await response.json()
       const location = extractLocation(payload)
@@ -139,6 +158,26 @@ async function detectCurrentLocation() {
   }
 
   throw lastError ?? new Error('Could not read your location details right now.')
+}
+
+async function detectCurrentLocation() {
+  if (typeof window === 'undefined' || !navigator.geolocation) {
+    throw new Error('Location autofill is not available in this browser.')
+  }
+
+  try {
+    const position = await new Promise<GeolocationPosition>((resolve, reject) => {
+      navigator.geolocation.getCurrentPosition(resolve, reject, {
+        enableHighAccuracy: true,
+        timeout: 15000,
+        maximumAge: 300000,
+      })
+    })
+
+    return reverseGeocode(position.coords.latitude, position.coords.longitude)
+  } catch (error) {
+    throw new Error(geolocationErrorMessage(error))
+  }
 }
 
 export default function Register() {
