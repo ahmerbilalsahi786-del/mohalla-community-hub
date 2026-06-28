@@ -21,6 +21,13 @@ import { useToast } from '@/hooks/use-toast'
 import { supabase } from '@/integrations/supabase/client'
 import { inviteRegisterPath, requestMemberJoin } from '@/lib/member-join'
 
+function passwordResetRedirectTo() {
+  const configuredUrl = import.meta.env.VITE_APP_URL?.trim()
+  const origin = configuredUrl || window.location.origin
+
+  return `${origin.replace(/\/$/, '')}/reset-password`
+}
+
 export default function Login() {
   const [, navigate] = useLocation()
   const queryClient = useQueryClient()
@@ -125,12 +132,33 @@ export default function Login() {
       return
     }
     setResetting(true)
-    const error = new Error("Password reset emails are temporarily disabled.")
-    setResetting(false)
-    toast({
-      title: error.message,
-      variant: "destructive",
-    })
+    try {
+      const { error } = await supabase.auth.resetPasswordForEmail(email.trim(), {
+        redirectTo: passwordResetRedirectTo(),
+      })
+
+      if (error) {
+        toast({
+          title: "Could not send reset email",
+          description: error.message,
+          variant: "destructive",
+        })
+        return
+      }
+
+      toast({
+        title: "Password reset email sent",
+        description: "Open the link in your email to set a new password.",
+      })
+    } catch (error) {
+      toast({
+        title: "Could not send reset email",
+        description: error instanceof Error ? error.message : "Please try again.",
+        variant: "destructive",
+      })
+    } finally {
+      setResetting(false)
+    }
   }
 
   return (
