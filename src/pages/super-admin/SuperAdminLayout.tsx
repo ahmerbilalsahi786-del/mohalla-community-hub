@@ -14,7 +14,7 @@ export function SuperAdminLayout({ children }: { children: React.ReactNode }) {
   const logout = useLogout();
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="portal-shell min-h-screen bg-background">
       <header className="sticky top-0 z-40 border-b border-border bg-card/95 backdrop-blur">
         <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-4 py-3 sm:px-6">
           <Link href="/super-admin/dashboard" className="flex min-w-0 items-center gap-3">

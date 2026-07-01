@@ -25,6 +25,7 @@ const DEMO_RSVPS_KEY = "mohalla_demo_rsvps";
 const DEMO_MEMBERS_KEY = "mohalla_demo_members";
 const DEMO_COMMUNITY_KEY = "mohalla_demo_community";
 const DEMO_PREFS_KEY = "mohalla_demo_notification_preferences";
+const DEMO_CITY_PUBLICATIONS_KEY = "mohalla_demo_city_publications";
 const DEMO_PROFILE = {
   id: DEMO_USER_ID,
   display_name: "Ahmed Khan",
@@ -245,6 +246,80 @@ function writeDemoCommunity(payload: JsonBody) {
   return next;
 }
 
+function cityKey(value?: unknown) {
+  return String(value ?? "").trim().toLowerCase();
+}
+
+function compactText(value?: unknown, maxLength = 260) {
+  const text = String(value ?? "").replace(/\s+/g, " ").trim();
+  return text.length > maxLength ? `${text.slice(0, maxLength - 1)}…` : text;
+}
+
+function sourceType(value?: unknown) {
+  const next = String(value ?? "").trim();
+  const allowed = new Set(["post", "event", "listing", "poll", "safety_alert", "place", "volunteer"]);
+  if (!allowed.has(next)) throw new Error("Unsupported city feed item type.");
+  return next;
+}
+
+function defaultDemoCityPublications() {
+  const now = new Date().toISOString();
+  const city = getDemoCommunity().city || "Lahore";
+  return [
+    {
+      id: "demo-city-publication-1",
+      community_id: "demo-park-view",
+      city,
+      source_type: "event",
+      source_id: "demo-neighbor-event",
+      title: "Family night market at Park View",
+      summary: "Food stalls, kids games, and a small craft bazaar open to nearby families this Friday evening.",
+      image_url: null,
+      href: "/city-feed",
+      author_id: null,
+      author_name: "Park View Admin",
+      community_name: "Park View Society",
+      community_area: "Gulberg",
+      published_by: null,
+      published_at: new Date(Date.now() - 1000 * 60 * 35).toISOString(),
+      is_active: true,
+      metadata: { date: now.slice(0, 10), location: "Central Park" },
+      created_at: now,
+      updated_at: now,
+    },
+    {
+      id: "demo-city-publication-2",
+      community_id: "demo-garden-estate",
+      city,
+      source_type: "post",
+      source_id: "demo-neighbor-post",
+      title: "New recycling pickup schedule",
+      summary: "Garden Estate is moving recyclable pickup to Sunday mornings and sharing their vendor contact with nearby societies.",
+      image_url: null,
+      href: "/city-feed",
+      author_id: null,
+      author_name: "Garden Estate Admin",
+      community_name: "Garden Estate",
+      community_area: "Model Town",
+      published_by: null,
+      published_at: new Date(Date.now() - 1000 * 60 * 90).toISOString(),
+      is_active: true,
+      metadata: { postType: "announcement" },
+      created_at: now,
+      updated_at: now,
+    },
+  ];
+}
+
+function readDemoCityPublications() {
+  const saved = readDemoRows(DEMO_CITY_PUBLICATIONS_KEY);
+  return saved.length > 0 ? saved : defaultDemoCityPublications();
+}
+
+function writeDemoCityPublications(rows: JsonBody[]) {
+  writeDemoRows(DEMO_CITY_PUBLICATIONS_KEY, rows, 100);
+}
+
 async function currentUserId() {
   if (isDemoMode()) return DEMO_USER_ID;
   const { data } = await supabase.auth.getSession();
@@ -284,6 +359,30 @@ async function requireCommunityManager() {
     throw new Error("Administrator access required.");
   }
   return currentCommunityId();
+}
+
+async function currentCommunityContext(managerOnly = false) {
+  if (isDemoMode()) {
+    const community = getDemoCommunity();
+    return {
+      id: String(community.id ?? "default"),
+      name: community.name ?? "Mohalla Community Hub",
+      area: community.area ?? "",
+      city: community.city || "Lahore",
+    };
+  }
+
+  const communityId = managerOnly ? await requireCommunityManager() : await currentCommunityId();
+  const { data, error } = await supabase.from("community_settings").select("*").eq("id", communityId).maybeSingle();
+  if (error) throw error;
+  const city = compactText(data?.welcome_message, 80);
+  if (!city) throw new Error("Add a city to your community settings before using City Feed.");
+  return {
+    id: communityId,
+    name: data?.name ?? "Mohalla Community",
+    area: data?.description ?? "",
+    city,
+  };
 }
 
 async function resolveRequestedUserId(value?: string | null) {
@@ -531,6 +630,220 @@ function toAlert(row: any, profile?: any) {
   };
 }
 
+function toCityPublication(row: any) {
+  return {
+    id: id(row.id),
+    communityId: row.community_id ?? "default",
+    city: row.city,
+    sourceType: row.source_type,
+    sourceId: row.source_id,
+    title: row.title,
+    summary: row.summary ?? "",
+    imageUrl: row.image_url ?? null,
+    href: row.href ?? "",
+    authorId: row.author_id ?? null,
+    authorName: row.author_name ?? "Resident",
+    communityName: row.community_name ?? "Mohalla Community",
+    communityArea: row.community_area ?? "",
+    publishedBy: row.published_by ?? null,
+    publishedAt: row.published_at ?? row.created_at ?? new Date().toISOString(),
+    isActive: Boolean(row.is_active),
+    metadata: row.metadata ?? {},
+  };
+}
+
+function assertSameCommunity(row: any, communityId: string) {
+  if (row?.community_id && String(row.community_id) !== String(communityId)) {
+    throw new Error("You can only publish items from your own community.");
+  }
+}
+
+async function sourceAuthor(userId?: string | null) {
+  if (!userId) return { authorId: null, authorName: "Resident" };
+  if (isDemoMode()) return { authorId: DEMO_USER_ID, authorName: profileName(DEMO_PROFILE) };
+  const profiles = await profilesById([userId]);
+  return { authorId: userId, authorName: profileName(profiles.get(userId)) };
+}
+
+async function buildDemoPublicationSnapshot(kind: string, sourceId: string) {
+  if (kind === "post") {
+    const row = readDemoPosts().find((item: any) => String(item.id) === sourceId);
+    if (!row) throw new Error("Post not found.");
+    return {
+      sourceType: "post",
+      sourceId,
+      title: compactText(row.title, 120),
+      summary: compactText(row.body),
+      imageUrl: row.image_urls?.[0] ?? null,
+      href: "/feed",
+      authorId: DEMO_USER_ID,
+      authorName: profileName(DEMO_PROFILE),
+      metadata: { postType: row.type ?? "general" },
+    };
+  }
+
+  if (kind === "event") {
+    const row = readDemoRows(DEMO_EVENTS_KEY).find((item: any) => String(item.id) === sourceId);
+    if (!row) throw new Error("Event not found.");
+    return {
+      sourceType: "event",
+      sourceId,
+      title: compactText(row.title, 120),
+      summary: compactText(row.description),
+      imageUrl: row.image_url ?? null,
+      href: "/events",
+      authorId: DEMO_USER_ID,
+      authorName: profileName(DEMO_PROFILE),
+      metadata: { date: row.event_date, time: row.event_time, location: row.location },
+    };
+  }
+
+  if (kind === "listing") {
+    const row = readDemoRows(DEMO_LISTINGS_KEY).find((item: any) => String(item.id) === sourceId);
+    if (!row) throw new Error("Listing not found.");
+    return {
+      sourceType: "listing",
+      sourceId,
+      title: compactText(row.title, 120),
+      summary: compactText(row.description),
+      imageUrl: row.image_urls?.[0] ?? null,
+      href: `/marketplace/${sourceId}`,
+      authorId: DEMO_USER_ID,
+      authorName: profileName(DEMO_PROFILE),
+      metadata: { category: row.category, pricePkr: row.price_pkr, status: row.status },
+    };
+  }
+
+  if (kind === "poll") {
+    const row = readDemoRows(DEMO_POLLS_KEY).find((item: any) => String(item.id) === sourceId);
+    if (!row) throw new Error("Poll not found.");
+    return {
+      sourceType: "poll",
+      sourceId,
+      title: compactText(row.question, 120),
+      summary: compactText((row.options ?? []).join(" · ")),
+      imageUrl: null,
+      href: "/polls",
+      authorId: DEMO_USER_ID,
+      authorName: profileName(DEMO_PROFILE),
+      metadata: { options: row.options ?? [], endsAt: row.endsAt },
+    };
+  }
+
+  if (kind === "safety_alert") {
+    const row = readDemoRows(DEMO_ALERTS_KEY).find((item: any) => String(item.id) === sourceId);
+    if (!row) throw new Error("Safety alert not found.");
+    return {
+      sourceType: "safety_alert",
+      sourceId,
+      title: compactText(row.title, 120),
+      summary: compactText(row.description),
+      imageUrl: row.image_url ?? null,
+      href: "/safety",
+      authorId: DEMO_USER_ID,
+      authorName: profileName(DEMO_PROFILE),
+      metadata: { severity: row.severity, location: row.location, alertType: row.alert_type },
+    };
+  }
+
+  throw new Error("Unsupported city feed item type.");
+}
+
+async function buildRemotePublicationSnapshot(kind: string, sourceId: string, communityId: string) {
+  if (kind === "post") {
+    const { data, error } = await extendedDb.from("posts").select("*").eq("id", sourceId).maybeSingle();
+    if (error) throw error;
+    if (!data) throw new Error("Post not found.");
+    assertSameCommunity(data, communityId);
+    const author = await sourceAuthor(data.user_id);
+    return {
+      sourceType: "post",
+      sourceId,
+      title: compactText(data.title, 120),
+      summary: compactText(data.body),
+      imageUrl: data.image_urls?.[0] ?? null,
+      href: "/feed",
+      ...author,
+      metadata: { postType: data.type ?? "general" },
+    };
+  }
+
+  if (kind === "event") {
+    const { data, error } = await extendedDb.from("events").select("*").eq("id", sourceId).maybeSingle();
+    if (error) throw error;
+    if (!data) throw new Error("Event not found.");
+    assertSameCommunity(data, communityId);
+    const author = await sourceAuthor(data.user_id);
+    return {
+      sourceType: "event",
+      sourceId,
+      title: compactText(data.title, 120),
+      summary: compactText(data.description),
+      imageUrl: data.image_url ?? null,
+      href: "/events",
+      ...author,
+      metadata: { date: data.event_date, time: data.event_time, location: data.location },
+    };
+  }
+
+  if (kind === "listing") {
+    const { data, error } = await extendedDb.from("listings").select("*").eq("id", sourceId).maybeSingle();
+    if (error) throw error;
+    if (!data) throw new Error("Listing not found.");
+    assertSameCommunity(data, communityId);
+    const author = await sourceAuthor(data.user_id);
+    return {
+      sourceType: "listing",
+      sourceId,
+      title: compactText(data.title, 120),
+      summary: compactText(data.description),
+      imageUrl: data.image_urls?.[0] ?? null,
+      href: `/marketplace/${sourceId}`,
+      ...author,
+      metadata: { category: data.category, pricePkr: data.price_pkr, status: data.status },
+    };
+  }
+
+  if (kind === "poll") {
+    const { data, error } = await extendedDb.from("polls").select("*, poll_options(option_text)").eq("id", sourceId).maybeSingle();
+    if (error) throw error;
+    if (!data) throw new Error("Poll not found.");
+    assertSameCommunity(data, communityId);
+    const options = (data.poll_options ?? []).map((option: any) => option.option_text).filter(Boolean);
+    const author = await sourceAuthor(data.user_id);
+    return {
+      sourceType: "poll",
+      sourceId,
+      title: compactText(data.question, 120),
+      summary: compactText(options.join(" · ")),
+      imageUrl: null,
+      href: "/polls",
+      ...author,
+      metadata: { options, endsAt: data.ends_at },
+    };
+  }
+
+  if (kind === "safety_alert") {
+    const { data, error } = await extendedDb.from("safety_alerts").select("*").eq("id", sourceId).maybeSingle();
+    if (error) throw error;
+    if (!data) throw new Error("Safety alert not found.");
+    assertSameCommunity(data, communityId);
+    const author = await sourceAuthor(data.user_id);
+    return {
+      sourceType: "safety_alert",
+      sourceId,
+      title: compactText(data.title, 120),
+      summary: compactText(data.description),
+      imageUrl: null,
+      href: "/safety",
+      ...author,
+      metadata: { severity: data.severity, location: data.location, alertType: data.alert_type },
+    };
+  }
+
+  throw new Error("Unsupported city feed item type.");
+}
+
 async function listFeed(params: URLSearchParams) {
   const page = Number(params.get("page") ?? 1);
   const limit = Number(params.get("limit") ?? 20);
@@ -702,6 +1015,177 @@ async function listSafety(params: URLSearchParams) {
   const rows = data ?? [];
   const profiles = await profilesById(rows.map((row: any) => row.user_id));
   return rows.map((row: any) => toAlert(row, profiles.get(row.user_id)));
+}
+
+async function listCityPublications(params: URLSearchParams) {
+  const page = Number(params.get("page") ?? 1);
+  const limit = Number(params.get("limit") ?? 20);
+  const search = params.get("search");
+  const kind = params.get("sourceType");
+  const community = await currentCommunityContext(false);
+
+  if (isDemoMode()) {
+    let rows = readDemoCityPublications().filter(
+      (row: any) => row.is_active !== false && cityKey(row.city) === cityKey(community.city),
+    );
+    if (kind && kind !== "all") rows = rows.filter((row: any) => row.source_type === kind);
+    rows = applySearch(rows, search, ["title", "summary", "community_name", "source_type"]);
+    return {
+      items: pageRows(rows, page, limit).map(toCityPublication),
+      total: rows.length,
+      page,
+      limit,
+      hasMore: page * limit < rows.length,
+      city: community.city,
+    };
+  }
+
+  let query = extendedDb
+    .from("city_publications")
+    .select("*")
+    .eq("is_active", true)
+    .ilike("city", community.city)
+    .order("published_at", { ascending: false })
+    .limit(200);
+
+  if (kind && kind !== "all") query = query.eq("source_type", kind);
+
+  const { data, error } = await query;
+  if (error) throw error;
+
+  const rows = applySearch(data ?? [], search, ["title", "summary", "community_name", "source_type"]);
+  return {
+    items: pageRows(rows, page, limit).map(toCityPublication),
+    total: rows.length,
+    page,
+    limit,
+    hasMore: page * limit < rows.length,
+    city: community.city,
+  };
+}
+
+async function getCityPublicationStatus(params: URLSearchParams) {
+  const kind = sourceType(params.get("sourceType"));
+  const sourceId = String(params.get("sourceId") ?? "").trim();
+  if (!sourceId) throw new Error("City feed source id is required.");
+  const community = await currentCommunityContext(false);
+
+  if (isDemoMode()) {
+    const row = readDemoCityPublications().find(
+      (item: any) =>
+        item.source_type === kind &&
+        String(item.source_id) === sourceId &&
+        cityKey(item.city) === cityKey(community.city) &&
+        item.is_active !== false,
+    );
+    return { isPublic: Boolean(row), publication: row ? toCityPublication(row) : null };
+  }
+
+  const { data, error } = await extendedDb
+    .from("city_publications")
+    .select("*")
+    .eq("community_id", community.id)
+    .eq("source_type", kind)
+    .eq("source_id", sourceId)
+    .eq("is_active", true)
+    .maybeSingle();
+  if (error) throw error;
+  return { isPublic: Boolean(data), publication: data ? toCityPublication(data) : null };
+}
+
+async function publishCityPublication(payload: JsonBody) {
+  const kind = sourceType(payload.sourceType);
+  const sourceId = String(payload.sourceId ?? "").trim();
+  if (!sourceId) throw new Error("City feed source id is required.");
+  const community = await currentCommunityContext(true);
+  const now = new Date().toISOString();
+
+  if (isDemoMode()) {
+    const snapshot = await buildDemoPublicationSnapshot(kind, sourceId);
+    const rows = readDemoCityPublications();
+    const existing = rows.find((row: any) => row.source_type === kind && String(row.source_id) === sourceId && row.community_id === community.id);
+    const row = {
+      id: existing?.id ?? `demo-city-publication-${Date.now()}`,
+      community_id: community.id,
+      city: community.city,
+      source_type: snapshot.sourceType,
+      source_id: snapshot.sourceId,
+      title: snapshot.title,
+      summary: snapshot.summary,
+      image_url: snapshot.imageUrl,
+      href: snapshot.href,
+      author_id: snapshot.authorId,
+      author_name: snapshot.authorName,
+      community_name: community.name,
+      community_area: community.area,
+      published_by: DEMO_USER_ID,
+      published_at: now,
+      is_active: true,
+      metadata: snapshot.metadata,
+      created_at: existing?.created_at ?? now,
+      updated_at: now,
+    };
+    writeDemoCityPublications([row, ...rows.filter((item: any) => item.id !== row.id)]);
+    return toCityPublication(row);
+  }
+
+  const snapshot = await buildRemotePublicationSnapshot(kind, sourceId, community.id);
+  const userId = await requiredUserId();
+  const { data, error } = await extendedDb
+    .from("city_publications")
+    .upsert(
+      {
+        community_id: community.id,
+        city: community.city,
+        source_type: snapshot.sourceType,
+        source_id: snapshot.sourceId,
+        title: snapshot.title,
+        summary: snapshot.summary,
+        image_url: snapshot.imageUrl,
+        href: snapshot.href,
+        author_id: snapshot.authorId,
+        author_name: snapshot.authorName,
+        community_name: community.name,
+        community_area: community.area,
+        published_by: userId,
+        published_at: now,
+        is_active: true,
+        metadata: snapshot.metadata,
+        updated_at: now,
+      },
+      { onConflict: "community_id,source_type,source_id" },
+    )
+    .select("*")
+    .single();
+  if (error) throw error;
+  return toCityPublication(data);
+}
+
+async function unpublishCityPublication(payload: JsonBody) {
+  const kind = sourceType(payload.sourceType);
+  const sourceId = String(payload.sourceId ?? "").trim();
+  if (!sourceId) throw new Error("City feed source id is required.");
+  const community = await currentCommunityContext(true);
+
+  if (isDemoMode()) {
+    const rows = readDemoCityPublications();
+    const next = rows.map((row: any) =>
+      row.source_type === kind && String(row.source_id) === sourceId && row.community_id === community.id
+        ? { ...row, is_active: false, updated_at: new Date().toISOString() }
+        : row,
+    );
+    writeDemoCityPublications(next);
+    return { ok: true };
+  }
+
+  const { error } = await extendedDb
+    .from("city_publications")
+    .update({ is_active: false, updated_at: new Date().toISOString() })
+    .eq("community_id", community.id)
+    .eq("source_type", kind)
+    .eq("source_id", sourceId);
+  if (error) throw error;
+  return { ok: true };
 }
 
 async function getPost(postId: string) {
@@ -1639,6 +2123,10 @@ export async function handleSupabaseApi<T = unknown>(url: string, method = "GET"
   if (/^\/api\/safety\/[^/]+\/resolve$/.test(path) && method === "PATCH") return resolveAlert(path.split("/")[3]) as T;
   if (/^\/api\/safety\/[^/]+\/comments$/.test(path) && method === "GET") return listAlertComments(path.split("/")[3]) as T;
   if (/^\/api\/safety\/[^/]+\/comments$/.test(path) && method === "POST") return createAlertComment(path.split("/")[3], payload) as T;
+  if (path === "/api/city-feed" && method === "GET") return listCityPublications(requestUrl.searchParams) as T;
+  if (path === "/api/city-feed/status" && method === "GET") return getCityPublicationStatus(requestUrl.searchParams) as T;
+  if (path === "/api/city-feed/publish" && method === "POST") return publishCityPublication(payload) as T;
+  if (path === "/api/city-feed/publish" && method === "DELETE") return unpublishCityPublication(payload) as T;
   if (path === "/api/admin/members" && method === "GET") return listAdminMembers(requestUrl.searchParams) as T;
   if (path === "/api/admin/members" && method === "POST") return createMember(payload) as T;
   if (/^\/api\/admin\/members\/[^/]+\/approve$/.test(path) && method === "PATCH") return updateMember(path.split("/")[4], "approve") as T;

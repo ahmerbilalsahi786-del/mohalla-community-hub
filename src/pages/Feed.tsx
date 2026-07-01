@@ -16,6 +16,7 @@ import { uploadImage } from '@/lib/cloudinary'
 import { cn } from '@/lib/utils'
 import { Link, useSearch } from 'wouter'
 import { useCurrentUser } from '@/hooks/use-current-user'
+import { PublicationToggle } from '@/components/city-feed/publication-toggle'
 
 type PostType = 'general' | 'announcement' | 'safety' | 'lost_found' | 'buy_sell' | 'event' | 'complaint'
 
@@ -379,6 +380,7 @@ function PostCard({ post, onLike }: { post: Post; onLike: (id: number) => void }
             </div>
           </div>
           <div className="flex shrink-0 items-center gap-1">
+            <PublicationToggle sourceType="post" sourceId={post.id} variant="icon" />
             {isOwner ? (
               <button type="button" aria-label="Delete post" disabled={actionBusy} onClick={deleteOwnPost} className="flex h-8 w-8 items-center justify-center rounded-md text-muted-foreground hover:bg-destructive/10 hover:text-destructive disabled:opacity-50">
                 <Trash2 size={15} />
@@ -741,7 +743,7 @@ export default function Feed() {
   const hasMore = data?.hasMore ?? false
 
   return (
-    <div className="flex min-h-screen bg-background">
+    <div className="portal-shell flex min-h-screen bg-background">
       {/* Background blobs */}
       <div className="pointer-events-none fixed inset-0 overflow-hidden">
         <div className="animate-blob absolute -left-32 top-1/4 h-96 w-96 rounded-full bg-primary/5 blur-3xl" />

@@ -1,5 +1,5 @@
 import { Link, useLocation } from 'wouter'
-import { Home, MessageSquare, ShoppingBag, ShieldAlert, Calendar, Menu, Users, Megaphone, MapPin, Heart, BarChart2, Settings, HelpCircle, ShieldCheck, LogOut } from 'lucide-react'
+import { Home, MessageSquare, ShoppingBag, ShieldAlert, Calendar, Menu, Users, Megaphone, MapPin, Heart, BarChart2, Settings, HelpCircle, ShieldCheck, LogOut, Globe2 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet'
 import { InstallAppButton } from '@/components/pwa/install-app'
@@ -15,6 +15,7 @@ const NAV = [
 
 const MORE_LINKS = [
   { label: 'Profile', icon: Users, href: '/profile/me' },
+  { label: 'City Feed', icon: Globe2, href: '/city-feed' },
   { label: 'Polls', icon: BarChart2, href: '/polls' },
   { label: 'Community', icon: Users, href: '/community' },
   { label: 'Announcements', icon: Megaphone, href: '/announcements' },

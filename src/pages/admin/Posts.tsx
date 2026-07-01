@@ -6,6 +6,7 @@ import {
 import { useQueryClient } from '@tanstack/react-query'
 import { Pin, PinOff, Trash2, FileText } from 'lucide-react'
 import { cn } from '@/lib/utils'
+import { PublicationToggle } from '@/components/city-feed/publication-toggle'
 
 type Post = {
   id: number; title: string; body: string; type: string; userName: string;
@@ -99,6 +100,7 @@ export default function AdminPosts() {
                       <td className="px-4 py-3 text-sm text-muted-foreground">{timeAgo(post.createdAt)}</td>
                       <td className="px-4 py-3">
                         <div className="flex items-center gap-1">
+                          <PublicationToggle sourceType="post" sourceId={post.id} variant="table" />
                           <button
                             onClick={() => pin.mutate({ postId: post.id })}
                             title={post.isPinned ? 'Unpin' : 'Pin to top of feed'}

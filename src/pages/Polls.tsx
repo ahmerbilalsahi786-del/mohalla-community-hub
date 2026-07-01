@@ -9,6 +9,7 @@ import { TopNavbar } from '@/components/dashboard/top-navbar'
 import { BarChart2, Plus, X, Clock, Users, CheckCircle2, Loader2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
+import { PublicationToggle } from '@/components/city-feed/publication-toggle'
 
 type PollResult = {
   id: number; question: string; options: string[]; totalVotes: number;
@@ -116,6 +117,7 @@ function PollCard({ poll }: { poll: PollResult }) {
             <CheckCircle2 size={11} /> You voted
           </span>
         )}
+        <PublicationToggle sourceType="poll" sourceId={poll.id} variant="chip" className="ml-auto" />
       </div>
     </div>
   )
@@ -227,7 +229,7 @@ export default function Polls() {
   const ended = (data as any)?.ended ?? []
 
   return (
-    <div className="flex min-h-screen bg-background">
+    <div className="portal-shell flex min-h-screen bg-background">
       <div className="pointer-events-none fixed inset-0 overflow-hidden">
         <div className="absolute -left-32 top-1/4 h-96 w-96 rounded-full bg-primary/5 blur-3xl" />
         <div className="absolute -right-32 bottom-1/4 h-96 w-96 rounded-full bg-accent/5 blur-3xl" />

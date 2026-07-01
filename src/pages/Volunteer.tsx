@@ -387,7 +387,7 @@ export default function Volunteer() {
   }
 
   return (
-    <div className="flex min-h-screen bg-background">
+    <div className="portal-shell flex min-h-screen bg-background">
       <div className="pointer-events-none fixed inset-0 overflow-hidden">
         <div className="animate-blob absolute -left-32 top-1/4 h-96 w-96 rounded-full bg-primary/5 blur-3xl" />
         <div className="animate-blob animation-delay-2000 absolute -right-32 top-1/2 h-96 w-96 rounded-full bg-accent/5 blur-3xl" />

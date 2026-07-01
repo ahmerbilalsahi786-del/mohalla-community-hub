@@ -10,6 +10,7 @@ const PAGE_META: Record<string, { title: string; subtitle: string }> = {
   '/dashboard': { title: 'Dashboard', subtitle: 'Welcome back to your community' },
   '/': { title: 'Dashboard', subtitle: 'Welcome back to your community' },
   '/feed': { title: 'Community Feed', subtitle: 'Stay connected with your neighbors' },
+  '/city-feed': { title: 'City Feed', subtitle: 'Public updates across your city' },
   '/events': { title: 'Events', subtitle: 'Upcoming community events' },
   '/polls': { title: 'Polls', subtitle: 'Vote and share your opinion' },
   '/community': { title: 'Community', subtitle: 'Your mohalla members' },

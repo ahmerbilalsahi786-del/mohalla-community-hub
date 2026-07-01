@@ -72,7 +72,7 @@ export default function MarketplaceListing({ params }: Props) {
 
   if (isLoading) {
     return (
-      <div className="flex min-h-screen bg-background">
+      <div className="portal-shell flex min-h-screen bg-background">
         <Sidebar />
         <div className="flex flex-1 flex-col">
           <TopNavbar />
@@ -91,7 +91,7 @@ export default function MarketplaceListing({ params }: Props) {
 
   if (error || !listing) {
     return (
-      <div className="flex min-h-screen bg-background">
+      <div className="portal-shell flex min-h-screen bg-background">
         <Sidebar />
         <div className="flex flex-1 flex-col">
           <TopNavbar />
@@ -130,7 +130,7 @@ export default function MarketplaceListing({ params }: Props) {
   }
 
   return (
-    <div className="flex min-h-screen bg-background">
+    <div className="portal-shell flex min-h-screen bg-background">
       <div className="pointer-events-none fixed inset-0 overflow-hidden">
         <div className="absolute -left-32 top-1/3 h-96 w-96 rounded-full bg-primary/5 blur-3xl" />
       </div>

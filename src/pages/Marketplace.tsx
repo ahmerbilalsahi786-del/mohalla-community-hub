@@ -13,6 +13,7 @@ import { Button } from '@/components/ui/button'
 import { useToast } from '@/hooks/use-toast'
 import { uploadMultipleImages } from '@/lib/cloudinary'
 import { cn } from '@/lib/utils'
+import { PublicationToggle } from '@/components/city-feed/publication-toggle'
 
 type Category = 'all' | 'furniture' | 'electronics' | 'clothes' | 'vehicles' | 'services' | 'free' | 'other'
 type Condition = 'new' | 'good' | 'fair'
@@ -80,6 +81,13 @@ function ListingCard({ listing }: { listing: Listing }) {
         'group relative flex flex-col overflow-hidden rounded-2xl border border-border bg-card shadow-sm hover:shadow-md transition-all cursor-pointer',
         isSold && 'opacity-60'
       )}>
+        <PublicationToggle
+          sourceType="listing"
+          sourceId={listing.id}
+          variant="chip"
+          stopNavigation
+          className="absolute right-2 top-2 z-10 bg-background/90 shadow-sm backdrop-blur"
+        />
         {/* Image */}
         <div className="relative aspect-[4/3] bg-muted/50 overflow-hidden">
           {listing.imageUrls.length > 0 ? (
@@ -402,7 +410,7 @@ export default function Marketplace() {
   }
 
   return (
-    <div className="flex min-h-screen bg-background">
+    <div className="portal-shell flex min-h-screen bg-background">
       <div className="pointer-events-none fixed inset-0 overflow-hidden">
         <div className="absolute -left-32 top-1/4 h-96 w-96 rounded-full bg-primary/5 blur-3xl" />
         <div className="absolute -right-32 bottom-1/4 h-96 w-96 rounded-full bg-accent/5 blur-3xl" />

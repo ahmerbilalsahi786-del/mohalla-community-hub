@@ -9,6 +9,14 @@ export interface CommunityTheme {
 }
 
 const defaults = {
+  primary: "#2388D9",
+  secondary: "#22C6B8",
+  background: "#F3FBFF",
+  banner: "#F8FDFF",
+  sidebar: "#F4FBFF",
+};
+
+const legacyDefaults = {
   primary: "#1B5E20",
   secondary: "#0288D1",
   background: "#FAFDF8",
@@ -20,8 +28,9 @@ function isHexColor(value?: string | null) {
   return Boolean(value && /^#[0-9a-f]{6}$/i.test(value));
 }
 
-function safeColor(value: string | null | undefined, fallback: string) {
-  return isHexColor(value) ? value! : fallback;
+function safeColor(value: string | null | undefined, fallback: string, legacyFallback?: string) {
+  if (!isHexColor(value)) return fallback;
+  return value!.toLowerCase() === legacyFallback?.toLowerCase() ? fallback : value!;
 }
 
 function foregroundFor(hex: string) {
@@ -35,11 +44,11 @@ function foregroundFor(hex: string) {
 export function useCommunityTheme(community: CommunityTheme | null | undefined) {
   useEffect(() => {
     const root = document.documentElement;
-    const primary = safeColor(community?.themePrimaryColor, defaults.primary);
-    const secondary = safeColor(community?.themeSecondaryColor, defaults.secondary);
-    const background = safeColor(community?.themeBackgroundColor, defaults.background);
-    const banner = safeColor(community?.themeBannerColor, defaults.banner);
-    const sidebar = safeColor(community?.themeSidebarColor, defaults.sidebar);
+    const primary = safeColor(community?.themePrimaryColor, defaults.primary, legacyDefaults.primary);
+    const secondary = safeColor(community?.themeSecondaryColor, defaults.secondary, legacyDefaults.secondary);
+    const background = safeColor(community?.themeBackgroundColor, defaults.background, legacyDefaults.background);
+    const banner = safeColor(community?.themeBannerColor, defaults.banner, legacyDefaults.banner);
+    const sidebar = safeColor(community?.themeSidebarColor, defaults.sidebar, legacyDefaults.sidebar);
 
     root.style.setProperty("--community-primary", primary);
     root.style.setProperty("--community-secondary", secondary);

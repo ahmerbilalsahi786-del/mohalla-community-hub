@@ -34,7 +34,7 @@ export function AdminLayout({ children }: { children: React.ReactNode }) {
   })
 
   return (
-    <div className="flex min-h-screen bg-background">
+    <div className="portal-shell flex min-h-screen bg-background">
       <div className="pointer-events-none fixed inset-0 overflow-hidden">
         <div className="absolute -left-32 top-1/4 h-96 w-96 rounded-full bg-primary/4 blur-3xl" />
         <div className="absolute -right-32 bottom-1/4 h-96 w-96 rounded-full bg-accent/4 blur-3xl" />

@@ -15,6 +15,7 @@ import { cn } from '@/lib/utils'
 import { useToast } from '@/hooks/use-toast'
 import { uploadImage } from '@/lib/cloudinary'
 import LocationPicker, { type PickedLocation } from '@/components/location-picker'
+import { PublicationToggle } from '@/components/city-feed/publication-toggle'
 
 type EventItem = {
   id: number; title: string; description: string; date: string; time: string;
@@ -110,6 +111,7 @@ function EventCard({ event, isPast }: { event: EventItem; isPast?: boolean }) {
 
         <div className="mt-3 flex items-center justify-between">
           <span className="text-xs text-muted-foreground">By {event.userName} · {event.unitNumber}</span>
+          <PublicationToggle sourceType="event" sourceId={event.id} variant="chip" className="ml-auto mr-2" />
           {!isPast && (
             <div className="flex items-center gap-1">
               {RSVP_OPTIONS.map(opt => {
@@ -296,7 +298,7 @@ export default function Events() {
   const past = (data as any)?.past ?? []
 
   return (
-    <div className="flex min-h-screen bg-background">
+    <div className="portal-shell flex min-h-screen bg-background">
       <div className="pointer-events-none fixed inset-0 overflow-hidden">
         <div className="absolute -left-32 top-1/4 h-96 w-96 rounded-full bg-primary/5 blur-3xl" />
         <div className="absolute -right-32 bottom-1/4 h-96 w-96 rounded-full bg-accent/5 blur-3xl" />

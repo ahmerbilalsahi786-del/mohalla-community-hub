@@ -1,6 +1,7 @@
+import { useEffect, useMemo, useState } from 'react'
 import { Link } from 'wouter'
 import { formatDistanceToNow } from 'date-fns'
-import { ArrowRight, Calendar, MessageSquare, ShoppingBag, Sparkles, TrendingUp, UserCheck, Users } from 'lucide-react'
+import { ArrowRight, Calendar, Flame, MessageSquare, ShoppingBag, Sparkles, TrendingUp, UserCheck, Users } from 'lucide-react'
 import { DashboardShell } from '@/components/dashboard/dashboard-shell'
 import { StatCard } from '@/components/dashboard/stat-card'
 import { ActivityCard } from '@/components/dashboard/activity-card'
@@ -17,6 +18,93 @@ import {
   useListEvents,
   useListPosts,
 } from '@/lib/generated/api'
+
+type TrendingTopic = {
+  id: string
+  label: string
+  title: string
+  description: string
+  meta: string
+  href: string
+  tone: string
+}
+
+function TrendingTopicsSlideshow({ topics }: { topics: TrendingTopic[] }) {
+  const pageCount = Math.max(1, Math.ceil(topics.length / 2))
+  const pages = useMemo(() => {
+    const pairs: TrendingTopic[][] = []
+    for (let i = 0; i < topics.length; i += 2) {
+      const pair = topics.slice(i, i + 2)
+      if (pair.length === 1 && topics.length > 1) pair.push(topics[0])
+      pairs.push(pair)
+    }
+    return pairs
+  }, [topics])
+  const [page, setPage] = useState(0)
+
+  useEffect(() => {
+    setPage((current) => Math.min(current, pageCount - 1))
+  }, [pageCount])
+
+  useEffect(() => {
+    if (pageCount <= 1) return undefined
+    const timer = window.setTimeout(() => {
+      setPage((current) => (current + 1) % pageCount)
+    }, 3000)
+    return () => window.clearTimeout(timer)
+  }, [page, pageCount])
+
+  const visibleTopics = pages[page] ?? pages[0] ?? []
+
+  return (
+    <div
+      data-topic-slideshow
+      data-active-page={page}
+      data-page-count={pages.length}
+      className="max-w-3xl rounded-2xl border portal-soft-rule bg-card/80 p-3 shadow-sm"
+    >
+      <div className="mb-3 flex items-center justify-between gap-3">
+        <div className="flex min-w-0 items-center gap-2">
+          <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary">
+            <Flame className="h-4 w-4" />
+          </span>
+          <div className="min-w-0">
+            <p className="text-sm font-black text-foreground">Daily pulse</p>
+            <p className="truncate text-xs text-muted-foreground">Posts and hot topics trending now</p>
+          </div>
+        </div>
+        <div className="flex shrink-0 gap-1.5" aria-hidden="true">
+          {pages.map((_, index) => (
+            <span
+              key={index}
+              className={index === page ? 'h-1.5 w-5 rounded-full bg-primary' : 'h-1.5 w-1.5 rounded-full bg-muted-foreground/30'}
+            />
+          ))}
+        </div>
+      </div>
+
+      <div className="grid gap-3 sm:grid-cols-2" aria-live="polite">
+        {visibleTopics.map((topic) => (
+          <Link
+            key={`${page}-${topic.id}`}
+            href={topic.href}
+            className="group min-h-32 rounded-xl border portal-soft-rule bg-background/70 p-4 transition-all hover:-translate-y-0.5 hover:border-primary/40 hover:bg-card"
+          >
+            <div className="mb-3 flex items-start justify-between gap-2">
+              <span className="rounded-full border portal-soft-rule bg-card/80 px-2.5 py-1 text-[11px] font-black uppercase text-primary">
+                {topic.label}
+              </span>
+              <span className={`h-2.5 w-2.5 rounded-full ${topic.tone}`} />
+            </div>
+            <p className="line-clamp-2 text-sm font-black leading-snug text-foreground">{topic.title}</p>
+            <p className="mt-1 line-clamp-2 text-xs leading-relaxed text-muted-foreground">{topic.description}</p>
+            <p className="mt-3 truncate text-[11px] font-semibold text-muted-foreground">{topic.meta}</p>
+          </Link>
+        ))}
+      </div>
+    </div>
+  )
+}
 
 export default function Dashboard() {
   const { data: user } = useCurrentUser()
@@ -89,6 +177,59 @@ export default function Dashboard() {
         },
   ]
 
+  const trendingTopics = useMemo<TrendingTopic[]>(() => {
+    const postTopics = recentPosts.map((post) => ({
+      id: `post-${post.id}`,
+      label: post.type === 'announcement' ? 'Notice' : post.type === 'safety' ? 'Safety' : 'Post',
+      title: post.title || 'Community update',
+      description: post.body || `${post.userName || 'A resident'} shared a new update.`,
+      meta: `${post.userName || 'Resident'} · ${formatDistanceToNow(new Date(post.createdAt), { addSuffix: true })}`,
+      href: '/feed',
+      tone: post.type === 'safety' ? 'bg-red-500' : post.type === 'announcement' ? 'bg-amber-500' : 'bg-primary',
+    }))
+
+    const fallbackTopics: TrendingTopic[] = [
+      {
+        id: 'approvals',
+        label: isManager ? 'Admin' : 'People',
+        title: isManager ? `${stats.pendingMembers} ${approvalLabel} waiting` : `${stats.totalMembers} neighbors connected`,
+        description: isManager ? 'Review new residents and keep the community trusted.' : 'See who is active in your mohalla today.',
+        meta: isManager ? 'Admin queue' : 'Community directory',
+        href: isManager ? '/admin/members' : '/community',
+        tone: 'bg-pink-500',
+      },
+      {
+        id: 'posts',
+        label: 'Hot topic',
+        title: `${stats.postsThisMonth} fresh updates this month`,
+        description: 'Catch up on daily posts, notices, and neighbor conversations.',
+        meta: 'Community feed',
+        href: '/feed',
+        tone: 'bg-primary',
+      },
+      {
+        id: 'events',
+        label: 'Calendar',
+        title: `${upcomingEvents.length} ${eventLabel} coming up`,
+        description: upcomingEvents[0]?.title || 'No event is scheduled yet. Start the next gathering.',
+        meta: upcomingEvents[0]?.date ? formatDistanceToNow(new Date(`${upcomingEvents[0].date}T00:00:00`), { addSuffix: true }) : 'Events',
+        href: '/events',
+        tone: 'bg-accent',
+      },
+      {
+        id: 'marketplace',
+        label: 'Market',
+        title: `${stats.activeListings} active marketplace listings`,
+        description: 'Browse useful items, services, and neighbor-to-neighbor offers.',
+        meta: 'Marketplace',
+        href: '/marketplace',
+        tone: 'bg-amber-500',
+      },
+    ]
+
+    return [...postTopics, ...fallbackTopics].slice(0, 8)
+  }, [approvalLabel, eventLabel, isManager, recentPosts, stats.activeListings, stats.pendingMembers, stats.postsThisMonth, stats.totalMembers, upcomingEvents])
+
   const activities = recentPosts.map((post) => ({
     id: String(post.id),
     user: post.userName || 'Resident',
@@ -144,6 +285,8 @@ export default function Dashboard() {
                   {isManager ? 'Review approvals' : 'See upcoming events'}
                 </Link>
               </div>
+
+              <TrendingTopicsSlideshow topics={trendingTopics} />
             </div>
 
             <div className="grid gap-3 sm:grid-cols-3 xl:grid-cols-1">

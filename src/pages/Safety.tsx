@@ -14,6 +14,7 @@ import {
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
+import { PublicationToggle } from '@/components/city-feed/publication-toggle'
 
 type AlertType = 'theft' | 'suspicious' | 'emergency' | 'power_outage' | 'water_shortage' | 'other'
 type Severity = 'low' | 'medium' | 'high'
@@ -205,6 +206,7 @@ function AlertCard({ alert, onResolve }: { alert: AlertData; onResolve: (id: num
               </div>
 
               <div className="flex items-center gap-2">
+                <PublicationToggle sourceType="safety_alert" sourceId={alert.id} variant="chip" />
                 {/* Share to WhatsApp */}
                 <a
                   href={buildWhatsAppShareUrl(alert)}
@@ -402,7 +404,7 @@ export default function Safety() {
   const resolvedAlerts = (allAlerts as AlertData[]).filter((a) => a.isResolved)
 
   return (
-    <div className="flex min-h-screen bg-background">
+    <div className="portal-shell flex min-h-screen bg-background">
       <div className="pointer-events-none fixed inset-0 overflow-hidden">
         <div className="absolute -left-32 top-1/4 h-96 w-96 rounded-full bg-red-500/3 blur-3xl" />
         <div className="absolute -right-32 bottom-1/4 h-96 w-96 rounded-full bg-primary/5 blur-3xl" />
