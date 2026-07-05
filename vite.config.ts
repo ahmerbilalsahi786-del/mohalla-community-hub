@@ -143,6 +143,7 @@ export default defineConfig(({ mode }) => {
       "import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY": JSON.stringify(supabasePublishableKey),
       "import.meta.env.VITE_SUPABASE_ANON_KEY": JSON.stringify(supabasePublishableKey),
       "import.meta.env.VITE_API_BASE_URL": JSON.stringify(resolveApiBaseUrl(env.VITE_API_BASE_URL)),
+      "import.meta.env.VITE_VAPID_PUBLIC_KEY": JSON.stringify(env.VITE_VAPID_PUBLIC_KEY || ""),
     },
     resolve: {
       alias: {

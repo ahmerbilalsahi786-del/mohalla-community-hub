@@ -8,6 +8,8 @@ const DEFAULT_PREFS = {
   notifyComments: true,
   notifyLikes: true,
   notifySafety: true,
+  notifyEvents: true,
+  notifyMessages: true,
   notifyAnnouncements: true,
   notifyMarketplace: true,
   notifyApprovals: true,
@@ -29,6 +31,20 @@ const DEMO_CITY_PUBLICATIONS_KEY = "mohalla_demo_city_publications";
 const DEMO_MESSAGE_CONVERSATIONS_KEY = "mohalla_demo_message_conversations";
 const DEMO_CONVERSATION_MESSAGES_KEY = "mohalla_demo_conversation_messages";
 const DEMO_MESSAGE_READS_KEY = "mohalla_demo_message_reads";
+
+type MobilePushKind = "event" | "safety_alert" | "announcement" | "message";
+
+function notifyInstalledApps(kind: MobilePushKind, sourceId: string) {
+  supabase.functions
+    .invoke("send-mobile-push", { body: { kind, sourceId } })
+    .then(({ error }) => {
+      if (error) console.warn("Mobile push notification failed", error.message);
+    })
+    .catch((error) => {
+      console.warn("Mobile push notification failed", error);
+    });
+}
+
 const DEMO_PROFILE = {
   id: DEMO_USER_ID,
   display_name: "Ahmed Khan",
@@ -1467,6 +1483,7 @@ async function createEvent(payload: JsonBody) {
     .select("*")
     .single();
   if (error) throw error;
+  notifyInstalledApps("event", String(data.id));
   const profiles = await profilesById([userId]);
   return toEvent(data, profiles.get(userId));
 }
@@ -1531,6 +1548,7 @@ async function createSafetyAlert(payload: JsonBody) {
     .select("*")
     .single();
   if (error) throw error;
+  notifyInstalledApps("safety_alert", String(data.id));
   const profiles = await profilesById([userId]);
   return toAlert(data, profiles.get(userId));
 }
@@ -2006,6 +2024,7 @@ async function sendMessage(conversationId: string, payload: JsonBody) {
     .single();
   if (error) throw error;
   await extendedDb.from("message_conversations").update({ updated_at: new Date().toISOString() }).eq("id", conversationId);
+  notifyInstalledApps("message", String(data.id));
   const profiles = await profilesById([userId]);
   return toConversationMessage(data, userId, profiles.get(userId));
 }
@@ -2300,7 +2319,9 @@ async function adminStats() {
 }
 
 async function createAnnouncement(payload: JsonBody) {
-  return createPost({ ...payload, type: "announcement", isPinned: true });
+  const post = await createPost({ ...payload, type: "announcement", isPinned: true });
+  notifyInstalledApps("announcement", String(post.id));
+  return post;
 }
 
 async function getProfile(userIdParam: string) {
@@ -2401,6 +2422,8 @@ function mapPreferences(row?: any) {
     notifyComments: row?.notify_comments ?? true,
     notifyLikes: row?.notify_likes ?? true,
     notifySafety: row?.notify_safety ?? true,
+    notifyEvents: row?.notify_events ?? true,
+    notifyMessages: row?.notify_messages ?? true,
     notifyAnnouncements: row?.notify_announcements ?? true,
     notifyMarketplace: row?.notify_marketplace ?? true,
     notifyApprovals: row?.notify_approvals ?? true,
@@ -2429,6 +2452,8 @@ async function saveNotificationPreferences(payload: JsonBody) {
       notify_comments: payload.notifyComments,
       notify_likes: payload.notifyLikes,
       notify_safety: payload.notifySafety,
+      notify_events: payload.notifyEvents,
+      notify_messages: payload.notifyMessages,
       notify_announcements: payload.notifyAnnouncements,
       notify_marketplace: payload.notifyMarketplace,
       notify_approvals: payload.notifyApprovals,

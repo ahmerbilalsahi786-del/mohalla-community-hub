@@ -1,4 +1,4 @@
-const CACHE_VERSION = "mohalla-v3";
+const CACHE_VERSION = "mohalla-v4";
 const APP_SHELL_CACHE = `${CACHE_VERSION}-shell`;
 const RUNTIME_CACHE = `${CACHE_VERSION}-runtime`;
 
@@ -70,4 +70,42 @@ self.addEventListener("fetch", (event) => {
       }),
     );
   }
+});
+
+self.addEventListener("push", (event) => {
+  let payload = {};
+  try {
+    payload = event.data?.json() ?? {};
+  } catch {
+    payload = { title: "Mohalla", body: event.data?.text() ?? "You have a new notification." };
+  }
+
+  const title = payload.title || "Mohalla";
+  const url = payload.url || payload.link || "/notifications";
+  const options = {
+    body: payload.body || "You have a new community update.",
+    icon: "/pwa-192.png",
+    badge: "/pwa-192.png",
+    tag: payload.tag || `mohalla-${Date.now()}`,
+    data: { url },
+  };
+
+  event.waitUntil(self.registration.showNotification(title, options));
+});
+
+self.addEventListener("notificationclick", (event) => {
+  event.notification.close();
+  const targetUrl = new URL(event.notification.data?.url || "/notifications", self.location.origin).href;
+
+  event.waitUntil(
+    self.clients.matchAll({ type: "window", includeUncontrolled: true }).then((clients) => {
+      for (const client of clients) {
+        if ("focus" in client) {
+          client.navigate(targetUrl);
+          return client.focus();
+        }
+      }
+      return self.clients.openWindow(targetUrl);
+    }),
+  );
 });
