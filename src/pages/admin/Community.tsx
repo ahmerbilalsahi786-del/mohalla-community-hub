@@ -11,6 +11,7 @@ import { Button } from '@/components/ui/button'
 import { useToast } from '@/hooks/use-toast'
 import { uploadImage } from '@/lib/cloudinary'
 import { cn } from '@/lib/utils'
+import LocationPicker, { type PickedLocation } from '@/components/location-picker'
 
 export default function AdminCommunity() {
   const qc = useQueryClient()
@@ -22,6 +23,7 @@ export default function AdminCommunity() {
   const [city, setCity]   = useState('')
   const [rules, setRules] = useState('')
   const [logoUrl, setLogoUrl] = useState<string | undefined>(undefined)
+  const [mapPoint, setMapPoint] = useState<PickedLocation | null>(null)
   const [uploading, setUploading] = useState(false)
   const [saved, setSaved] = useState(false)
   const { toast } = useToast()
@@ -33,6 +35,13 @@ export default function AdminCommunity() {
       setCity(settings.city ?? '')
       setRules(settings.rules ?? '')
       setLogoUrl(settings.logoUrl ?? undefined)
+      if (typeof (settings as any).latitude === 'number' && typeof (settings as any).longitude === 'number') {
+        setMapPoint({
+          latitude: (settings as any).latitude,
+          longitude: (settings as any).longitude,
+          address: [settings.area, settings.city].filter(Boolean).join(', '),
+        })
+      }
     }
   }, [settings])
 
@@ -67,7 +76,17 @@ export default function AdminCommunity() {
   }
 
   const handleSave = () => {
-    update.mutate({ data: { communityId: 'default', name, area, city, rules, logoUrl } })
+    const data = {
+      communityId: 'default',
+      name,
+      area,
+      city,
+      rules,
+      logoUrl,
+      latitude: mapPoint?.latitude ?? null,
+      longitude: mapPoint?.longitude ?? null,
+    } as any
+    update.mutate({ data })
   }
 
   const statCards = stats ? [
@@ -165,6 +184,16 @@ export default function AdminCommunity() {
               className="w-full rounded-xl border border-border bg-muted/30 px-4 py-3 text-sm focus:outline-none focus:border-primary transition-colors resize-none font-mono"
             />
             <p className="mt-1 text-xs text-muted-foreground">Displayed to members when they join the community.</p>
+          </div>
+
+          <div>
+            <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-1.5 block">Society Map Point</label>
+            <LocationPicker
+              compact
+              initialLat={mapPoint?.latitude ?? (settings as any)?.latitude ?? null}
+              initialLng={mapPoint?.longitude ?? (settings as any)?.longitude ?? null}
+              onSelect={(data) => setMapPoint(data)}
+            />
           </div>
 
           <div className="flex items-center gap-3">

@@ -1,4 +1,5 @@
 import { supabase } from "@/integrations/supabase/client";
+import { sendApprovalEmail } from "@/lib/approval-email";
 
 const db = supabase as any;
 
@@ -102,6 +103,17 @@ export async function updateCommunityStatus(id: string, status: Exclude<Communit
     reason: reason ?? null,
   });
   if (error) throw error;
+
+  if (status === "approved") {
+    const { data } = await db.from("community_settings").select("requested_by_user_id").eq("id", id).maybeSingle();
+    if (data?.requested_by_user_id) {
+      try {
+        await sendApprovalEmail(data.requested_by_user_id, "approved");
+      } catch (emailError) {
+        console.warn("Community approval email could not be sent:", emailError);
+      }
+    }
+  }
 }
 
 export async function fetchPlatformCommunity(id: string) {

@@ -17,6 +17,7 @@ const NotFound = lazy(() => import("@/pages/not-found"));
 const Landing = lazy(() => import("@/pages/Landing"));
 const Dashboard = lazy(() => import("@/pages/Dashboard"));
 const Feed = lazy(() => import("@/pages/Feed"));
+const Messages = lazy(() => import("@/pages/Messages"));
 const CityFeed = lazy(() => import("@/pages/CityFeed"));
 const Marketplace = lazy(() => import("@/pages/Marketplace"));
 const MarketplaceListing = lazy(() => import("@/pages/MarketplaceListing"));
@@ -69,6 +70,7 @@ const queryClient = new QueryClient({
 // Protected page wrappers
 const PDashboard       = ProtectedRoute(Dashboard);
 const PFeed            = ProtectedRoute(Feed);
+const PMessages        = ProtectedRoute(Messages);
 const PCityFeed        = ProtectedRoute(CityFeed);
 const PMarketplace     = ProtectedRoute(Marketplace);
 const PMarketplaceListing = ProtectedRoute(MarketplaceListing);
@@ -112,6 +114,8 @@ function Router() {
       {/* Protected routes */}
       <Route path="/dashboard" component={PDashboard} />
       <Route path="/feed" component={PFeed} />
+      <Route path="/messages" component={PMessages} />
+      <Route path="/messages/:id" component={PMessages} />
       <Route path="/city-feed" component={PCityFeed} />
       <Route path="/marketplace" component={PMarketplace} />
       <Route path="/marketplace/:id" component={PMarketplaceListing} />

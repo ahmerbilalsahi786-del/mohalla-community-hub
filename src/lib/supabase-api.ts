@@ -26,6 +26,9 @@ const DEMO_MEMBERS_KEY = "mohalla_demo_members";
 const DEMO_COMMUNITY_KEY = "mohalla_demo_community";
 const DEMO_PREFS_KEY = "mohalla_demo_notification_preferences";
 const DEMO_CITY_PUBLICATIONS_KEY = "mohalla_demo_city_publications";
+const DEMO_MESSAGE_CONVERSATIONS_KEY = "mohalla_demo_message_conversations";
+const DEMO_CONVERSATION_MESSAGES_KEY = "mohalla_demo_conversation_messages";
+const DEMO_MESSAGE_READS_KEY = "mohalla_demo_message_reads";
 const DEMO_PROFILE = {
   id: DEMO_USER_ID,
   display_name: "Ahmed Khan",
@@ -203,6 +206,8 @@ function getDemoCommunity() {
       name: "Mohalla Community Hub",
       area: "Gulberg",
       city: "Lahore",
+      latitude: 31.5204,
+      longitude: 74.3587,
       logoUrl: null,
       status: "approved",
       themePrimaryColor: "#1B5E20",
@@ -229,6 +234,8 @@ function getDemoCommunity() {
     name: "Mohalla Community Hub",
     area: "Gulberg",
     city: "Lahore",
+    latitude: 31.5204,
+    longitude: 74.3587,
     logoUrl: null,
     status: "approved",
     themePrimaryColor: "#1B5E20",
@@ -280,6 +287,8 @@ function defaultDemoCityPublications() {
       author_name: "Park View Admin",
       community_name: "Park View Society",
       community_area: "Gulberg",
+      latitude: 31.5268,
+      longitude: 74.3529,
       published_by: null,
       published_at: new Date(Date.now() - 1000 * 60 * 35).toISOString(),
       is_active: true,
@@ -301,6 +310,8 @@ function defaultDemoCityPublications() {
       author_name: "Garden Estate Admin",
       community_name: "Garden Estate",
       community_area: "Model Town",
+      latitude: 31.4806,
+      longitude: 74.3239,
       published_by: null,
       published_at: new Date(Date.now() - 1000 * 60 * 90).toISOString(),
       is_active: true,
@@ -369,19 +380,24 @@ async function currentCommunityContext(managerOnly = false) {
       name: community.name ?? "Mohalla Community Hub",
       area: community.area ?? "",
       city: community.city || "Lahore",
+      latitude: community.latitude ?? null,
+      longitude: community.longitude ?? null,
     };
   }
 
   const communityId = managerOnly ? await requireCommunityManager() : await currentCommunityId();
-  const { data, error } = await supabase.from("community_settings").select("*").eq("id", communityId).maybeSingle();
+  const { data, error } = await extendedDb.from("community_settings").select("*").eq("id", communityId).maybeSingle();
   if (error) throw error;
-  const city = compactText(data?.welcome_message, 80);
+  const communityRow = data as JsonBody | null;
+  const city = compactText(communityRow?.welcome_message, 80);
   if (!city) throw new Error("Add a city to your community settings before using City Feed.");
   return {
     id: communityId,
-    name: data?.name ?? "Mohalla Community",
-    area: data?.description ?? "",
+    name: communityRow?.name ?? "Mohalla Community",
+    area: communityRow?.description ?? "",
     city,
+    latitude: communityRow?.latitude ?? null,
+    longitude: communityRow?.longitude ?? null,
   };
 }
 
@@ -539,6 +555,8 @@ function createDemoAlert(payload: JsonBody) {
     title: payload.title,
     description: payload.description,
     location: payload.locationDetail ?? "",
+    latitude: payload.latitude ?? null,
+    longitude: payload.longitude ?? null,
     severity: payload.severity ?? "medium",
     is_resolved: false,
     created_at: now,
@@ -623,6 +641,8 @@ function toAlert(row: any, profile?: any) {
     title: row.title,
     description: row.description,
     locationDetail: row.location ?? "",
+    latitude: row.latitude ?? null,
+    longitude: row.longitude ?? null,
     imageUrl: null,
     severity: row.severity ?? "medium",
     isResolved: Boolean(row.is_resolved),
@@ -645,6 +665,8 @@ function toCityPublication(row: any) {
     authorName: row.author_name ?? "Resident",
     communityName: row.community_name ?? "Mohalla Community",
     communityArea: row.community_area ?? "",
+    latitude: row.latitude ?? row.metadata?.latitude ?? null,
+    longitude: row.longitude ?? row.metadata?.longitude ?? null,
     publishedBy: row.published_by ?? null,
     publishedAt: row.published_at ?? row.created_at ?? new Date().toISOString(),
     isActive: Boolean(row.is_active),
@@ -694,7 +716,9 @@ async function buildDemoPublicationSnapshot(kind: string, sourceId: string) {
       href: "/events",
       authorId: DEMO_USER_ID,
       authorName: profileName(DEMO_PROFILE),
-      metadata: { date: row.event_date, time: row.event_time, location: row.location },
+      latitude: row.latitude ?? null,
+      longitude: row.longitude ?? null,
+      metadata: { date: row.event_date, time: row.event_time, location: row.location, latitude: row.latitude ?? null, longitude: row.longitude ?? null },
     };
   }
 
@@ -742,7 +766,9 @@ async function buildDemoPublicationSnapshot(kind: string, sourceId: string) {
       href: "/safety",
       authorId: DEMO_USER_ID,
       authorName: profileName(DEMO_PROFILE),
-      metadata: { severity: row.severity, location: row.location, alertType: row.alert_type },
+      latitude: row.latitude ?? null,
+      longitude: row.longitude ?? null,
+      metadata: { severity: row.severity, location: row.location, alertType: row.alert_type, latitude: row.latitude ?? null, longitude: row.longitude ?? null },
     };
   }
 
@@ -782,7 +808,9 @@ async function buildRemotePublicationSnapshot(kind: string, sourceId: string, co
       imageUrl: data.image_url ?? null,
       href: "/events",
       ...author,
-      metadata: { date: data.event_date, time: data.event_time, location: data.location },
+      latitude: data.latitude ?? null,
+      longitude: data.longitude ?? null,
+      metadata: { date: data.event_date, time: data.event_time, location: data.location, latitude: data.latitude ?? null, longitude: data.longitude ?? null },
     };
   }
 
@@ -837,7 +865,9 @@ async function buildRemotePublicationSnapshot(kind: string, sourceId: string, co
       imageUrl: null,
       href: "/safety",
       ...author,
-      metadata: { severity: data.severity, location: data.location, alertType: data.alert_type },
+      latitude: data.latitude ?? null,
+      longitude: data.longitude ?? null,
+      metadata: { severity: data.severity, location: data.location, alertType: data.alert_type, latitude: data.latitude ?? null, longitude: data.longitude ?? null },
     };
   }
 
@@ -1017,6 +1047,60 @@ async function listSafety(params: URLSearchParams) {
   return rows.map((row: any) => toAlert(row, profiles.get(row.user_id)));
 }
 
+function hasUsablePoint(row: any) {
+  return Number.isFinite(Number(row?.latitude)) && Number.isFinite(Number(row?.longitude));
+}
+
+function toCityCommunity(row: any) {
+  return {
+    id: String(row.id),
+    name: row.name ?? "Mohalla Community",
+    area: row.description ?? row.area ?? "",
+    city: row.welcome_message ?? row.city ?? "",
+    logoUrl: row.logo_url ?? row.logoUrl ?? null,
+    latitude: Number(row.latitude),
+    longitude: Number(row.longitude),
+  };
+}
+
+async function listCityMapCommunities(city: string) {
+  if (isDemoMode()) {
+    const own = getDemoCommunity();
+    return [
+      toCityCommunity(own),
+      toCityCommunity({
+        id: "demo-park-view",
+        name: "Park View Society",
+        description: "Gulberg",
+        welcome_message: own.city || "Lahore",
+        logo_url: null,
+        latitude: 31.5268,
+        longitude: 74.3529,
+      }),
+      toCityCommunity({
+        id: "demo-garden-estate",
+        name: "Garden Estate",
+        description: "Model Town",
+        welcome_message: own.city || "Lahore",
+        logo_url: null,
+        latitude: 31.4806,
+        longitude: 74.3239,
+      }),
+    ].filter((row) => cityKey(row.city) === cityKey(city) && hasUsablePoint(row));
+  }
+
+  const { data, error } = await extendedDb
+    .from("community_settings")
+    .select("id, name, description, welcome_message, logo_url, latitude, longitude")
+    .eq("status", "approved")
+    .ilike("welcome_message", city)
+    .not("latitude", "is", null)
+    .not("longitude", "is", null)
+    .limit(200);
+  if (error) throw error;
+  return (data ?? []).filter(hasUsablePoint).map(toCityCommunity);
+}
+
 async function listCityPublications(params: URLSearchParams) {
   const page = Number(params.get("page") ?? 1);
   const limit = Number(params.get("limit") ?? 20);
@@ -1037,6 +1121,7 @@ async function listCityPublications(params: URLSearchParams) {
       limit,
       hasMore: page * limit < rows.length,
       city: community.city,
+      communities: await listCityMapCommunities(community.city),
     };
   }
 
@@ -1061,6 +1146,7 @@ async function listCityPublications(params: URLSearchParams) {
     limit,
     hasMore: page * limit < rows.length,
     city: community.city,
+    communities: await listCityMapCommunities(community.city),
   };
 }
 
@@ -1102,6 +1188,7 @@ async function publishCityPublication(payload: JsonBody) {
 
   if (isDemoMode()) {
     const snapshot = await buildDemoPublicationSnapshot(kind, sourceId);
+    const snapshotPoint = snapshot as JsonBody;
     const rows = readDemoCityPublications();
     const existing = rows.find((row: any) => row.source_type === kind && String(row.source_id) === sourceId && row.community_id === community.id);
     const row = {
@@ -1118,6 +1205,8 @@ async function publishCityPublication(payload: JsonBody) {
       author_name: snapshot.authorName,
       community_name: community.name,
       community_area: community.area,
+      latitude: snapshotPoint.latitude ?? null,
+      longitude: snapshotPoint.longitude ?? null,
       published_by: DEMO_USER_ID,
       published_at: now,
       is_active: true,
@@ -1130,6 +1219,7 @@ async function publishCityPublication(payload: JsonBody) {
   }
 
   const snapshot = await buildRemotePublicationSnapshot(kind, sourceId, community.id);
+  const snapshotPoint = snapshot as JsonBody;
   const userId = await requiredUserId();
   const { data, error } = await extendedDb
     .from("city_publications")
@@ -1147,6 +1237,8 @@ async function publishCityPublication(payload: JsonBody) {
         author_name: snapshot.authorName,
         community_name: community.name,
         community_area: community.area,
+        latitude: snapshotPoint.latitude ?? null,
+        longitude: snapshotPoint.longitude ?? null,
         published_by: userId,
         published_at: now,
         is_active: true,
@@ -1424,7 +1516,7 @@ async function createSafetyAlert(payload: JsonBody) {
   if (isDemoMode()) return createDemoAlert(payload);
 
   const userId = await requiredUserId();
-  const { data, error } = await supabase
+  const { data, error } = await extendedDb
     .from("safety_alerts")
     .insert({
       user_id: userId,
@@ -1432,6 +1524,8 @@ async function createSafetyAlert(payload: JsonBody) {
       title: payload.title,
       description: payload.description,
       location: payload.locationDetail ?? null,
+      latitude: payload.latitude ?? null,
+      longitude: payload.longitude ?? null,
       severity: payload.severity ?? "medium",
     })
     .select("*")
@@ -1670,6 +1764,328 @@ async function listCommunityMembers(params: URLSearchParams) {
   return status && status !== "all" ? members.filter((member: any) => member.status === status) : members;
 }
 
+function demoMemberProfile(userId: string) {
+  if (userId === DEMO_USER_ID) return { ...DEMO_PROFILE, community_id: "default", membership_status: "approved" };
+  const member = readDemoMembers().find((row: any) => String(row.userId) === userId || String(row.id) === userId);
+  if (!member) return null;
+  return {
+    id: member.userId ?? member.id,
+    display_name: member.name,
+    full_name: member.name,
+    unit_number: member.unitNumber ?? "",
+    avatar_url: null,
+    community_id: member.communityId ?? "default",
+    membership_status: member.status ?? "approved",
+  };
+}
+
+function messageParticipant(profile?: any) {
+  return {
+    userId: profile?.id ?? "",
+    name: profileName(profile),
+    unitNumber: unit(profile),
+    avatarUrl: profile?.avatar_url ?? null,
+  };
+}
+
+function conversationPair(userId: string, otherUserId: string) {
+  return [userId, otherUserId].sort();
+}
+
+function toConversation(row: any, currentUserIdValue: string, profile?: any, messages: any[] = [], readAt?: string | null) {
+  const sortedMessages = [...messages].sort((a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime());
+  const lastMessage = sortedMessages[sortedMessages.length - 1] ?? null;
+  const readTime = readAt ? new Date(readAt).getTime() : 0;
+  const unreadCount = sortedMessages.filter((message) => {
+    return message.sender_id !== currentUserIdValue && new Date(message.created_at).getTime() > readTime;
+  }).length;
+
+  return {
+    id: String(row.id),
+    participant: messageParticipant(profile),
+    postId: row.post_id ?? null,
+    postTitle: row.post_title ?? null,
+    lastMessage: lastMessage?.body ?? null,
+    lastMessageAt: lastMessage?.created_at ?? row.updated_at ?? row.created_at,
+    unreadCount,
+    createdAt: row.created_at ?? new Date().toISOString(),
+  };
+}
+
+function toConversationMessage(row: any, currentUserIdValue: string, profile?: any) {
+  return {
+    id: String(row.id),
+    conversationId: String(row.conversation_id),
+    senderId: row.sender_id,
+    senderName: profileName(profile),
+    body: row.body,
+    createdAt: row.created_at ?? new Date().toISOString(),
+    isMine: row.sender_id === currentUserIdValue,
+  };
+}
+
+function readDemoConversationMessages() {
+  return readDemoRows(DEMO_CONVERSATION_MESSAGES_KEY);
+}
+
+function writeDemoConversationMessages(rows: JsonBody[]) {
+  writeDemoRows(DEMO_CONVERSATION_MESSAGES_KEY, rows, 500);
+}
+
+function readDemoMessageReads() {
+  return readDemoObject(DEMO_MESSAGE_READS_KEY, {});
+}
+
+function writeDemoMessageReads(value: JsonBody) {
+  writeDemoObject(DEMO_MESSAGE_READS_KEY, value);
+}
+
+function demoConversationDetail(row: any) {
+  const current = DEMO_USER_ID;
+  const otherId = row.participant_one === current ? row.participant_two : row.participant_one;
+  const otherProfile = demoMemberProfile(otherId) ?? { id: otherId, display_name: "Resident", unit_number: "" };
+  const profiles = new Map([
+    [DEMO_USER_ID, DEMO_PROFILE],
+    [otherId, otherProfile],
+  ]);
+  const messages = readDemoConversationMessages()
+    .filter((message: any) => String(message.conversation_id) === String(row.id))
+    .sort((a: any, b: any) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime());
+  const reads = readDemoMessageReads();
+  return {
+    conversation: toConversation(row, current, otherProfile, messages, reads[row.id]),
+    messages: messages.map((message: any) => toConversationMessage(message, current, profiles.get(message.sender_id))),
+  };
+}
+
+async function listMessageConversations() {
+  if (isDemoMode()) {
+    const conversations = readDemoRows(DEMO_MESSAGE_CONVERSATIONS_KEY)
+      .filter((row: any) => row.participant_one === DEMO_USER_ID || row.participant_two === DEMO_USER_ID)
+      .map((row: any) => demoConversationDetail(row).conversation)
+      .sort((a: any, b: any) => new Date(b.lastMessageAt ?? b.createdAt).getTime() - new Date(a.lastMessageAt ?? a.createdAt).getTime());
+    return { conversations };
+  }
+
+  const userId = await requiredUserId();
+  const communityId = await currentCommunityId();
+  const { data, error } = await extendedDb
+    .from("message_conversations")
+    .select("*")
+    .eq("community_id", communityId)
+    .or(`participant_one.eq.${userId},participant_two.eq.${userId}`)
+    .order("updated_at", { ascending: false });
+  if (error) throw error;
+
+  const rows = data ?? [];
+  const conversationIds = rows.map((row: any) => row.id);
+  const otherIds = rows.map((row: any) => row.participant_one === userId ? row.participant_two : row.participant_one);
+  const [profiles, messagesResult, readsResult] = await Promise.all([
+    profilesById(otherIds),
+    conversationIds.length
+      ? extendedDb.from("conversation_messages").select("*").in("conversation_id", conversationIds).order("created_at", { ascending: true })
+      : Promise.resolve({ data: [], error: null }),
+    conversationIds.length
+      ? extendedDb.from("message_reads").select("*").eq("user_id", userId).in("conversation_id", conversationIds)
+      : Promise.resolve({ data: [], error: null }),
+  ]);
+  if (messagesResult.error) throw messagesResult.error;
+  if (readsResult.error) throw readsResult.error;
+
+  const messagesByConversation = new Map<string, any[]>();
+  (messagesResult.data ?? []).forEach((message: any) => {
+    const key = String(message.conversation_id);
+    messagesByConversation.set(key, [...(messagesByConversation.get(key) ?? []), message]);
+  });
+  const readsByConversation = new Map<string, string | null>(
+    (readsResult.data ?? []).map((row: any) => [String(row.conversation_id), row.last_read_at ?? null]),
+  );
+  const conversations = rows
+    .map((row: any) => {
+      const otherId = row.participant_one === userId ? row.participant_two : row.participant_one;
+      return toConversation(row, userId, profiles.get(otherId), messagesByConversation.get(String(row.id)) ?? [], readsByConversation.get(String(row.id)));
+    })
+    .sort((a: any, b: any) => new Date(b.lastMessageAt ?? b.createdAt).getTime() - new Date(a.lastMessageAt ?? a.createdAt).getTime());
+
+  return { conversations };
+}
+
+async function getMessageConversation(conversationId: string) {
+  if (isDemoMode()) {
+    const row = readDemoRows(DEMO_MESSAGE_CONVERSATIONS_KEY).find((conversation: any) => String(conversation.id) === conversationId);
+    if (!row) throw new Error("Conversation not found.");
+    return demoConversationDetail(row);
+  }
+
+  const userId = await requiredUserId();
+  const { data: conversation, error } = await extendedDb.from("message_conversations").select("*").eq("id", conversationId).maybeSingle();
+  if (error) throw error;
+  if (!conversation) throw new Error("Conversation not found.");
+  const otherId = conversation.participant_one === userId ? conversation.participant_two : conversation.participant_one;
+  const { data: messages, error: messagesError } = await extendedDb
+    .from("conversation_messages")
+    .select("*")
+    .eq("conversation_id", conversationId)
+    .order("created_at", { ascending: true });
+  if (messagesError) throw messagesError;
+  const { data: readRow, error: readError } = await extendedDb
+    .from("message_reads")
+    .select("*")
+    .eq("conversation_id", conversationId)
+    .eq("user_id", userId)
+    .maybeSingle();
+  if (readError) throw readError;
+  const profiles = await profilesById([otherId, ...(messages ?? []).map((message: any) => message.sender_id)]);
+
+  return {
+    conversation: toConversation(conversation, userId, profiles.get(otherId), messages ?? [], readRow?.last_read_at),
+    messages: (messages ?? []).map((message: any) => toConversationMessage(message, userId, profiles.get(message.sender_id))),
+  };
+}
+
+async function markConversationRead(conversationId: string) {
+  if (isDemoMode()) {
+    const reads = readDemoMessageReads();
+    reads[conversationId] = new Date().toISOString();
+    writeDemoMessageReads(reads);
+    return { ok: true };
+  }
+
+  const userId = await requiredUserId();
+  const { error } = await extendedDb
+    .from("message_reads")
+    .upsert(
+      { conversation_id: conversationId, user_id: userId, last_read_at: new Date().toISOString() },
+      { onConflict: "conversation_id,user_id" },
+    );
+  if (error) throw error;
+  return { ok: true };
+}
+
+async function sendMessage(conversationId: string, payload: JsonBody) {
+  const body = compactText(payload.body, 2000);
+  if (!body) throw new Error("Message cannot be empty.");
+
+  if (isDemoMode()) {
+    const row = {
+      id: `demo-message-${Date.now()}`,
+      conversation_id: conversationId,
+      sender_id: DEMO_USER_ID,
+      body,
+      created_at: new Date().toISOString(),
+    };
+    writeDemoConversationMessages([...readDemoConversationMessages(), row]);
+    const conversations = readDemoRows(DEMO_MESSAGE_CONVERSATIONS_KEY).map((conversation: any) =>
+      String(conversation.id) === conversationId ? { ...conversation, updated_at: row.created_at } : conversation,
+    );
+    writeDemoRows(DEMO_MESSAGE_CONVERSATIONS_KEY, conversations, 100);
+    return toConversationMessage(row, DEMO_USER_ID, DEMO_PROFILE);
+  }
+
+  const userId = await requiredUserId();
+  const { data, error } = await extendedDb
+    .from("conversation_messages")
+    .insert({ conversation_id: conversationId, sender_id: userId, body })
+    .select("*")
+    .single();
+  if (error) throw error;
+  await extendedDb.from("message_conversations").update({ updated_at: new Date().toISOString() }).eq("id", conversationId);
+  const profiles = await profilesById([userId]);
+  return toConversationMessage(data, userId, profiles.get(userId));
+}
+
+async function startConversation(payload: JsonBody) {
+  const recipientId = String(payload.recipientId ?? "").trim();
+  if (!recipientId) throw new Error("Choose a member to message.");
+
+  if (isDemoMode()) {
+    if (recipientId === DEMO_USER_ID) throw new Error("You cannot message yourself.");
+    const recipient = demoMemberProfile(recipientId);
+    if (!recipient) throw new Error("Member not found.");
+    const postId = payload.postId ? String(payload.postId) : null;
+    const post = postId ? readDemoPosts().find((row: any) => String(row.id) === postId) : null;
+    const [participantOne, participantTwo] = conversationPair(DEMO_USER_ID, recipientId);
+    const rows = readDemoRows(DEMO_MESSAGE_CONVERSATIONS_KEY);
+    let conversation = rows.find(
+      (row: any) =>
+        row.participant_one === participantOne &&
+        row.participant_two === participantTwo &&
+        String(row.post_id ?? "") === String(postId ?? ""),
+    );
+    if (!conversation) {
+      const now = new Date().toISOString();
+      conversation = {
+        id: `demo-conversation-${Date.now()}`,
+        community_id: "default",
+        created_by: DEMO_USER_ID,
+        participant_one: participantOne,
+        participant_two: participantTwo,
+        post_id: postId,
+        post_title: post?.title ?? payload.postTitle ?? null,
+        created_at: now,
+        updated_at: now,
+      };
+      writeDemoRows(DEMO_MESSAGE_CONVERSATIONS_KEY, [conversation, ...rows], 100);
+    }
+    if (payload.openingMessage?.trim()) await sendMessage(String(conversation.id), { body: payload.openingMessage });
+    return demoConversationDetail(conversation);
+  }
+
+  const userId = await requiredUserId();
+  if (recipientId === userId) throw new Error("You cannot message yourself.");
+  const communityId = await currentCommunityId();
+  const { data: recipient, error: recipientError } = await supabase
+    .from("profiles")
+    .select("*")
+    .eq("id", recipientId)
+    .eq("community_id", communityId)
+    .eq("membership_status", "approved")
+    .maybeSingle();
+  if (recipientError) throw recipientError;
+  if (!recipient) throw new Error("This member is not available for private messages.");
+
+  const postId = payload.postId ? String(payload.postId) : null;
+  let postTitle: string | null = null;
+  if (postId) {
+    const { data: post, error: postError } = await extendedDb.from("posts").select("id, title, community_id").eq("id", postId).maybeSingle();
+    if (postError) throw postError;
+    if (!post || post.community_id !== communityId) throw new Error("Post not found in your community.");
+    postTitle = post.title;
+  }
+
+  const [participantOne, participantTwo] = conversationPair(userId, recipientId);
+  let query = extendedDb
+    .from("message_conversations")
+    .select("*")
+    .eq("community_id", communityId)
+    .eq("participant_one", participantOne)
+    .eq("participant_two", participantTwo);
+  query = postId ? query.eq("post_id", postId) : query.is("post_id", null);
+  const { data: existing, error: existingError } = await query.maybeSingle();
+  if (existingError) throw existingError;
+
+  let conversation = existing;
+  if (!conversation) {
+    const { data, error } = await extendedDb
+      .from("message_conversations")
+      .insert({
+        community_id: communityId,
+        created_by: userId,
+        participant_one: participantOne,
+        participant_two: participantTwo,
+        post_id: postId,
+        post_title: postTitle,
+      })
+      .select("*")
+      .single();
+    if (error) throw error;
+    conversation = data;
+  }
+
+  if (payload.openingMessage?.trim()) await sendMessage(String(conversation.id), { body: payload.openingMessage });
+  return getMessageConversation(String(conversation.id));
+}
+
 async function createMember(payload: JsonBody) {
   if (isDemoMode()) {
     const row = {
@@ -1775,22 +2191,25 @@ async function getCommunity() {
   if (isDemoMode()) return getDemoCommunity();
 
   const communityId = await requireCommunityManager();
-  const { data, error } = await supabase.from("community_settings").select("*").eq("id", communityId).maybeSingle();
+  const { data, error } = await extendedDb.from("community_settings").select("*").eq("id", communityId).maybeSingle();
   if (error) throw error;
+  const communityRow = data as JsonBody | null;
   return {
-    id: id(data?.id ?? "community"),
+    id: id(communityRow?.id ?? "community"),
     communityId: "default",
-    name: data?.name ?? "Mohalla Community Hub",
-    area: data?.description ?? "Neighbourhood",
-    city: data?.welcome_message ?? "Karachi",
-    logoUrl: data?.logo_url ?? null,
-    status: data?.status ?? "approved",
-    themePrimaryColor: data?.theme_primary_color ?? "#1B5E20",
-    themeSecondaryColor: data?.theme_secondary_color ?? "#0288D1",
-    themeBackgroundColor: data?.theme_background_color ?? "#FAFDF8",
-    themeBannerColor: data?.theme_banner_color ?? "#FFFFFF",
-    themeSidebarColor: data?.theme_sidebar_color ?? "#FFFFFF",
-    rules: data?.rules ?? "",
+    name: communityRow?.name ?? "Mohalla Community Hub",
+    area: communityRow?.description ?? "Neighbourhood",
+    city: communityRow?.welcome_message ?? "Karachi",
+    latitude: communityRow?.latitude ?? null,
+    longitude: communityRow?.longitude ?? null,
+    logoUrl: communityRow?.logo_url ?? null,
+    status: communityRow?.status ?? "approved",
+    themePrimaryColor: communityRow?.theme_primary_color ?? "#1B5E20",
+    themeSecondaryColor: communityRow?.theme_secondary_color ?? "#0288D1",
+    themeBackgroundColor: communityRow?.theme_background_color ?? "#FAFDF8",
+    themeBannerColor: communityRow?.theme_banner_color ?? "#FFFFFF",
+    themeSidebarColor: communityRow?.theme_sidebar_color ?? "#FFFFFF",
+    rules: communityRow?.rules ?? "",
   };
 }
 
@@ -1798,12 +2217,14 @@ async function updateCommunity(payload: JsonBody) {
   if (isDemoMode()) return writeDemoCommunity(payload);
 
   const current = await getCommunity();
-  const { data, error } = await supabase
+  const { data, error } = await extendedDb
     .from("community_settings")
     .update({
       name: payload.name ?? current.name,
       description: payload.area ?? current.area,
       welcome_message: payload.city ?? current.city,
+      latitude: payload.latitude === undefined ? current.latitude ?? null : payload.latitude,
+      longitude: payload.longitude === undefined ? current.longitude ?? null : payload.longitude,
       rules: payload.rules ?? current.rules,
       logo_url: payload.logoUrl ?? current.logoUrl ?? null,
       theme_primary_color: payload.themePrimaryColor ?? current.themePrimaryColor ?? "#1B5E20",
@@ -1823,6 +2244,8 @@ async function updateCommunity(payload: JsonBody) {
     name: data.name,
     area: data.description ?? "",
     city: data.welcome_message ?? "",
+    latitude: data.latitude ?? null,
+    longitude: data.longitude ?? null,
     logoUrl: data.logo_url ?? null,
     status: data.status ?? "approved",
     themePrimaryColor: data.theme_primary_color ?? "#1B5E20",
@@ -2127,6 +2550,11 @@ export async function handleSupabaseApi<T = unknown>(url: string, method = "GET"
   if (path === "/api/city-feed/status" && method === "GET") return getCityPublicationStatus(requestUrl.searchParams) as T;
   if (path === "/api/city-feed/publish" && method === "POST") return publishCityPublication(payload) as T;
   if (path === "/api/city-feed/publish" && method === "DELETE") return unpublishCityPublication(payload) as T;
+  if (path === "/api/messages" && method === "GET") return listMessageConversations() as T;
+  if (path === "/api/messages/start" && method === "POST") return startConversation(payload) as T;
+  if (/^\/api\/messages\/[^/]+$/.test(path) && method === "GET") return getMessageConversation(path.split("/")[3]) as T;
+  if (/^\/api\/messages\/[^/]+\/messages$/.test(path) && method === "POST") return sendMessage(path.split("/")[3], payload) as T;
+  if (/^\/api\/messages\/[^/]+\/read$/.test(path) && method === "POST") return markConversationRead(path.split("/")[3]) as T;
   if (path === "/api/admin/members" && method === "GET") return listAdminMembers(requestUrl.searchParams) as T;
   if (path === "/api/admin/members" && method === "POST") return createMember(payload) as T;
   if (/^\/api\/admin\/members\/[^/]+\/approve$/.test(path) && method === "PATCH") return updateMember(path.split("/")[4], "approve") as T;

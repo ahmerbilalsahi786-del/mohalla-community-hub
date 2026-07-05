@@ -18,6 +18,7 @@ import {
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { setToken } from '@/lib/auth'
+import { sendPendingApprovalEmail } from '@/lib/approval-email'
 import { useToast } from '@/hooks/use-toast'
 import { supabase } from '@/integrations/supabase/client'
 import {
@@ -86,7 +87,13 @@ async function detectCurrentLocation() {
     })
 
     const location = await reverseGeocodeParts(position.coords.latitude, position.coords.longitude)
-    if (location.area || location.city) return location
+    if (location.area || location.city) {
+      return {
+        ...location,
+        latitude: position.coords.latitude,
+        longitude: position.coords.longitude,
+      }
+    }
     throw new Error('We found your location but could not turn it into an area and city.')
   } catch (error) {
     throw new Error(geolocationErrorMessage(error))
@@ -113,6 +120,7 @@ export default function Register() {
     communityArea: '',
     communityCity: '',
   })
+  const [communityPoint, setCommunityPoint] = useState<{ latitude: number; longitude: number } | null>(null)
   const [showPw, setShowPw] = useState(false)
   const [loading, setLoading] = useState(false)
   const [autofillingLocation, setAutofillingLocation] = useState(false)
@@ -260,6 +268,7 @@ export default function Register() {
         communityArea: location.area || current.communityArea,
         communityCity: location.city || current.communityCity,
       }))
+      setCommunityPoint({ latitude: location.latitude, longitude: location.longitude })
       toast({
         title: 'Location filled in',
         description: [location.area, location.city].filter(Boolean).join(', ') || 'Your current area is ready.',
@@ -285,6 +294,16 @@ export default function Register() {
       fullName: form.name,
       unitNumber: form.unitNumber,
     })
+    const {
+      data: { user },
+    } = await supabase.auth.getUser()
+    if (user?.id) {
+      try {
+        await sendPendingApprovalEmail(user.id)
+      } catch (error) {
+        console.warn('Pending approval email could not be sent:', error)
+      }
+    }
     toast({
       title: 'Join request submitted',
       description: `Your approval request has been sent to ${selectedJoinCommunityName}.`,
@@ -367,6 +386,8 @@ export default function Register() {
             community_name: form.communityName,
             community_area: form.communityArea,
             community_city: form.communityCity,
+            community_latitude: communityPoint ? String(communityPoint.latitude) : null,
+            community_longitude: communityPoint ? String(communityPoint.longitude) : null,
           }
 
       const { data, error } = await supabase.auth.signUp({
@@ -393,6 +414,11 @@ export default function Register() {
         if (registerMode === 'join') {
           await requestSignedInMemberJoin()
           return
+        }
+        try {
+          if (data.user?.id) await sendPendingApprovalEmail(data.user.id)
+        } catch (error) {
+          console.warn('Pending approval email could not be sent:', error)
         }
         navigate('/pending-approval')
         return

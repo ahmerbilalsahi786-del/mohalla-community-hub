@@ -8,8 +8,8 @@ import {
   Home,
   Users,
   Calendar,
+  MessageCircle,
   MessageSquare,
-  Bell,
   Settings,
   HelpCircle,
   ChevronLeft,
@@ -22,6 +22,7 @@ import {
   ShieldCheck,
   BarChart2,
   LogOut,
+  UserCircle,
 } from 'lucide-react'
 import { InstallAppButton } from '@/components/pwa/install-app'
 import { canManageCommunity, useCurrentUser, useLogout } from '@/hooks/use-current-user'
@@ -29,6 +30,7 @@ import { canManageCommunity, useCurrentUser, useLogout } from '@/hooks/use-curre
 const navItems = [
   { name: 'Dashboard', icon: Home, href: '/dashboard', badge: null },
   { name: 'Community Feed', icon: MessageSquare, href: '/feed', badge: null },
+  { name: 'Messages', icon: MessageCircle, href: '/messages', badge: null },
   { name: 'City Feed', icon: Globe2, href: '/city-feed', badge: null },
   { name: 'Safety & Alerts', icon: ShieldAlert, href: '/safety', badge: null },
   { name: 'Events', icon: Calendar, href: '/events', badge: null },
@@ -41,7 +43,8 @@ const navItems = [
   { name: 'Admin Panel', icon: ShieldCheck, href: '/admin', badge: null },
 ]
 
-const bottomItems = [
+const utilityItems = [
+  { name: 'Profile', icon: UserCircle, href: '/profile/me', badge: null },
   { name: 'Settings', icon: Settings, href: '/settings', badge: null },
   { name: 'Help', icon: HelpCircle, href: '/help', badge: null },
 ]
@@ -53,10 +56,12 @@ export function Sidebar() {
   const logout = useLogout()
   const profileHref = `/profile/${user?.userId ?? 'me'}`
   const logoUrl = user?.community?.logoUrl
+  const societyName = user?.community?.name?.trim() || 'Mohalla'
   const visibleNavItems = navItems.filter((item) => item.href !== '/admin' || canManageCommunity(user?.role))
+  const visibleUtilityItems = utilityItems.map((item) => item.href === '/profile/me' ? { ...item, href: profileHref } : item)
 
   const activeItem =
-    [...visibleNavItems, ...bottomItems].find((i) => location === i.href || location.startsWith(`${i.href}/`))?.name ??
+    [...visibleNavItems, ...visibleUtilityItems].find((i) => location === i.href || location.startsWith(`${i.href}/`))?.name ??
     'Dashboard'
 
   return (
@@ -79,7 +84,7 @@ export function Sidebar() {
           </span>
           {!collapsed && (
             <div className="min-w-0">
-              <span className="brand-wordmark block truncate text-xl">Mohalla</span>
+              <span className="brand-wordmark block truncate text-xl">{societyName}</span>
               <span className="text-xs font-semibold text-muted-foreground">Neighborhood Portal</span>
             </div>
           )}
@@ -133,12 +138,10 @@ export function Sidebar() {
             )}
           </Link>
         ))}
-      </nav>
 
-      {/* Bottom Navigation */}
-      <div className="border-t border-sidebar-border p-3">
+        <div className="my-3 border-t border-sidebar-border" />
         <InstallAppButton collapsed={collapsed} className="mb-1" />
-        {bottomItems.map((item) => (
+        {visibleUtilityItems.map((item) => (
           <Link
             key={item.name}
             href={item.href}
@@ -162,48 +165,18 @@ export function Sidebar() {
             )}
           </Link>
         ))}
-      </div>
-
-      {/* User Profile */}
-      <div className="border-t border-sidebar-border p-3">
-        <Link
-          href={profileHref}
-          className={cn(
-            'flex items-center gap-3 rounded-xl border border-sidebar-border bg-background/75 p-3 transition-colors hover:bg-background',
-            collapsed && 'justify-center'
-          )}
-        >
-          <div className="relative shrink-0">
-            {user?.avatarUrl ? (
-              <img src={user.avatarUrl} alt="" className="h-10 w-10 rounded-full object-cover" />
-            ) : (
-              <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary text-sm font-bold text-primary-foreground shadow-md shadow-primary/15">
-                {(user?.name ?? 'R').slice(0, 1).toUpperCase()}
-              </div>
-            )}
-            <div className="absolute -bottom-0.5 -right-0.5 h-3 w-3 rounded-full border-2 border-card bg-green-500" />
-          </div>
-          {!collapsed && (
-            <div className="min-w-0 flex-1 overflow-hidden">
-              <p className="truncate text-sm font-semibold">{user?.name ?? 'Resident'}</p>
-              <p className="truncate text-xs text-muted-foreground">
-                {user?.unitNumber ? `${user.unitNumber} · ` : ''}{canManageCommunity(user?.role) ? 'Admin' : 'Member'}
-              </p>
-            </div>
-          )}
-        </Link>
         <button
           type="button"
           onClick={logout}
           className={cn(
-            'mt-2 flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-bold text-muted-foreground transition-colors hover:bg-sidebar-accent hover:text-sidebar-accent-foreground',
+            'group mt-1 flex min-h-11 w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-bold text-muted-foreground transition-colors hover:bg-sidebar-accent hover:text-sidebar-accent-foreground',
             collapsed && 'justify-center'
           )}
         >
           <LogOut size={20} className="shrink-0" />
           {!collapsed && <span>Logout</span>}
         </button>
-      </div>
+      </nav>
     </aside>
   )
 }

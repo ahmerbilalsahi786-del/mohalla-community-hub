@@ -1,15 +1,17 @@
 
 import { useEffect, useState } from 'react'
-import { Building2, Search, Sun, Moon, Plus, LogOut, ShieldCheck } from 'lucide-react'
+import { Building2, Search, Sun, Moon, Plus, ShieldCheck } from 'lucide-react'
 import { Button } from '@/components/ui/button'
-import { useLocation, Link } from 'wouter'
+import { useLocation } from 'wouter'
 import { NotificationBell } from './notification-bell'
-import { useCurrentUser, useLogout } from '@/hooks/use-current-user'
+import { MessageShortcut } from './message-shortcut'
+import { useCurrentUser } from '@/hooks/use-current-user'
 
 const PAGE_META: Record<string, { title: string; subtitle: string }> = {
   '/dashboard': { title: 'Dashboard', subtitle: 'Welcome back to your community' },
   '/': { title: 'Dashboard', subtitle: 'Welcome back to your community' },
   '/feed': { title: 'Community Feed', subtitle: 'Stay connected with your neighbors' },
+  '/messages': { title: 'Messages', subtitle: 'Private community conversations' },
   '/city-feed': { title: 'City Feed', subtitle: 'Public updates across your city' },
   '/events': { title: 'Events', subtitle: 'Upcoming community events' },
   '/polls': { title: 'Polls', subtitle: 'Vote and share your opinion' },
@@ -31,6 +33,7 @@ const PAGE_META: Record<string, { title: string; subtitle: string }> = {
 function matchPageMeta(location: string) {
   if (PAGE_META[location]) return PAGE_META[location]
   if (location.startsWith('/marketplace/')) return { title: 'Listing Detail', subtitle: 'Buy & Sell Marketplace' }
+  if (location.startsWith('/messages/')) return { title: 'Messages', subtitle: 'Private community conversations' }
   if (location.startsWith('/profile/')) return { title: 'Profile', subtitle: 'Community member' }
   return { title: 'Mohalla', subtitle: 'Community Hub' }
 }
@@ -41,9 +44,7 @@ export function TopNavbar() {
   )
   const [location, navigate] = useLocation()
   const { data: user } = useCurrentUser()
-  const logout = useLogout()
   const meta = matchPageMeta(location)
-  const profileHref = `/profile/${user?.userId ?? 'me'}`
   const logoUrl = user?.community?.logoUrl
 
   useEffect(() => {
@@ -137,30 +138,7 @@ export function TopNavbar() {
           {darkMode ? <Sun size={20} /> : <Moon size={20} />}
         </button>
 
-        {/* User Menu → profile link */}
-        <Link href={profileHref} className="block">
-          <button aria-label="Open profile" className="flex h-10 items-center gap-2 rounded-xl border portal-soft-rule bg-card/90 p-1 transition-colors hover:bg-card sm:h-11 sm:py-1.5 sm:pl-1.5 sm:pr-3">
-            {user?.avatarUrl ? (
-              <img src={user.avatarUrl} alt="" className="h-8 w-8 rounded-lg object-cover" />
-            ) : (
-              <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary text-sm font-bold text-primary-foreground">
-                {(user?.name ?? 'R').slice(0, 1).toUpperCase()}
-              </div>
-            )}
-            <div className="hidden text-left md:block">
-              <p className="max-w-28 truncate text-sm font-semibold text-foreground">{user?.name ?? 'Resident'}</p>
-              <p className="max-w-28 truncate text-xs text-muted-foreground">{user?.community?.name ?? 'Community'}</p>
-            </div>
-          </button>
-        </Link>
-        <button
-          type="button"
-          onClick={logout}
-          aria-label="Logout"
-          className="flex h-10 w-10 items-center justify-center rounded-xl border portal-soft-rule bg-card/90 text-foreground transition-colors hover:bg-card"
-        >
-          <LogOut size={18} />
-        </button>
+        <MessageShortcut />
       </div>
       </div>
     </header>

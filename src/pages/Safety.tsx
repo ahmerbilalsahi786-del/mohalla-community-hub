@@ -15,6 +15,7 @@ import {
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
 import { PublicationToggle } from '@/components/city-feed/publication-toggle'
+import LocationPicker, { type PickedLocation } from '@/components/location-picker'
 
 type AlertType = 'theft' | 'suspicious' | 'emergency' | 'power_outage' | 'water_shortage' | 'other'
 type Severity = 'low' | 'medium' | 'high'
@@ -58,6 +59,8 @@ interface AlertData {
   title: string
   description: string
   locationDetail: string
+  latitude?: number | null
+  longitude?: number | null
   imageUrl?: string | null
   severity: string
   isResolved: boolean
@@ -254,6 +257,7 @@ function ReportAlertModal({ onClose }: { onClose: () => void }) {
   const [title, setTitle] = useState('')
   const [description, setDescription] = useState('')
   const [location, setLocation] = useState('')
+  const [pickedLocation, setPickedLocation] = useState<PickedLocation | null>(null)
   const [severity, setSeverity] = useState<Severity>('medium')
   const queryClient = useQueryClient()
 
@@ -367,12 +371,33 @@ function ReportAlertModal({ onClose }: { onClose: () => void }) {
               />
             </div>
           </div>
+
+          <div>
+            <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-1.5 block">Map Tag (optional)</label>
+            <LocationPicker
+              compact
+              onSelect={(data) => {
+                setPickedLocation(data)
+                if (!location.trim() && data.address) setLocation(data.address)
+              }}
+            />
+          </div>
         </div>
 
         <div className="flex shrink-0 items-center justify-end gap-2 border-t border-border bg-muted/20 px-4 py-3 sm:px-5 sm:py-4">
           <Button variant="ghost" onClick={onClose} className="rounded-xl">Cancel</Button>
           <Button
-            onClick={() => createAlert.mutate({ data: { type, title: title.trim(), description: description.trim(), locationDetail: location.trim(), severity } })}
+            onClick={() => createAlert.mutate({
+              data: {
+                type,
+                title: title.trim(),
+                description: description.trim(),
+                locationDetail: location.trim(),
+                latitude: pickedLocation?.latitude ?? null,
+                longitude: pickedLocation?.longitude ?? null,
+                severity,
+              } as any,
+            })}
             disabled={!title.trim() || !description.trim() || createAlert.isPending}
             className={cn(
               'rounded-xl text-white',

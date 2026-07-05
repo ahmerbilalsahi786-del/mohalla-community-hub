@@ -8,15 +8,16 @@ import { TopNavbar } from '@/components/dashboard/top-navbar'
 import {
   Pin, Heart, MessageSquare, Plus, X, ChevronDown, ChevronUp,
   Megaphone, Shield, Search, ShoppingBag, Calendar, Users, ImagePlus, Send, Loader2,
-  MapPin, BarChart2, ChevronRight, AlertTriangle, Flag, Trash2, UserX,
+  MapPin, BarChart2, ChevronRight, AlertTriangle, Flag, Trash2, UserX, MessageCircle,
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { useToast } from '@/hooks/use-toast'
 import { uploadImage } from '@/lib/cloudinary'
 import { cn } from '@/lib/utils'
-import { Link, useSearch } from 'wouter'
+import { Link, useLocation, useSearch } from 'wouter'
 import { useCurrentUser } from '@/hooks/use-current-user'
 import { PublicationToggle } from '@/components/city-feed/publication-toggle'
+import { useStartConversation } from '@/lib/messages'
 
 type PostType = 'general' | 'announcement' | 'safety' | 'lost_found' | 'buy_sell' | 'event' | 'complaint'
 
@@ -307,6 +308,8 @@ function PostCard({ post, onLike }: { post: Post; onLike: (id: number) => void }
   const queryClient = useQueryClient()
   const { data: currentUser } = useCurrentUser()
   const { toast } = useToast()
+  const [, navigate] = useLocation()
+  const startConversation = useStartConversation()
   const isOwner = currentUser?.userId === post.userId
 
   const handleLike = () => {
@@ -351,6 +354,26 @@ function PostCard({ post, onLike }: { post: Post; onLike: (id: number) => void }
       title: response.ok ? `${post.userName} was blocked.` : 'Could not update block.',
       variant: response.ok ? 'default' : 'destructive',
     })
+  }
+
+  const talkInPrivate = () => {
+    startConversation.mutate(
+      {
+        recipientId: post.userId,
+        postId: post.id,
+        openingMessage: `Hi ${post.userName}, I wanted to discuss your post: "${post.title}"`,
+      },
+      {
+        onSuccess: (data) => navigate(`/messages/${data.conversation.id}`),
+        onError: (error: any) => {
+          toast({
+            title: 'Could not start private chat',
+            description: error?.message ?? 'Please try again.',
+            variant: 'destructive',
+          })
+        },
+      },
+    )
   }
 
   return (
@@ -407,7 +430,7 @@ function PostCard({ post, onLike }: { post: Post; onLike: (id: number) => void }
         <ImageGrid urls={post.imageUrls} />
 
         {/* Actions */}
-        <div className="mt-4 flex items-center gap-4">
+        <div className="mt-4 flex flex-wrap items-center gap-4">
           <button
             onClick={handleLike}
             className={cn(
@@ -426,6 +449,16 @@ function PostCard({ post, onLike }: { post: Post; onLike: (id: number) => void }
             <span>{post.commentsCount}</span>
             {expanded ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
           </button>
+          {!isOwner && (
+            <button
+              onClick={talkInPrivate}
+              disabled={startConversation.isPending}
+              className="flex items-center gap-1.5 text-sm font-medium text-muted-foreground transition-colors hover:text-primary disabled:opacity-50"
+            >
+              {startConversation.isPending ? <Loader2 size={18} className="animate-spin" /> : <MessageCircle size={18} />}
+              <span>Talk in private</span>
+            </button>
+          )}
         </div>
 
         {expanded && <CommentSection postId={post.id} />}

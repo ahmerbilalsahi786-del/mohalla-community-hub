@@ -17,14 +17,27 @@ export interface CityPublication {
   authorName: string;
   communityName: string;
   communityArea?: string | null;
+  latitude?: number | null;
+  longitude?: number | null;
   publishedBy?: string | null;
   publishedAt: string;
   isActive: boolean;
   metadata: Record<string, unknown>;
 }
 
+export interface CityMapCommunity {
+  id: string;
+  name: string;
+  area?: string | null;
+  city: string;
+  logoUrl?: string | null;
+  latitude: number;
+  longitude: number;
+}
+
 export interface CityPublicationList {
   items: CityPublication[];
+  communities: CityMapCommunity[];
   total: number;
   page: number;
   limit: number;

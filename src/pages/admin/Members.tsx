@@ -10,6 +10,7 @@ import { supabase } from '@/integrations/supabase/client'
 import { useCurrentUser } from '@/hooks/use-current-user'
 import { useToast } from '@/hooks/use-toast'
 import { titleCaseWord } from '@/lib/format-label'
+import { sendMemberApprovedEmail } from '@/lib/approval-email'
 
 type Member = {
   id: number; userId: string; name: string; unitNumber: string; phone: string;
@@ -97,7 +98,16 @@ function MemberRow({ member, refetch }: { member: Member; refetch: () => void })
     }
 
     if (status === 'approved') {
-      toast({ title: 'Member approved' })
+      try {
+        await sendMemberApprovedEmail(member.userId)
+        toast({ title: 'Member approved', description: 'Approval email sent.' })
+      } catch (emailError) {
+        console.warn('Approval email could not be sent:', emailError)
+        toast({
+          title: 'Member approved',
+          description: 'The approval email could not be sent. Check the email function secrets.',
+        })
+      }
     } else {
       toast({ title: 'Member rejected' })
     }

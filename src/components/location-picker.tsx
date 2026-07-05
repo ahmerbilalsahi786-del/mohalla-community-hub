@@ -1,6 +1,5 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { Crosshair, Loader2, MapPin, Search } from 'lucide-react'
-import { MapContainer, Marker, TileLayer, useMap, useMapEvents } from 'react-leaflet'
 import L from 'leaflet'
 import 'leaflet/dist/leaflet.css'
 import { reverseGeocode, searchAddress, type AddressSearchResult } from '@/lib/geocode'
@@ -28,24 +27,63 @@ const markerIcon = L.divIcon({
   iconAnchor: [14, 28],
 })
 
-function MapClickHandler({ onPick }: { onPick: (lat: number, lng: number) => void }) {
-  useMapEvents({
-    click: (event) => {
-      onPick(event.latlng.lat, event.latlng.lng)
-    },
-  })
-
-  return null
-}
-
-function RecenterMap({ center }: { center: [number, number] }) {
-  const map = useMap()
+function PickerMap({
+  center,
+  position,
+  onPick,
+}: {
+  center: [number, number]
+  position: [number, number] | null
+  onPick: (lat: number, lng: number) => void
+}) {
+  const containerRef = useRef<HTMLDivElement | null>(null)
+  const mapRef = useRef<L.Map | null>(null)
+  const markerRef = useRef<L.Marker | null>(null)
+  const onPickRef = useRef(onPick)
 
   useEffect(() => {
-    map.flyTo(center, Math.max(map.getZoom(), 14), { duration: 0.5 })
-  }, [center, map])
+    onPickRef.current = onPick
+  }, [onPick])
 
-  return null
+  useEffect(() => {
+    if (!containerRef.current || mapRef.current) return
+
+    const map = L.map(containerRef.current).setView(center, 13)
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      attribution: '&copy; OpenStreetMap contributors',
+    }).addTo(map)
+    map.on('click', (event: L.LeafletMouseEvent) => {
+      onPickRef.current(event.latlng.lat, event.latlng.lng)
+    })
+    mapRef.current = map
+
+    return () => {
+      map.remove()
+      mapRef.current = null
+      markerRef.current = null
+    }
+  }, [center])
+
+  useEffect(() => {
+    const map = mapRef.current
+    if (!map) return
+
+    map.flyTo(center, Math.max(map.getZoom(), 14), { duration: 0.5 })
+    if (position) {
+      if (markerRef.current) {
+        markerRef.current.setLatLng(position)
+      } else {
+        markerRef.current = L.marker(position, { icon: markerIcon }).addTo(map)
+      }
+    } else if (markerRef.current) {
+      markerRef.current.remove()
+      markerRef.current = null
+    }
+
+    setTimeout(() => map.invalidateSize(), 0)
+  }, [center, position])
+
+  return <div ref={containerRef} className="h-full w-full" />
 }
 
 export default function LocationPicker({
@@ -153,15 +191,7 @@ export default function LocationPicker({
       )}
 
       <div className={cn('overflow-hidden rounded-xl border border-border', compact ? 'h-48' : 'h-64')}>
-        <MapContainer center={center} zoom={13} className="h-full w-full">
-          <TileLayer
-            attribution="&copy; OpenStreetMap contributors"
-            url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-          />
-          <MapClickHandler onPick={(lat, lng) => void handlePick(lat, lng)} />
-          <RecenterMap center={center} />
-          {position && <Marker position={position} icon={markerIcon} />}
-        </MapContainer>
+        <PickerMap center={center} position={position} onPick={(lat, lng) => void handlePick(lat, lng)} />
       </div>
 
       <p className="flex items-start gap-1.5 text-xs text-muted-foreground">
