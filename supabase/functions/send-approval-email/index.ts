@@ -48,6 +48,21 @@ function personName(profile?: Partial<Profile> | null) {
   return profile?.display_name ?? profile?.full_name ?? profile?.email?.split("@")[0] ?? "Resident";
 }
 
+function readJsonSecret(name: string, key = "default") {
+  const raw = Deno.env.get(name);
+  if (!raw) return null;
+  try {
+    const parsed = JSON.parse(raw) as Record<string, string>;
+    return parsed[key] ?? parsed.default ?? Object.values(parsed)[0] ?? null;
+  } catch {
+    return null;
+  }
+}
+
+function serviceKey() {
+  return Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? readJsonSecret("SUPABASE_SECRET_KEYS");
+}
+
 function emailLayout(title: string, body: string, actionLabel: string, actionUrl: string) {
   return `
     <div style="font-family:Arial,sans-serif;line-height:1.6;color:#111827">
@@ -92,7 +107,7 @@ Deno.serve(async (req) => {
   if (req.method !== "POST") return json({ error: "Method not allowed" }, 405);
 
   const supabaseUrl = Deno.env.get("SUPABASE_URL");
-  const serviceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
+  const serviceRoleKey = serviceKey();
   const resendApiKey = Deno.env.get("RESEND_API_KEY");
   const emailFrom = Deno.env.get("EMAIL_FROM") ?? "Mohalla <no-reply@mohalla.app>";
   const appUrl = (Deno.env.get("APP_URL") ?? "https://mohallapk.vercel.app").replace(/\/$/, "");
@@ -101,7 +116,12 @@ Deno.serve(async (req) => {
     return json({ error: "Supabase function secrets are not configured." }, 500);
   }
   if (!resendApiKey) {
-    return json({ error: "RESEND_API_KEY is not configured." }, 500);
+    return json({
+      sent: false,
+      count: 0,
+      skipped: true,
+      reason: "Email provider is not configured.",
+    });
   }
 
   const authHeader = req.headers.get("Authorization") ?? "";

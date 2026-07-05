@@ -65,6 +65,10 @@ export function communityMembersQueryKey() {
   return ["/api/community/members", "approved"] as const;
 }
 
+export function communityMembersSearchQueryKey(search = "") {
+  return ["/api/community/members", "approved", search.trim()] as const;
+}
+
 export async function listMessageConversations() {
   return customFetch<{ conversations: MessageConversation[] }>("/api/messages", { method: "GET" });
 }
@@ -96,8 +100,11 @@ export async function markConversationRead(conversationId: string) {
   return customFetch<{ ok: boolean }>(`/api/messages/${conversationId}/read`, { method: "POST" });
 }
 
-export async function listCommunityMembers() {
-  return customFetch<CommunityMember[]>("/api/community/members?status=approved&limit=200", { method: "GET" });
+export async function listCommunityMembers(search = "") {
+  const params = new URLSearchParams({ status: "approved", limit: "200" });
+  const trimmedSearch = search.trim();
+  if (trimmedSearch) params.set("search", trimmedSearch);
+  return customFetch<CommunityMember[]>(`/api/community/members?${params.toString()}`, { method: "GET" });
 }
 
 export function useListMessageConversations() {
@@ -117,10 +124,10 @@ export function useMessageConversation(conversationId?: string | null) {
   });
 }
 
-export function useCommunityMembers(enabled = true) {
+export function useCommunityMembers(enabled = true, search = "") {
   return useQuery({
-    queryKey: communityMembersQueryKey(),
-    queryFn: listCommunityMembers,
+    queryKey: communityMembersSearchQueryKey(search),
+    queryFn: () => listCommunityMembers(search),
     enabled,
   });
 }

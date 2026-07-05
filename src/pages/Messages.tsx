@@ -104,17 +104,21 @@ function MemberPicker({
   const [query, setQuery] = useState("");
   const [selectedId, setSelectedId] = useState("");
   const [openingMessage, setOpeningMessage] = useState("");
-  const { data: members = [], isLoading } = useCommunityMembers(true);
+  const memberSearch = query.trim();
+  const { data: members = [], isLoading, isError } = useCommunityMembers(true, memberSearch);
 
   const filteredMembers = useMemo(() => {
-    const needle = query.trim().toLowerCase();
+    const needle = memberSearch.toLowerCase();
     return members
       .filter((member) => member.userId !== currentUserId)
       .filter((member) => {
         if (!needle) return true;
-        return member.name.toLowerCase().includes(needle) || member.unitNumber.toLowerCase().includes(needle);
+        return (
+          (member.name ?? "").toLowerCase().includes(needle) ||
+          (member.unitNumber ?? "").toLowerCase().includes(needle)
+        );
       });
-  }, [currentUserId, members, query]);
+  }, [currentUserId, memberSearch, members]);
 
   const selectedMember = filteredMembers.find((member) => member.userId === selectedId) ?? null;
 
@@ -136,6 +140,8 @@ function MemberPicker({
             <Loader2 className="h-4 w-4 animate-spin" />
             Loading members...
           </div>
+        ) : isError ? (
+          <p className="px-2 py-4 text-sm text-destructive">Could not load community members.</p>
         ) : filteredMembers.length === 0 ? (
           <p className="px-2 py-4 text-sm text-muted-foreground">No members found.</p>
         ) : (

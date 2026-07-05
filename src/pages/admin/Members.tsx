@@ -99,13 +99,20 @@ function MemberRow({ member, refetch }: { member: Member; refetch: () => void })
 
     if (status === 'approved') {
       try {
-        await sendMemberApprovedEmail(member.userId)
-        toast({ title: 'Member approved', description: 'Approval email sent.' })
+        const emailResult = await sendMemberApprovedEmail(member.userId)
+        toast({
+          title: 'Member approved',
+          description: emailResult.skipped
+            ? emailResult.reason ?? 'Email notifications are not configured.'
+            : 'Approval email sent.',
+        })
       } catch (emailError) {
         console.warn('Approval email could not be sent:', emailError)
         toast({
           title: 'Member approved',
-          description: 'The approval email could not be sent. Check the email function secrets.',
+          description: emailError instanceof Error
+            ? emailError.message
+            : 'The approval email could not be sent. Check the email function secrets.',
         })
       }
     } else {

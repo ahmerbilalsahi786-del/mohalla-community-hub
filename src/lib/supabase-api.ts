@@ -1746,21 +1746,37 @@ async function listAdminMembers(params: URLSearchParams) {
 
 async function listCommunityMembers(params: URLSearchParams) {
   if (isDemoMode()) {
-    return readDemoMembers().filter((member: any) => member.status === "approved");
+    const search = compactText(params.get("search"), 80).toLowerCase();
+    const members = readDemoMembers().filter((member: any) => member.status === "approved");
+    if (!search) return members;
+    return members.filter((member: any) => {
+      return [member.name, member.unitNumber, member.role]
+        .some((value) => String(value ?? "").toLowerCase().includes(search));
+    });
   }
 
   const limit = Number(params.get("limit") ?? 100);
   const communityId = await currentCommunityId();
-  const { data, error } = await extendedDb
+  const status = params.get("status");
+  const search = compactText(params.get("search"), 80);
+  let query = extendedDb
     .from("profiles")
-    .select("*, user_roles(*)")
+    .select("id, display_name, full_name, unit_number, membership_status, is_verified, created_at, community_id")
     .eq("community_id", communityId)
-    .eq("membership_status", "approved")
     .limit(limit);
+
+  if (status && status !== "all") query = query.eq("membership_status", status);
+  if (search) {
+    const pattern = `%${search.replace(/[%_]/g, "\\$&")}%`;
+    query = query.or(`display_name.ilike.${pattern},full_name.ilike.${pattern},unit_number.ilike.${pattern}`);
+  }
+
+  const { data, error } = await query
+    .order("display_name", { ascending: true, nullsFirst: false })
+    .order("full_name", { ascending: true, nullsFirst: false });
   if (error) throw error;
 
   const members = (data ?? []).map((profile: any) => toMember(profile, false));
-  const status = params.get("status");
   return status && status !== "all" ? members.filter((member: any) => member.status === status) : members;
 }
 
