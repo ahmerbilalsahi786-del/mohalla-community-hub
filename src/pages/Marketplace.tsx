@@ -14,6 +14,8 @@ import { useToast } from '@/hooks/use-toast'
 import { uploadMultipleImages } from '@/lib/cloudinary'
 import { cn } from '@/lib/utils'
 import { PublicationToggle } from '@/components/city-feed/publication-toggle'
+import { CommunityEmptyState } from '@/components/community/community-empty-state'
+import { MarketplaceListingSkeleton } from '@/components/community/skeleton-states'
 
 type Category = 'all' | 'furniture' | 'electronics' | 'clothes' | 'vehicles' | 'services' | 'free' | 'other'
 type Condition = 'new' | 'good' | 'fair'
@@ -513,36 +515,17 @@ export default function Marketplace() {
             {isLoading ? (
               <div className="grid grid-cols-1 gap-3 min-[380px]:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 sm:gap-4">
                 {Array.from({ length: 8 }).map((_, i) => (
-                  <div key={i} className="rounded-2xl border border-border bg-card animate-pulse">
-                    <div className="aspect-[4/3] bg-muted rounded-t-2xl" />
-                    <div className="p-3 space-y-2">
-                      <div className="h-4 bg-muted rounded w-3/4" />
-                      <div className="h-3 bg-muted rounded w-1/2" />
-                      <div className="h-5 bg-muted rounded w-1/3" />
-                    </div>
-                  </div>
+                  <MarketplaceListingSkeleton key={i} />
                 ))}
               </div>
             ) : listings.length === 0 ? (
-              <div className="flex flex-col items-center justify-center py-20 text-center">
-                <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-muted/50 mb-4">
-                  <Package size={32} className="text-muted-foreground/50" />
-                </div>
-                <h3 className="font-semibold text-foreground">
-                  {debouncedSearch || activeCategory !== 'all' || minPrice || maxPrice
-                    ? 'No listings found'
-                    : 'No listings yet.'}
-                </h3>
-                <p className="text-sm text-muted-foreground mt-1">
-                  {debouncedSearch || activeCategory !== 'all' || minPrice || maxPrice
-                    ? 'Try different filters'
-                    : 'Have something to sell?'}
-                </p>
-                <Button onClick={() => setShowCreate(true)} className="mt-4 rounded-xl bg-primary">
-                  <Plus size={16} className="mr-2" />
-                  Add Listing
-                </Button>
-              </div>
+              <CommunityEmptyState
+                kind="marketplace"
+                title={debouncedSearch || activeCategory !== 'all' || minPrice || maxPrice ? 'No listings found' : undefined}
+                description={debouncedSearch || activeCategory !== 'all' || minPrice || maxPrice ? 'Try different filters, or add the first helpful listing for your neighbours.' : undefined}
+                action="Add Listing"
+                onAction={() => setShowCreate(true)}
+              />
             ) : (
               <>
                 <p className="text-sm text-muted-foreground mb-4">{data?.total ?? 0} listings</p>

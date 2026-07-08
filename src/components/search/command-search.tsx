@@ -1,11 +1,12 @@
 import { useState, useEffect, useRef, useCallback } from 'react'
 import { useLocation } from 'wouter'
-import { Search, MessageSquare, ShoppingBag, Users, X, Loader2, ArrowRight } from 'lucide-react'
+import { Search, MessageSquare, ShoppingBag, Users, X, Loader2, ArrowRight, CalendarDays, MapPin, ClipboardList } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
 interface Result {
   id: string
-  type: 'post' | 'listing' | 'member'
+  type: 'post' | 'listing' | 'member' | 'event' | 'place' | 'complaint'
+  group: 'Neighbors' | 'Posts' | 'Events' | 'Marketplace' | 'Places' | 'Complaints'
   title: string
   subtitle: string
   href: string
@@ -21,10 +22,14 @@ function useDebounce<T>(value: T, delay: number): T {
 }
 
 const TYPE_CONFIG = {
-  post:    { icon: MessageSquare, label: 'Post',    color: 'text-blue-500' },
-  listing: { icon: ShoppingBag,   label: 'Listing', color: 'text-green-600' },
-  member:  { icon: Users,         label: 'Member',  color: 'text-primary' },
+  member:    { icon: Users,         label: 'Neighbor',    color: 'text-primary' },
+  post:      { icon: MessageSquare, label: 'Post',        color: 'text-blue-500' },
+  event:     { icon: CalendarDays,  label: 'Event',       color: 'text-amber-600' },
+  listing:   { icon: ShoppingBag,   label: 'Listing',     color: 'text-green-600' },
+  place:     { icon: MapPin,        label: 'Place',       color: 'text-violet-600' },
+  complaint: { icon: ClipboardList, label: 'Complaint',   color: 'text-red-600' },
 }
+const GROUP_ORDER: Result['group'][] = ['Neighbors', 'Posts', 'Events', 'Marketplace', 'Places', 'Complaints']
 
 export function CommandSearch() {
   const [open, setOpen]       = useState(false)
@@ -63,15 +68,18 @@ export function CommandSearch() {
   useEffect(() => {
     if (!debouncedQuery.trim()) { setResults([]); return }
     const q = debouncedQuery.trim()
+    const qLow = q.toLowerCase()
     let cancelled = false
 
     ;(async () => {
       setLoading(true)
       try {
-        const [postsRes, listingsRes, membersRes] = await Promise.allSettled([
-          fetch(`/api/feed?search=${encodeURIComponent(q)}&limit=4`).then(r => r.json()),
-          fetch(`/api/listings?search=${encodeURIComponent(q)}&limit=4`).then(r => r.json()),
-          fetch(`/api/community/members?communityId=default&limit=4`).then(r => r.json()),
+        const [postsRes, listingsRes, membersRes, eventsRes, placesRes] = await Promise.allSettled([
+          fetch(`/api/feed?search=${encodeURIComponent(q)}&limit=6`).then(r => r.json()),
+          fetch(`/api/listings?search=${encodeURIComponent(q)}&limit=6`).then(r => r.json()),
+          fetch(`/api/community/members?communityId=default&limit=20`).then(r => r.json()),
+          fetch(`/api/events?communityId=default`).then(r => r.json()),
+          fetch(`/api/places`).then(r => r.json()),
         ])
 
         if (cancelled) return
@@ -80,27 +88,55 @@ export function CommandSearch() {
 
         if (postsRes.status === 'fulfilled' && postsRes.value?.posts) {
           for (const p of postsRes.value.posts.slice(0, 4)) {
-            out.push({ id: `post-${p.id}`, type: 'post', title: p.title, subtitle: `by ${p.userName} · ${p.type}`, href: '/feed' })
+            const isComplaint = p.type === 'complaint'
+            out.push({
+              id: `${isComplaint ? 'complaint' : 'post'}-${p.id}`,
+              type: isComplaint ? 'complaint' : 'post',
+              group: isComplaint ? 'Complaints' : 'Posts',
+              title: p.title,
+              subtitle: `by ${p.userName} · ${p.type}`,
+              href: '/feed',
+            })
           }
         }
 
         if (listingsRes.status === 'fulfilled' && listingsRes.value?.listings) {
           for (const l of listingsRes.value.listings.slice(0, 4)) {
-            out.push({ id: `listing-${l.id}`, type: 'listing', title: l.title, subtitle: `Rs ${(l.pricePkr ?? 0).toLocaleString()} · ${l.userName}`, href: `/marketplace/${l.id}` })
+            out.push({ id: `listing-${l.id}`, type: 'listing', group: 'Marketplace', title: l.title, subtitle: `Rs ${(l.pricePkr ?? 0).toLocaleString()} · ${l.userName}`, href: `/marketplace/${l.id}` })
           }
         }
 
         if (membersRes.status === 'fulfilled' && Array.isArray(membersRes.value)) {
-          const qLow = q.toLowerCase()
           for (const m of (membersRes.value as any[]).filter(m =>
             m.name?.toLowerCase().includes(qLow) ||
-            m.unitNumber?.toLowerCase().includes(qLow)
+            m.unitNumber?.toLowerCase().includes(qLow) ||
+            m.role?.toLowerCase().includes(qLow)
           ).slice(0, 4)) {
-            out.push({ id: `member-${m.id}`, type: 'member', title: m.name, subtitle: `Unit ${m.unitNumber}`, href: `/profile/${m.userId}` })
+            out.push({ id: `member-${m.id}`, type: 'member', group: 'Neighbors', title: m.name, subtitle: `Unit ${m.unitNumber}${m.role ? ` · ${m.role}` : ''}`, href: `/profile/${m.userId}` })
           }
         }
 
-        setResults(out)
+        if (postsRes.status === 'fulfilled' && Array.isArray((postsRes.value as any)?.posts)) {
+          for (const p of ((postsRes.value as any).posts as any[]).filter((post) => post.type === 'complaint' && `${post.title} ${post.body}`.toLowerCase().includes(qLow)).slice(0, 3)) {
+            if (!out.some((item) => item.id === `complaint-${p.id}`)) {
+              out.push({ id: `complaint-${p.id}`, type: 'complaint', group: 'Complaints', title: p.title, subtitle: p.body ?? 'Community complaint', href: '/feed' })
+            }
+          }
+        }
+
+        if (eventsRes.status === 'fulfilled') {
+          const events = [...((eventsRes.value as any)?.upcoming ?? []), ...((eventsRes.value as any)?.past ?? [])]
+          for (const event of events.filter((item: any) => `${item.title} ${item.location}`.toLowerCase().includes(qLow)).slice(0, 4)) {
+            out.push({ id: `event-${event.id}`, type: 'event', group: 'Events', title: event.title, subtitle: `${event.date}${event.location ? ` · ${event.location}` : ''}`, href: '/events' })
+          }
+        }
+        if (placesRes.status === 'fulfilled' && Array.isArray(placesRes.value)) {
+          for (const place of (placesRes.value as any[]).filter((item) => `${item.name} ${item.category} ${item.description} ${item.location}`.toLowerCase().includes(qLow)).slice(0, 4)) {
+            out.push({ id: `place-${place.id}`, type: 'place', group: 'Places', title: place.name, subtitle: `${place.category}${place.location ? ` · ${place.location}` : ''}`, href: '/places' })
+          }
+        }
+
+        setResults(out.slice(0, 24))
         setSelected(0)
       } catch {}
       finally { if (!cancelled) setLoading(false) }
@@ -147,28 +183,38 @@ export function CommandSearch() {
         {/* Results */}
         {results.length > 0 ? (
           <div className="max-h-80 overflow-y-auto divide-y divide-border/50">
-            {results.map((r, i) => {
-              const cfg = TYPE_CONFIG[r.type]
-              const Icon = cfg.icon
+            {GROUP_ORDER.map((group) => {
+              const groupResults = results.filter((result) => result.group === group)
+              if (groupResults.length === 0) return null
               return (
-                <button
-                  key={r.id}
-                  onClick={() => { navigate(r.href); setOpen(false) }}
-                  className={cn(
-                    'w-full flex items-center gap-3 px-4 py-3 text-left transition-colors hover:bg-muted/50',
-                    i === selected && 'bg-muted/50'
-                  )}
-                >
-                  <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-muted/60">
-                    <Icon size={15} className={cfg.color} />
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium text-foreground truncate">{r.title}</p>
-                    <p className="text-xs text-muted-foreground truncate">{r.subtitle}</p>
-                  </div>
-                  <span className="text-xs text-muted-foreground/60 shrink-0">{cfg.label}</span>
-                  <ArrowRight size={14} className="text-muted-foreground/40 shrink-0" />
-                </button>
+                <div key={group}>
+                  <div className="bg-muted/35 px-4 py-2 text-[11px] font-black uppercase text-muted-foreground">{group}</div>
+                  {groupResults.map((r) => {
+                    const index = results.indexOf(r)
+                    const cfg = TYPE_CONFIG[r.type]
+                    const Icon = cfg.icon
+                    return (
+                      <button
+                        key={r.id}
+                        onClick={() => { navigate(r.href); setOpen(false) }}
+                        className={cn(
+                          'w-full flex items-center gap-3 px-4 py-3 text-left transition-colors hover:bg-muted/50',
+                          index === selected && 'bg-muted/50'
+                        )}
+                      >
+                        <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-muted/60">
+                          <Icon size={15} className={cfg.color} />
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <p className="text-sm font-medium text-foreground truncate">{r.title}</p>
+                          <p className="text-xs text-muted-foreground truncate">{r.subtitle}</p>
+                        </div>
+                        <span className="text-xs text-muted-foreground/60 shrink-0">{cfg.label}</span>
+                        <ArrowRight size={14} className="text-muted-foreground/40 shrink-0" />
+                      </button>
+                    )
+                  })}
+                </div>
               )
             })}
           </div>

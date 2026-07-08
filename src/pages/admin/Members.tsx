@@ -11,6 +11,9 @@ import { useCurrentUser } from '@/hooks/use-current-user'
 import { useToast } from '@/hooks/use-toast'
 import { titleCaseWord } from '@/lib/format-label'
 import { sendMemberApprovedEmail } from '@/lib/approval-email'
+import { CommunityEmptyState } from '@/components/community/community-empty-state'
+import { ResidentBadgeGroup } from '@/components/community/resident-badge'
+import { ResidentListSkeleton } from '@/components/community/skeleton-states'
 
 type Member = {
   id: number; userId: string; name: string; unitNumber: string; phone: string;
@@ -134,6 +137,12 @@ function MemberRow({ member, refetch }: { member: Member; refetch: () => void })
               {member.isVerified && <BadgeCheck size={13} className="text-blue-500" />}
             </div>
             <span className="text-xs text-muted-foreground">{member.userId}</span>
+            <ResidentBadgeGroup
+              role={member.role}
+              isVerified={member.isVerified}
+              isNew={member.status === 'pending'}
+              className="mt-1.5"
+            />
           </div>
         </div>
       </td>
@@ -271,8 +280,8 @@ export default function AdminMembers() {
 
         <div className="overflow-hidden rounded-2xl border border-border bg-card shadow-sm">
           {isLoading ? (
-            <div className="space-y-3 p-6">
-              {[1,2,3,4].map(i => <div key={i} className="h-12 rounded-xl bg-muted animate-pulse" />)}
+            <div className="p-6">
+              <ResidentListSkeleton rows={4} />
             </div>
           ) : error ? (
             <div className="flex flex-col items-center justify-center py-16 text-center">
@@ -285,15 +294,12 @@ export default function AdminMembers() {
               </p>
             </div>
           ) : members.length === 0 ? (
-            <div className="flex flex-col items-center justify-center py-16 text-center">
-              <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-muted mb-3">
-                <Users size={24} className="text-muted-foreground" />
-              </div>
-              <p className="font-medium text-foreground">No members here</p>
-              <p className="text-sm text-muted-foreground mt-1">
-                {tab === 'pending' ? 'No pending join requests.' : 'No members match this filter.'}
-              </p>
-            </div>
+            <CommunityEmptyState
+              kind="members"
+              title="No members here"
+              description={tab === 'pending' ? 'No pending join requests.' : 'No members match this filter.'}
+              className="m-6"
+            />
           ) : (
             <div className="overflow-x-auto">
               <table className="w-full">

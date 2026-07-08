@@ -3,18 +3,12 @@ import { TopNavbar } from '@/components/dashboard/top-navbar'
 import { useQuery } from '@tanstack/react-query'
 import { Users, MapPin, Phone } from 'lucide-react'
 import { Link } from 'wouter'
-import { cn } from '@/lib/utils'
+import { CommunityEmptyState } from '@/components/community/community-empty-state'
+import { ResidentBadgeGroup } from '@/components/community/resident-badge'
+import { ResidentListSkeleton } from '@/components/community/skeleton-states'
 
 function getInitials(name: string) {
   return name.split(' ').map((n) => n[0]).join('').slice(0, 2).toUpperCase()
-}
-
-const ROLE_BADGE: Record<string, { label: string; cls: string }> = {
-  admin:    { label: 'Admin',    cls: 'bg-primary/10 text-primary' },
-  moderator:{ label: 'Moderator',cls: 'bg-blue-500/10 text-blue-700' },
-  user:     { label: 'Resident', cls: 'bg-muted text-muted-foreground' },
-  resident: { label: 'Resident', cls: 'bg-muted text-muted-foreground' },
-  security: { label: 'Security', cls: 'bg-amber-100 text-amber-700' },
 }
 
 export default function Community() {
@@ -55,32 +49,12 @@ export default function Community() {
             </div>
 
             {isLoading ? (
-              <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-                {[1,2,3,4,5,6].map((i) => (
-                  <div key={i} className="rounded-2xl border border-border bg-card p-4 animate-pulse">
-                    <div className="flex items-center gap-3 mb-3">
-                      <div className="h-12 w-12 rounded-full bg-muted shrink-0" />
-                      <div className="space-y-1.5 flex-1">
-                        <div className="h-4 w-28 bg-muted rounded" />
-                        <div className="h-3 w-16 bg-muted rounded" />
-                      </div>
-                    </div>
-                    <div className="h-3 w-full bg-muted rounded" />
-                  </div>
-                ))}
-              </div>
+              <ResidentListSkeleton rows={6} />
             ) : members.length === 0 ? (
-              <div className="flex flex-col items-center justify-center py-20 text-center">
-                <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-muted/50 mb-4">
-                  <Users size={32} className="text-muted-foreground/50" />
-                </div>
-                <h3 className="font-semibold text-foreground">No members yet</h3>
-                <p className="text-sm text-muted-foreground mt-1">Members will appear here once they join.</p>
-              </div>
+              <CommunityEmptyState kind="members" />
             ) : (
               <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
                 {members.map((m) => {
-                  const role = ROLE_BADGE[m.role] ?? ROLE_BADGE.user
                   return (
                     <Link key={m.id} href={`/profile/${m.userId}`}>
                       <div className="group cursor-pointer rounded-2xl border border-border bg-card p-4 hover:border-primary/30 hover:shadow-sm transition-all">
@@ -100,10 +74,13 @@ export default function Community() {
                               <span>Unit {m.unitNumber}</span>
                             </div>
                           </div>
-                          <span className={cn('rounded-full px-2 py-0.5 text-xs font-semibold shrink-0', role.cls)}>
-                            {role.label}
-                          </span>
                         </div>
+                        <ResidentBadgeGroup
+                          role={m.role}
+                          isVerified={m.isVerified ?? m.status === 'approved'}
+                          isNew={m.isNewNeighbor ?? m.isNew ?? false}
+                          className="mb-3"
+                        />
                         {m.whatsappNumber && (
                           <a
                             href={`https://wa.me/${m.whatsappNumber.replace(/\D/g, '')}`}

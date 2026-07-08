@@ -16,6 +16,8 @@ import { useToast } from '@/hooks/use-toast'
 import { uploadImage } from '@/lib/cloudinary'
 import LocationPicker, { type PickedLocation } from '@/components/location-picker'
 import { PublicationToggle } from '@/components/city-feed/publication-toggle'
+import { CommunityEmptyState } from '@/components/community/community-empty-state'
+import { EventSkeleton } from '@/components/community/skeleton-states'
 
 type EventItem = {
   id: number; title: string; description: string; date: string; time: string;
@@ -320,7 +322,7 @@ export default function Events() {
 
             {isLoading ? (
               <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-                {[1,2,3].map(i => <div key={i} className="h-64 rounded-2xl bg-muted animate-pulse" />)}
+                {[1,2,3].map(i => <EventSkeleton key={i} />)}
               </div>
             ) : (
               <div className="space-y-8">
@@ -332,16 +334,11 @@ export default function Events() {
                     </div>
                   </div>
                 ) : (
-                  <div className="flex flex-col items-center justify-center rounded-2xl border border-border bg-card py-16 text-center">
-                    <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-primary/10 mb-3">
-                      <Calendar size={28} className="text-primary" />
-                    </div>
-                    <h3 className="font-semibold text-foreground">No upcoming events</h3>
-                    <p className="text-sm text-muted-foreground mt-1">Be the first to organise something for the mohalla!</p>
-                    <Button onClick={() => setShowCreate(true)} className="mt-4 gap-2 rounded-xl" size="sm">
-                      <Plus size={14} /> Create Event
-                    </Button>
-                  </div>
+                  <CommunityEmptyState
+                    kind="events"
+                    action="Create Event"
+                    onAction={() => setShowCreate(true)}
+                  />
                 )}
 
                 {past.length > 0 && (

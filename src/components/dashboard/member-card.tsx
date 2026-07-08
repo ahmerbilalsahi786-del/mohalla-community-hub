@@ -1,6 +1,8 @@
 import { Link } from 'wouter'
 import { cn } from '@/lib/utils'
 import { titleCaseWords } from '@/lib/format-label'
+import { CommunityEmptyState } from '@/components/community/community-empty-state'
+import { ResidentBadgeGroup } from '@/components/community/resident-badge'
 
 interface Member {
   id: string
@@ -33,7 +35,7 @@ export function MemberCard({ members }: MemberCardProps) {
       {/* Members List */}
       <div className="divide-y divide-border">
         {members.length === 0 ? (
-          <p className="px-6 py-8 text-center text-sm text-muted-foreground">No members to show yet.</p>
+          <CommunityEmptyState kind="members" compact className="border-0 bg-transparent py-8 shadow-none" />
         ) : members.map((member) => (
           <Link
             key={member.id}
@@ -56,6 +58,11 @@ export function MemberCard({ members }: MemberCardProps) {
             <div className="min-w-0 flex-1">
               <h4 className="truncate font-semibold text-card-foreground">{member.name}</h4>
               <p className="text-sm text-muted-foreground">{titleCaseWords(member.role)}</p>
+              <ResidentBadgeGroup
+                role={member.role}
+                isVerified={member.isVerified}
+                className="mt-2"
+              />
               {member.mutualConnections && (
                 <p className="text-xs text-muted-foreground">
                   {member.mutualConnections} mutual connections
