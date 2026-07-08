@@ -1,19 +1,27 @@
 import { useState, useRef, useEffect } from 'react'
-import { Bell, Check, CheckCheck, MessageSquare, Heart, ShieldAlert, Megaphone, ShoppingBag, UserCheck, X } from 'lucide-react'
+import { Bell, CalendarDays, CheckCheck, ClipboardList, Heart, Megaphone, MessageSquare, ShieldAlert, ShoppingBag, UserCheck, UserPlus, X } from 'lucide-react'
 import { cn } from '@/lib/utils'
+import { CommunityEmptyState } from '@/components/community/community-empty-state'
+import { TimelineRow } from '@/components/community/timeline-row'
 
 type Notif = {
-  id: number; type: string; title: string; body: string; link: string;
+  id: string; type: string; title: string; body: string; link: string;
   isRead: boolean; createdAt: string;
 }
 
-const TYPE_ICON: Record<string, { icon: React.ElementType; color: string }> = {
-  comment:      { icon: MessageSquare, color: 'text-blue-500' },
-  like:         { icon: Heart,         color: 'text-rose-500' },
-  safety:       { icon: ShieldAlert,   color: 'text-red-500' },
-  announcement: { icon: Megaphone,     color: 'text-amber-500' },
-  marketplace:  { icon: ShoppingBag,   color: 'text-green-600' },
-  approved:     { icon: UserCheck,     color: 'text-primary' },
+const TYPE_ICON: Record<string, { icon: React.ElementType; tone: string; label: string }> = {
+  approval:     { icon: UserCheck,     tone: 'bg-primary/10 text-primary', label: 'Approval' },
+  approved:     { icon: UserCheck,     tone: 'bg-primary/10 text-primary', label: 'Approval' },
+  comment:      { icon: MessageSquare, tone: 'bg-blue-500/10 text-blue-700 dark:text-blue-300', label: 'Comment' },
+  complaint:    { icon: ClipboardList, tone: 'bg-red-600/10 text-red-700 dark:text-red-300', label: 'Complaint' },
+  event:        { icon: CalendarDays,  tone: 'bg-amber-500/10 text-amber-700 dark:text-amber-300', label: 'Event' },
+  resident:     { icon: UserPlus,      tone: 'bg-emerald-500/10 text-emerald-700 dark:text-emerald-300', label: 'New resident' },
+  like:         { icon: Heart,         tone: 'bg-rose-500/10 text-rose-700 dark:text-rose-300', label: 'Like' },
+  safety:       { icon: ShieldAlert,   tone: 'bg-red-500/10 text-red-700 dark:text-red-300', label: 'Safety' },
+  safety_alert: { icon: ShieldAlert,   tone: 'bg-red-500/10 text-red-700 dark:text-red-300', label: 'Safety' },
+  announcement: { icon: Megaphone,     tone: 'bg-amber-500/10 text-amber-700 dark:text-amber-300', label: 'Announcement' },
+  marketplace:  { icon: ShoppingBag,   tone: 'bg-green-500/10 text-green-700 dark:text-green-300', label: 'Marketplace' },
+  message:      { icon: MessageSquare, tone: 'bg-primary/10 text-primary', label: 'Message' },
 }
 
 function timeAgo(d: string) {
@@ -67,7 +75,7 @@ export function NotificationBell() {
     setUnread(0)
   }
 
-  const markOneRead = async (id: number, link: string) => {
+  const markOneRead = async (id: string, link: string) => {
     setNotifs(n => n.map(x => x.id === id ? { ...x, isRead: true } : x))
     setUnread(u => Math.max(0, u - 1))
     fetch(`/api/notifications/${id}/read`, { method: 'PATCH' })
@@ -80,35 +88,43 @@ export function NotificationBell() {
         type="button"
         aria-label="Notifications"
         onClick={() => { setOpen(o => !o); if (!open) fetchNotifs() }}
-        className="relative flex h-10 w-10 items-center justify-center rounded-xl border portal-soft-rule bg-card/90 text-muted-foreground transition-colors hover:bg-card hover:text-foreground"
+        className="relative flex h-10 w-10 items-center justify-center rounded-lg border portal-soft-rule bg-card text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground"
       >
         <Bell size={20} />
         {unread > 0 && (
-          <span className="absolute -right-0.5 -top-0.5 flex h-5 min-w-[20px] items-center justify-center rounded-full bg-destructive px-1 text-xs font-bold text-destructive-foreground">
+          <span className="absolute -right-0.5 -top-0.5 flex h-5 min-w-[20px] items-center justify-center rounded-full bg-destructive px-1 text-xs font-bold text-destructive-foreground ring-2 ring-background">
             {unread > 9 ? '9+' : unread}
           </span>
         )}
       </button>
 
       {open && (
-        <div className="absolute right-0 top-12 z-50 w-80 rounded-2xl border border-border bg-card shadow-2xl shadow-black/10 overflow-hidden">
-          {/* Header */}
-          <div className="flex items-center justify-between px-4 py-3 border-b border-border">
-            <span className="font-semibold text-foreground text-sm">Notifications</span>
+        <div className="fixed inset-0 z-[80]">
+          <button
+            type="button"
+            aria-label="Close notifications"
+            className="absolute inset-0 bg-black/35 backdrop-blur-[2px]"
+            onClick={() => setOpen(false)}
+          />
+          <aside className="notification-drawer absolute bottom-0 right-0 top-0 flex w-full max-w-md flex-col border-l border-border bg-card shadow-2xl sm:w-[420px]">
+          <div className="flex items-start justify-between border-b border-border px-5 py-4">
+            <div>
+              <span className="text-base font-black text-foreground">Notifications</span>
+              <p className="mt-0.5 text-sm text-muted-foreground">Approvals, comments, complaints, residents, and events</p>
+            </div>
             <div className="flex items-center gap-2">
               {unread > 0 && (
-                <button onClick={markAllRead} className="flex items-center gap-1 text-xs text-primary hover:text-primary/80 font-medium transition-colors">
+                <button onClick={markAllRead} className="flex items-center gap-1 text-xs font-semibold text-primary transition-colors hover:text-primary-hover">
                   <CheckCheck size={12} /> Mark all read
                 </button>
               )}
-              <button type="button" aria-label="Close notifications" onClick={() => setOpen(false)} className="flex h-6 w-6 items-center justify-center rounded-lg hover:bg-muted text-muted-foreground">
-                <X size={14} />
+              <button type="button" aria-label="Close notifications" onClick={() => setOpen(false)} className="flex h-8 w-8 items-center justify-center rounded-lg text-muted-foreground hover:bg-secondary">
+                <X size={16} />
               </button>
             </div>
           </div>
 
-          {/* List */}
-          <div className="max-h-[380px] overflow-y-auto divide-y divide-border">
+          <div className="min-h-0 flex-1 overflow-y-auto divide-y divide-border">
             {loading && notifs.length === 0 ? (
               <div className="space-y-3 p-4">
                 {[1,2,3].map(i => (
@@ -122,54 +138,37 @@ export function NotificationBell() {
                 ))}
               </div>
             ) : notifs.length === 0 ? (
-              <div className="flex flex-col items-center justify-center py-10 text-center px-4">
-                <Bell size={28} className="text-muted-foreground/40 mb-2" />
-                <p className="text-sm font-medium text-muted-foreground">All caught up!</p>
-                <p className="text-xs text-muted-foreground/60 mt-0.5">No notifications yet</p>
-              </div>
+              <CommunityEmptyState kind="notifications" className="m-5 min-h-[360px]" />
             ) : (
               notifs.map((n) => {
                 const cfg = TYPE_ICON[n.type] ?? TYPE_ICON.announcement
-                const Icon = cfg.icon
                 return (
-                  <button
+                  <TimelineRow
                     key={n.id}
+                    icon={cfg.icon}
+                    title={n.title}
+                    description={n.body}
+                    meta={`${cfg.label} · ${timeAgo(n.createdAt)}`}
+                    tone={cfg.tone}
+                    unread={!n.isRead}
                     onClick={() => markOneRead(n.id, n.link)}
-                    className={cn(
-                      'w-full flex items-start gap-3 px-4 py-3 text-left transition-colors hover:bg-muted/50',
-                      !n.isRead && 'bg-primary/5'
-                    )}
-                  >
-                    <div className={cn('flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-muted/60 mt-0.5', cfg.color)}>
-                      <Icon size={14} />
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <p className={cn('text-sm leading-snug truncate', n.isRead ? 'text-muted-foreground' : 'font-semibold text-foreground')}>
-                        {n.title}
-                      </p>
-                      {n.body && <p className="text-xs text-muted-foreground mt-0.5 line-clamp-2">{n.body}</p>}
-                      <p className="text-xs text-muted-foreground/60 mt-1">{timeAgo(n.createdAt)}</p>
-                    </div>
-                    {!n.isRead && (
-                      <span className="mt-2 h-2 w-2 shrink-0 rounded-full bg-primary" />
-                    )}
-                  </button>
+                  />
                 )
               })
             )}
           </div>
 
-          {/* Footer */}
           {notifs.length > 0 && (
             <div className="border-t border-border px-4 py-2.5">
               <button
                 onClick={() => { window.location.href = '/notifications'; setOpen(false) }}
-                className="w-full text-center text-xs text-primary hover:text-primary/80 font-medium transition-colors"
+                className="w-full text-center text-xs font-semibold text-primary transition-colors hover:text-primary-hover"
               >
                 View all notifications
               </button>
             </div>
           )}
+          </aside>
         </div>
       )}
     </div>

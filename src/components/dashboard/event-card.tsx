@@ -31,20 +31,18 @@ const categoryColors: Record<string, string> = {
 export function EventCard({ event, variant = 'default' }: EventCardProps) {
   if (variant === 'compact') {
     return (
-      <div className="group flex items-center gap-4 rounded-xl border portal-soft-rule bg-card/90 p-4 transition-all hover:border-primary/30 hover:shadow-sm">
-        {/* Date Badge */}
-        <div className="flex h-14 w-14 shrink-0 flex-col items-center justify-center rounded-xl bg-primary/10">
-          <span className="text-xs font-medium text-primary">
+      <div className="group flex items-center gap-4 rounded-xl border portal-soft-rule bg-card p-4 shadow-sm transition-all hover:border-primary/30 hover:bg-secondary/35">
+        <div className="flex h-14 w-14 shrink-0 flex-col items-center justify-center rounded-lg border border-primary/15 bg-primary/10">
+          <span className="text-xs font-bold text-primary">
             {new Date(event.date).toLocaleDateString('en-US', { month: 'short' })}
           </span>
-          <span className="text-xl font-bold text-primary">
+          <span className="text-xl font-black text-primary">
             {new Date(event.date).getDate()}
           </span>
         </div>
 
-        {/* Content */}
         <div className="min-w-0 flex-1">
-          <h4 className="truncate font-semibold text-card-foreground">{event.title}</h4>
+          <h4 className="truncate font-bold text-card-foreground">{event.title}</h4>
           <div className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-muted-foreground">
             <span className="flex min-w-0 items-center gap-1">
               <MapPin size={12} />
@@ -57,9 +55,8 @@ export function EventCard({ event, variant = 'default' }: EventCardProps) {
           </div>
         </div>
 
-        {/* Category */}
         <span className={cn(
-          'shrink-0 rounded-full px-2.5 py-1 text-xs font-medium',
+          'shrink-0 rounded-full px-2.5 py-1 text-xs font-bold',
           categoryColors[event.category] || 'bg-muted text-muted-foreground'
         )}>
           {event.category}
@@ -69,36 +66,32 @@ export function EventCard({ event, variant = 'default' }: EventCardProps) {
   }
 
   return (
-    <div className="portal-panel group relative overflow-hidden rounded-2xl transition-all duration-300 hover:shadow-lg hover:shadow-primary/10">
-      {/* Image/Banner */}
-      <div className="relative h-32 bg-gradient-to-br from-primary/20 via-accent/10 to-primary/5">
-        {/* Category Badge */}
+    <div className="group relative overflow-hidden rounded-xl border portal-soft-rule bg-card shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:border-primary/30 hover:shadow-md">
+      <div className="relative h-28 bg-secondary">
+        <div className="absolute inset-0 bg-[linear-gradient(135deg,color-mix(in_oklch,var(--primary)_16%,transparent),transparent_58%),linear-gradient(90deg,color-mix(in_oklch,var(--chart-4)_18%,transparent),transparent_65%)]" />
         <div className="absolute left-4 top-4">
           <span className={cn(
-            'rounded-full px-3 py-1 text-xs font-semibold',
+            'rounded-full border border-white/45 bg-card/90 px-3 py-1 text-xs font-bold shadow-sm',
             categoryColors[event.category] || 'bg-muted text-muted-foreground'
           )}>
             {event.category}
           </span>
         </div>
 
-        {/* Date Badge */}
-        <div className="absolute -bottom-6 right-4 flex h-16 w-16 flex-col items-center justify-center rounded-xl border border-border bg-card shadow-md">
-          <span className="text-xs font-medium text-primary">
+        <div className="absolute -bottom-6 right-4 flex h-16 w-16 flex-col items-center justify-center rounded-lg border border-border bg-card shadow-md">
+          <span className="text-xs font-bold text-primary">
             {new Date(event.date).toLocaleDateString('en-US', { month: 'short' })}
           </span>
-          <span className="text-2xl font-bold text-card-foreground">
+          <span className="text-2xl font-black text-card-foreground">
             {new Date(event.date).getDate()}
           </span>
         </div>
       </div>
 
-      {/* Content */}
       <div className="relative p-6 pt-8">
         <h3 className="break-words text-lg font-bold text-card-foreground">{event.title}</h3>
         <p className="mt-2 line-clamp-2 text-sm text-muted-foreground">{event.description}</p>
 
-        {/* Meta Info */}
         <div className="mt-4 flex flex-wrap items-center gap-4 text-sm text-muted-foreground">
           <div className="flex items-center gap-1.5">
             <Calendar size={14} className="text-primary" />
@@ -117,14 +110,12 @@ export function EventCard({ event, variant = 'default' }: EventCardProps) {
           </div>
         </div>
 
-        {/* Action */}
         <div className="mt-4 flex items-center justify-between">
-          {/* Attendee Avatars */}
           <div className="flex -space-x-2">
             {[...Array(4)].map((_, i) => (
               <div
                 key={i}
-                className="h-8 w-8 rounded-full border-2 border-card bg-gradient-to-br from-primary/40 to-accent/40"
+                className="h-8 w-8 rounded-full border-2 border-card bg-secondary"
                 style={{ zIndex: 4 - i }}
               />
             ))}
@@ -137,7 +128,7 @@ export function EventCard({ event, variant = 'default' }: EventCardProps) {
 
           <Button 
             size="sm"
-            className="rounded-xl bg-primary text-primary-foreground hover:bg-primary/90"
+            className="rounded-lg bg-primary text-primary-foreground hover:bg-primary-hover"
           >
             Join Event
           </Button>

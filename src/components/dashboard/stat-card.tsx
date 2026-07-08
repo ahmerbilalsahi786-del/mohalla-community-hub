@@ -1,5 +1,5 @@
 import { cn } from '@/lib/utils'
-import type { LucideIcon } from 'lucide-react'
+import { ArrowUpRight, type LucideIcon } from 'lucide-react'
 import { Link } from 'wouter'
 
 interface StatCardProps {
@@ -24,11 +24,10 @@ export function StatCard({
   href,
 }: StatCardProps) {
   const content = (
-    <div className={cn('portal-panel group relative min-h-[150px] overflow-hidden rounded-2xl p-5 transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[0_24px_60px_rgba(15,23,42,0.08)]', href && 'cursor-pointer')}>
-      <div className="absolute inset-x-5 top-0 h-px bg-gradient-to-r from-transparent via-background/80 to-transparent" />
+    <div className={cn('group relative min-h-[142px] overflow-hidden rounded-xl border portal-soft-rule bg-card p-5 shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:border-primary/30 hover:shadow-md', href && 'cursor-pointer')}>
       <div className="relative flex items-start justify-between gap-3">
         <div className="min-w-0 flex-1">
-          <p className="text-xs font-black uppercase text-muted-foreground">{title}</p>
+          <p className="text-sm font-bold text-card-foreground">{title}</p>
           <p className="mt-3 break-words text-3xl font-black tracking-tight text-card-foreground">{value}</p>
           {change && (
             <div className="mt-2 flex flex-wrap items-center gap-1">
@@ -46,13 +45,18 @@ export function StatCard({
             </div>
           )}
           {!change && description && (
-            <p className="mt-2 text-sm text-muted-foreground">{description}</p>
+            <p className="mt-2 text-sm leading-relaxed text-muted-foreground">{description}</p>
           )}
         </div>
-        <div className={cn('flex h-12 w-12 shrink-0 items-center justify-center rounded-xl shadow-sm', iconColor)}>
+        <div className={cn('flex h-11 w-11 shrink-0 items-center justify-center rounded-lg', iconColor)}>
           <Icon size={24} />
         </div>
       </div>
+      {href && (
+        <div className="absolute bottom-4 right-4 flex h-7 w-7 items-center justify-center rounded-full bg-secondary text-muted-foreground opacity-0 transition-opacity group-hover:opacity-100">
+          <ArrowUpRight size={14} />
+        </div>
+      )}
     </div>
   )
 

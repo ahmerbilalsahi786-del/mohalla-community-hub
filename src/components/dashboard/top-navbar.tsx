@@ -8,9 +8,9 @@ import { MessageShortcut } from './message-shortcut'
 import { useCurrentUser } from '@/hooks/use-current-user'
 
 const PAGE_META: Record<string, { title: string; subtitle: string }> = {
-  '/dashboard': { title: 'Dashboard', subtitle: 'Welcome back to your community' },
-  '/': { title: 'Dashboard', subtitle: 'Welcome back to your community' },
-  '/feed': { title: 'Community Feed', subtitle: 'Stay connected with your neighbors' },
+  '/dashboard': { title: 'Dashboard', subtitle: 'Your mohalla, organized for today' },
+  '/': { title: 'Dashboard', subtitle: 'Your mohalla, organized for today' },
+  '/feed': { title: 'Community Feed', subtitle: 'Posts, notices, and neighbor conversations' },
   '/messages': { title: 'Messages', subtitle: 'Private community conversations' },
   '/city-feed': { title: 'City Feed', subtitle: 'Public updates across your city' },
   '/events': { title: 'Events', subtitle: 'Upcoming community events' },
@@ -71,15 +71,14 @@ export function TopNavbar() {
   }
 
   return (
-    <header className="sticky top-0 z-40 border-b portal-soft-rule bg-background/82 px-3 py-3 backdrop-blur-xl sm:px-5 lg:px-7">
+    <header className="sticky top-0 z-40 border-b portal-soft-rule bg-background/90 px-3 py-3 backdrop-blur-xl sm:px-5 lg:px-7">
       <div className="mx-auto flex min-h-16 w-full max-w-[1360px] items-center gap-3 text-foreground">
-      {/* Left Section - Page Title */}
       <div className="flex min-w-0 flex-1 items-center gap-3">
-        <div className="hidden h-11 w-11 shrink-0 items-center justify-center overflow-hidden rounded-xl bg-primary/10 text-primary ring-1 ring-primary/15 sm:flex">
+        <div className="hidden h-11 w-11 shrink-0 items-center justify-center overflow-hidden rounded-xl bg-primary text-primary-foreground ring-1 ring-primary/15 sm:flex">
           {logoUrl ? <img src={logoUrl} alt="" className="h-full w-full object-cover" /> : <Building2 size={20} />}
         </div>
         <div className="flex min-w-0 flex-col">
-          <div className="portal-chip mb-1 hidden w-fit text-primary xl:inline-flex">
+          <div className="portal-chip mb-1 hidden w-fit border-primary/20 bg-primary/10 text-primary xl:inline-flex">
             <ShieldCheck className="h-3.5 w-3.5" />
             Verified Portal
           </div>
@@ -88,52 +87,52 @@ export function TopNavbar() {
         </div>
       </div>
 
-      {/* Center Section - Search (click opens Cmd+K palette) */}
       <div className="hidden min-w-0 flex-[1.1] justify-center px-2 lg:flex">
         <button
+          type="button"
           onClick={() => {
-            const e = new KeyboardEvent('keydown', { key: 'k', metaKey: true, bubbles: true })
+            const e = new KeyboardEvent('keydown', { key: 'k', ctrlKey: true, bubbles: true })
             document.dispatchEvent(e)
           }}
-          className="relative flex h-11 w-full max-w-xl items-center gap-2 rounded-xl border portal-soft-rule bg-card/90 pl-10 pr-3 text-left text-sm text-foreground shadow-sm transition-colors hover:bg-card"
+          aria-label="Open search"
+          className="relative flex h-11 w-full max-w-xl items-center gap-2 rounded-xl border portal-soft-rule bg-card pl-10 pr-3 text-left text-sm text-foreground shadow-xs transition-colors hover:border-primary/30 hover:bg-secondary/50"
         >
           <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
           <span className="min-w-0 flex-1 truncate text-muted-foreground">Search neighbors, events, notices, listings...</span>
-          <kbd className="pointer-events-none ml-auto shrink-0 rounded-lg border portal-soft-rule bg-muted/60 px-1.5 py-0.5 text-xs text-muted-foreground">
-            ⌘K
+          <kbd className="pointer-events-none ml-auto shrink-0 rounded-md border portal-soft-rule bg-muted/70 px-1.5 py-0.5 text-xs text-muted-foreground">
+            Ctrl K
           </kbd>
         </button>
       </div>
 
-      {/* Right Section - Actions */}
       <div className="flex shrink-0 items-center gap-1.5 sm:gap-2">
         <button
+          type="button"
           onClick={() => {
-            const e = new KeyboardEvent('keydown', { key: 'k', metaKey: true, bubbles: true })
+            const e = new KeyboardEvent('keydown', { key: 'k', ctrlKey: true, bubbles: true })
             document.dispatchEvent(e)
           }}
           aria-label="Search"
-          className="flex h-10 w-10 items-center justify-center rounded-xl border portal-soft-rule bg-card/90 text-foreground transition-colors hover:bg-card lg:hidden"
+          className="flex h-10 w-10 items-center justify-center rounded-lg border portal-soft-rule bg-card text-foreground transition-colors hover:bg-secondary lg:hidden"
         >
           <Search size={20} />
         </button>
 
-        {/* Quick Action */}
         <Button
           onClick={openComposer}
-          className="hidden h-11 gap-2 rounded-xl bg-primary px-5 text-primary-foreground shadow-lg shadow-primary/15 hover:bg-primary/90 sm:flex"
+          className="hidden h-11 gap-2 rounded-lg bg-primary px-5 text-primary-foreground hover:bg-primary-hover sm:flex"
         >
           <Plus size={16} />
           <span>New Post</span>
         </Button>
 
-        {/* Live Notification Bell */}
         <NotificationBell />
 
-        {/* Theme Toggle */}
         <button
+          type="button"
           onClick={toggleDarkMode}
-          className="flex h-10 w-10 items-center justify-center rounded-xl border portal-soft-rule bg-card/90 text-foreground transition-colors hover:bg-card"
+          aria-label={darkMode ? 'Use light mode' : 'Use dark mode'}
+          className="flex h-10 w-10 items-center justify-center rounded-lg border portal-soft-rule bg-card text-foreground transition-colors hover:bg-secondary"
         >
           {darkMode ? <Sun size={20} /> : <Moon size={20} />}
         </button>

@@ -12,6 +12,7 @@ import {
   MessageSquare,
   Settings,
   HelpCircle,
+  Landmark,
   ChevronLeft,
   ChevronRight,
   MapPin,
@@ -67,15 +68,13 @@ export function Sidebar() {
   return (
     <aside
       className={cn(
-        'sticky top-0 relative flex h-dvh shrink-0 flex-col overflow-hidden border-r border-sidebar-border bg-sidebar text-sidebar-foreground shadow-[12px_0_36px_rgba(15,23,42,0.04)] transition-all duration-300 ease-in-out self-start',
-        'hidden md:flex',
+        'sticky top-0 hidden h-dvh shrink-0 flex-col overflow-hidden border-r border-sidebar-border bg-sidebar text-sidebar-foreground shadow-[8px_0_24px_rgba(15,23,42,0.04)] transition-all duration-300 ease-in-out self-start md:flex',
         collapsed ? 'w-20' : 'w-[17rem]'
       )}
     >
-      {/* Logo Section */}
-      <div className="flex min-h-20 items-center justify-between border-b border-sidebar-border bg-card/92 px-4 shadow-sm">
-        <Link href="/dashboard" className="flex min-w-0 items-center gap-3">
-          <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-primary/10 p-0.5 text-primary shadow-sm ring-1 ring-primary/15">
+      <div className="flex min-h-20 items-center justify-between border-b border-sidebar-border bg-sidebar px-4">
+        <Link href="/dashboard" className={cn('flex min-w-0 items-center gap-3', collapsed && 'mx-auto')}>
+          <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-primary text-primary-foreground shadow-sm ring-1 ring-primary/15">
             {logoUrl ? (
               <img src={logoUrl} alt="" className="h-full w-full rounded-[10px] object-cover" />
             ) : (
@@ -83,25 +82,51 @@ export function Sidebar() {
             )}
           </span>
           {!collapsed && (
-            <div className="min-w-0">
-              <span className="brand-wordmark block truncate text-xl">{societyName}</span>
-              <span className="text-xs font-semibold text-muted-foreground">Neighborhood Portal</span>
+            <div className="min-w-0 leading-tight">
+              <span className="brand-wordmark block truncate text-xl text-sidebar-foreground">Mohalla</span>
+              <span className="block truncate text-xs font-semibold text-muted-foreground">Community Portal</span>
             </div>
           )}
         </Link>
         <button
           onClick={() => setCollapsed(!collapsed)}
-          className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border border-sidebar-border bg-background/80 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+          className={cn(
+            'flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-sidebar-border bg-card text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground',
+            collapsed && 'hidden'
+          )}
           aria-label={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
         >
           {collapsed ? <ChevronRight size={16} /> : <ChevronLeft size={16} />}
         </button>
       </div>
 
-      {/* Main Navigation */}
+      {!collapsed && (
+        <div className="mx-3 mt-3 rounded-xl border border-sidebar-border bg-secondary/55 px-3 py-3">
+          <div className="flex items-center gap-2">
+            <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-card text-primary">
+              <Landmark size={16} />
+            </span>
+            <div className="min-w-0">
+              <p className="truncate text-sm font-bold text-sidebar-foreground">{societyName}</p>
+              <p className="truncate text-xs text-muted-foreground">Verified neighborhood space</p>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {collapsed && (
+        <button
+          onClick={() => setCollapsed(false)}
+          className="mx-auto mt-3 flex h-9 w-9 items-center justify-center rounded-lg border border-sidebar-border bg-card text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground"
+          aria-label="Expand sidebar"
+        >
+          <ChevronRight size={16} />
+        </button>
+      )}
+
       <nav className="flex-1 space-y-1 overflow-y-auto px-3 py-4">
-        <div className={cn('mb-3 px-3 text-[11px] font-black uppercase text-muted-foreground', collapsed && 'sr-only')}>
-          Main Menu
+        <div className={cn('mb-3 px-3 text-[11px] font-bold uppercase text-muted-foreground', collapsed && 'sr-only')}>
+          Main menu
         </div>
         {visibleNavItems.map((item) => (
           <Link
@@ -110,16 +135,16 @@ export function Sidebar() {
             className={cn(
               'group relative flex min-h-11 items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-bold transition-all duration-200',
               activeItem === item.name
-                ? 'bg-primary text-primary-foreground shadow-lg shadow-primary/15'
+                ? 'border border-primary/20 bg-primary/10 text-primary shadow-none'
                 : 'text-muted-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground'
             )}
           >
             {activeItem === item.name && (
-              <div className="absolute left-0 top-1/2 h-6 w-1 -translate-y-1/2 rounded-r-full bg-accent" />
+              <div className="absolute left-0 top-1/2 h-6 w-1 -translate-y-1/2 rounded-r-full bg-primary" />
             )}
             <item.icon size={20} className={cn(
               'shrink-0 transition-colors',
-              activeItem === item.name ? 'text-primary-foreground' : 'text-muted-foreground group-hover:text-sidebar-accent-foreground'
+              activeItem === item.name ? 'text-primary' : 'text-muted-foreground group-hover:text-sidebar-accent-foreground'
             )} />
             {!collapsed && (
               <>
@@ -128,8 +153,8 @@ export function Sidebar() {
                   <span className={cn(
                     'shrink-0 rounded-full px-2 py-0.5 text-[11px] font-black',
                     item.badge === 'New' 
-                      ? 'bg-accent text-accent-foreground'
-                      : 'bg-background/20 text-primary-foreground'
+                      ? 'bg-accent/15 text-accent'
+                      : 'bg-secondary text-secondary-foreground'
                   )}>
                     {item.badge}
                   </span>
@@ -148,7 +173,7 @@ export function Sidebar() {
             className={cn(
               'group flex min-h-11 items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-bold transition-all duration-200',
               activeItem === item.name
-                ? 'bg-sidebar-accent text-sidebar-accent-foreground'
+                ? 'border border-primary/20 bg-primary/10 text-primary'
                 : 'text-muted-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground'
             )}
           >
@@ -169,7 +194,7 @@ export function Sidebar() {
           type="button"
           onClick={logout}
           className={cn(
-            'group mt-1 flex min-h-11 w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-bold text-muted-foreground transition-colors hover:bg-sidebar-accent hover:text-sidebar-accent-foreground',
+            'group mt-1 flex min-h-11 w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-bold text-muted-foreground transition-colors hover:bg-destructive/10 hover:text-destructive',
             collapsed && 'justify-center'
           )}
         >

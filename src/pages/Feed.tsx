@@ -18,6 +18,9 @@ import { Link, useLocation, useSearch } from 'wouter'
 import { useCurrentUser } from '@/hooks/use-current-user'
 import { PublicationToggle } from '@/components/city-feed/publication-toggle'
 import { useStartConversation } from '@/lib/messages'
+import { CommunityEmptyState } from '@/components/community/community-empty-state'
+import { FeedPostSkeleton } from '@/components/community/skeleton-states'
+import { PostTypeSelector } from '@/components/feed/post-type-selector'
 
 type PostType = 'general' | 'announcement' | 'safety' | 'lost_found' | 'buy_sell' | 'event' | 'complaint'
 
@@ -42,20 +45,20 @@ function EventWidget() {
   if (!upcoming.length) return null
   const next = upcoming[0]
   return (
-    <div className="rounded-2xl border border-border bg-card overflow-hidden shadow-sm">
-      <div className="flex items-center justify-between px-4 py-3 border-b border-border bg-primary/5">
-        <div className="flex items-center gap-2 font-semibold text-sm text-foreground">
+    <div className="overflow-hidden rounded-xl border border-border bg-card shadow-sm">
+      <div className="flex items-center justify-between border-b border-border bg-secondary/55 px-4 py-3">
+        <div className="flex items-center gap-2 text-sm font-bold text-foreground">
           <Calendar size={14} className="text-primary" />
           Upcoming Event
         </div>
-        <Link href="/events" className="flex items-center gap-1 text-xs text-primary hover:text-primary/80 font-medium transition-colors">
+        <Link href="/events" className="flex items-center gap-1 text-xs font-semibold text-primary transition-colors hover:text-primary-hover">
           All events <ChevronRight size={12} />
         </Link>
       </div>
       <div className="px-4 py-3">
         <p className="font-semibold text-foreground text-sm leading-snug">{next.title}</p>
         <div className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-muted-foreground">
-          <span className="flex items-center gap-1"><Calendar size={11} />{formatDate(next.date)}{next.time && ` · ${next.time}`}</span>
+          <span className="flex items-center gap-1"><Calendar size={11} />{formatDate(next.date)}{next.time && ` - ${next.time}`}</span>
           {next.location && <span className="flex items-center gap-1"><MapPin size={11} />{next.location}</span>}
           <span className="flex items-center gap-1"><Users size={11} />{next.rsvpCount} attending</span>
         </div>
@@ -76,13 +79,13 @@ function PollWidget() {
   const poll = active[0]
   const hasVoted = poll.myVoteIndex !== null
   return (
-    <div className="rounded-2xl border border-border bg-card overflow-hidden shadow-sm">
-      <div className="flex items-center justify-between px-4 py-3 border-b border-border bg-accent/5">
-        <div className="flex items-center gap-2 font-semibold text-sm text-foreground">
+    <div className="overflow-hidden rounded-xl border border-border bg-card shadow-sm">
+      <div className="flex items-center justify-between border-b border-border bg-secondary/55 px-4 py-3">
+        <div className="flex items-center gap-2 text-sm font-bold text-foreground">
           <BarChart2 size={14} className="text-accent" />
           Community Poll
         </div>
-        <Link href="/polls" className="flex items-center gap-1 text-xs text-accent hover:text-accent/80 font-medium transition-colors">
+        <Link href="/polls" className="flex items-center gap-1 text-xs font-semibold text-primary transition-colors hover:text-primary-hover">
           All polls <ChevronRight size={12} />
         </Link>
       </div>
@@ -102,12 +105,12 @@ function PollWidget() {
                 </div>
               )
             })}
-            <p className="text-xs text-muted-foreground">{poll.totalVotes} votes · {timeLeft(poll.endsAt)}</p>
+            <p className="text-xs text-muted-foreground">{poll.totalVotes} votes - {timeLeft(poll.endsAt)}</p>
           </div>
         ) : (
           <div>
-            <p className="text-xs text-muted-foreground mb-2">{poll.options.length} options · {timeLeft(poll.endsAt)}</p>
-            <Link href="/polls" className="inline-flex items-center gap-1.5 rounded-xl bg-accent/10 hover:bg-accent/20 text-accent px-3 py-1.5 text-xs font-semibold transition-colors">
+            <p className="text-xs text-muted-foreground mb-2">{poll.options.length} options - {timeLeft(poll.endsAt)}</p>
+            <Link href="/polls" className="inline-flex items-center gap-1.5 rounded-lg bg-accent/10 px-3 py-1.5 text-xs font-semibold text-accent transition-colors hover:bg-accent/20">
               <BarChart2 size={11} /> Vote now
             </Link>
           </div>
@@ -119,17 +122,17 @@ function PollWidget() {
 
 function ComplaintBar({ onCompose }: { onCompose: () => void }) {
   return (
-    <div className="overflow-hidden rounded-2xl border border-red-200 bg-red-50 shadow-sm dark:border-red-900/50 dark:bg-red-950/20">
-      <div className="flex items-center gap-3 p-4">
-        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-red-600 text-white">
+    <div className="overflow-hidden rounded-xl border border-red-200 bg-red-50/80 shadow-sm dark:border-red-900/50 dark:bg-red-950/20">
+      <div className="flex flex-col gap-3 p-4 sm:flex-row sm:items-center">
+        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-red-600 text-white">
           <AlertTriangle size={20} />
         </div>
         <div className="min-w-0 flex-1">
-          <p className="text-sm font-bold text-red-900 dark:text-red-100">File a complaint</p>
-          <p className="text-xs text-red-700/80 dark:text-red-200/80">Noise, water, parking, repairs, cleanliness</p>
+          <p className="text-sm font-bold text-red-950 dark:text-red-100">Report a neighborhood issue</p>
+          <p className="text-xs leading-relaxed text-red-800/80 dark:text-red-200/80">Noise, parking, water, repairs, cleanliness</p>
         </div>
-        <Button onClick={onCompose} className="shrink-0 rounded-xl bg-red-600 px-3 text-white hover:bg-red-700">
-          Report
+        <Button onClick={onCompose} className="h-10 shrink-0 rounded-lg bg-red-600 px-4 text-white hover:bg-red-700">
+          File Report
         </Button>
       </div>
     </div>
@@ -146,14 +149,14 @@ const CATEGORIES: { value: string; label: string; icon: React.ElementType; color
   { value: 'event', label: 'Events', icon: Calendar, color: 'text-accent' },
 ]
 
-const CATEGORY_BADGE: Record<string, { label: string; bg: string; text: string }> = {
-  announcement: { label: 'Announcement', bg: 'bg-amber-500/10', text: 'text-amber-700' },
-  safety: { label: 'Safety', bg: 'bg-red-500/10', text: 'text-red-600' },
-  complaint: { label: 'Complaint', bg: 'bg-red-600/10', text: 'text-red-700' },
-  lost_found: { label: 'Lost & Found', bg: 'bg-blue-500/10', text: 'text-blue-600' },
-  buy_sell: { label: 'Buy & Sell', bg: 'bg-green-500/10', text: 'text-green-700' },
-  event: { label: 'Event', bg: 'bg-accent/10', text: 'text-accent' },
-  general: { label: 'General', bg: 'bg-muted', text: 'text-muted-foreground' },
+const CATEGORY_BADGE: Record<string, { label: string; icon: React.ElementType; className: string }> = {
+  announcement: { label: 'Announcement', icon: Megaphone, className: 'bg-amber-500/10 text-amber-700 ring-amber-500/20 dark:text-amber-300' },
+  safety: { label: 'Safety', icon: Shield, className: 'bg-red-500/10 text-red-700 ring-red-500/20 dark:text-red-300' },
+  complaint: { label: 'Complaint', icon: AlertTriangle, className: 'bg-red-600/10 text-red-800 ring-red-600/20 dark:text-red-200' },
+  lost_found: { label: 'Lost & Found', icon: Search, className: 'bg-blue-500/10 text-blue-700 ring-blue-500/20 dark:text-blue-300' },
+  buy_sell: { label: 'Buy & Sell', icon: ShoppingBag, className: 'bg-green-500/10 text-green-700 ring-green-500/20 dark:text-green-300' },
+  event: { label: 'Event', icon: Calendar, className: 'bg-accent/10 text-accent ring-accent/20' },
+  general: { label: 'Post', icon: MessageSquare, className: 'bg-secondary text-secondary-foreground ring-border' },
 }
 
 function timeAgo(dateStr: string) {
@@ -170,7 +173,7 @@ function AvatarInitials({ name, size = 'md' }: { name: string; size?: 'sm' | 'md
   const initials = name.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase()
   return (
     <div className={cn(
-      'flex items-center justify-center rounded-full bg-gradient-to-br from-primary/60 to-accent/60 font-bold text-white shrink-0',
+      'flex shrink-0 items-center justify-center rounded-full bg-primary/10 font-bold text-primary ring-1 ring-primary/15',
       size === 'sm' ? 'h-8 w-8 text-xs' : 'h-10 w-10 text-sm'
     )}>
       {initials}
@@ -183,12 +186,12 @@ function ImageGrid({ urls }: { urls: string[] }) {
   const count = urls.length
   return (
     <div className={cn(
-      'mt-3 grid gap-1.5 rounded-xl overflow-hidden',
+      'mt-3 grid gap-1.5 overflow-hidden rounded-lg',
       count === 1 ? 'grid-cols-1' : count === 2 ? 'grid-cols-2' : 'grid-cols-2'
     )}>
       {urls.slice(0, 4).map((url, i) => (
         <div key={i} className={cn(
-          'relative bg-muted overflow-hidden',
+          'relative overflow-hidden bg-muted',
           count === 1 ? 'aspect-video' : 'aspect-square',
           count === 3 && i === 0 ? 'row-span-2' : ''
         )}>
@@ -225,56 +228,57 @@ function CommentSection({ postId }: { postId: number }) {
   }
 
   return (
-    <div className="mt-4 border-t border-border pt-4 space-y-3">
+    <div className="mt-4 space-y-3 border-t border-border pt-4">
       {isLoading ? (
         <div className="space-y-2">
           {[1,2].map(i => (
-            <div key={i} className="flex gap-2.5 animate-pulse">
-              <div className="h-8 w-8 rounded-full bg-muted shrink-0" />
+            <div key={i} className="flex animate-pulse gap-2.5">
+              <div className="h-8 w-8 shrink-0 rounded-full bg-muted" />
               <div className="flex-1 space-y-1.5">
                 <div className="h-3 w-24 bg-muted rounded" />
-                <div className="h-8 bg-muted rounded-xl" />
+                <div className="h-8 rounded-lg bg-muted" />
               </div>
             </div>
           ))}
         </div>
       ) : comments.length === 0 ? (
-        <p className="text-sm text-muted-foreground">No comments yet. Be the first!</p>
+        <p className="text-sm text-muted-foreground">No comments yet. Start the conversation.</p>
       ) : (
         <div className="space-y-3">
           {comments.map((c) => (
             <div key={c.id} className="flex gap-2.5">
               <AvatarInitials name={c.userName} size="sm" />
-              <div className="flex-1 min-w-0">
-                <div className="bg-muted/50 rounded-xl px-3 py-2">
+              <div className="min-w-0 flex-1">
+                <div className="rounded-lg bg-secondary/60 px-3 py-2">
                   <div className="flex items-baseline gap-2">
                     <span className="text-sm font-semibold text-foreground">{c.userName}</span>
                     <span className="text-xs text-muted-foreground">{c.unitNumber}</span>
                   </div>
                   <p className="text-sm text-foreground mt-0.5">{c.body}</p>
                 </div>
-                <p className="text-xs text-muted-foreground mt-1 px-1">{timeAgo(c.createdAt)}</p>
+                <p className="mt-1 px-1 text-xs text-muted-foreground">{timeAgo(c.createdAt)}</p>
               </div>
             </div>
           ))}
         </div>
       )}
 
-      <div className="flex gap-2 mt-3">
+      <div className="mt-3 flex gap-2">
         <AvatarInitials name={currentUser?.name ?? 'Resident'} size="sm" />
-        <div className="flex-1 flex gap-2 items-center">
+        <div className="flex flex-1 items-center gap-2">
           <input
             type="text"
             placeholder="Write a comment..."
             value={commentBody}
             onChange={(e) => setCommentBody(e.target.value)}
             onKeyDown={(e) => e.key === 'Enter' && handleSubmit()}
-            className="flex-1 text-sm bg-muted/50 rounded-xl px-3 py-2 border border-border focus:outline-none focus:border-primary focus:bg-background transition-colors"
+            className="flex-1 rounded-lg border border-border bg-muted/50 px-3 py-2 text-sm transition-colors focus:border-primary focus:bg-background focus:outline-none"
           />
           <button
             onClick={handleSubmit}
             disabled={!commentBody.trim() || createComment.isPending}
-            className="flex h-9 w-9 items-center justify-center rounded-xl bg-primary text-primary-foreground disabled:opacity-40 hover:bg-primary/90 transition-colors"
+            aria-label="Send comment"
+            className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary text-primary-foreground transition-colors hover:bg-primary-hover disabled:opacity-40"
           >
             <Send size={15} />
           </button>
@@ -305,6 +309,7 @@ function PostCard({ post, onLike }: { post: Post; onLike: (id: number) => void }
   const [liked, setLiked] = useState(false)
   const [actionBusy, setActionBusy] = useState(false)
   const badge = CATEGORY_BADGE[post.type] || CATEGORY_BADGE.general
+  const BadgeIcon = badge.icon
   const queryClient = useQueryClient()
   const { data: currentUser } = useCurrentUser()
   const { toast } = useToast()
@@ -377,27 +382,26 @@ function PostCard({ post, onLike }: { post: Post; onLike: (id: number) => void }
   }
 
   return (
-    <div className="relative overflow-hidden rounded-2xl border border-border bg-card shadow-sm hover:shadow-md transition-shadow">
+    <article className="feed-card-enter premium-card relative overflow-hidden rounded-xl border border-border bg-card shadow-sm transition-all hover:border-primary/25 hover:shadow-md">
       {post.isPinned && (
-        <div className="flex items-center gap-1.5 border-b border-border/50 bg-primary/5 px-4 py-2">
+        <div className="flex items-center gap-1.5 border-b border-border/50 bg-primary/10 px-4 py-2">
           <Pin size={13} className="text-primary" />
-          <span className="text-xs font-semibold text-primary">Pinned Post</span>
+          <span className="text-xs font-bold text-primary">Pinned post</span>
         </div>
       )}
 
-      <div className="p-4">
-        {/* Header */}
+      <div className="p-4 sm:p-5">
         <div className="flex items-start justify-between gap-3">
-          <div className="flex items-start gap-3 flex-1 min-w-0">
+          <div className="flex min-w-0 flex-1 items-start gap-3">
             <AvatarInitials name={post.userName} />
-            <div className="flex-1 min-w-0">
-              <div className="flex items-baseline gap-2 flex-wrap">
-                <span className="font-semibold text-sm text-foreground">{post.userName}</span>
+            <div className="min-w-0 flex-1">
+              <div className="flex flex-wrap items-baseline gap-x-2 gap-y-0.5">
+                <span className="text-sm font-bold text-foreground">{post.userName}</span>
                 <span className="text-xs text-muted-foreground">{post.unitNumber}</span>
-                <span className="text-xs text-muted-foreground">·</span>
                 <span className="text-xs text-muted-foreground">{timeAgo(post.createdAt)}</span>
               </div>
-              <span className={cn('mt-1 inline-flex rounded-full px-2 py-0.5 text-xs font-semibold', badge.bg, badge.text)}>
+              <span className={cn('mt-1.5 inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-[11px] font-bold leading-none ring-1', badge.className)}>
+                <BadgeIcon size={12} />
                 {badge.label}
               </span>
             </div>
@@ -405,15 +409,15 @@ function PostCard({ post, onLike }: { post: Post; onLike: (id: number) => void }
           <div className="flex shrink-0 items-center gap-1">
             <PublicationToggle sourceType="post" sourceId={post.id} variant="icon" />
             {isOwner ? (
-              <button type="button" aria-label="Delete post" disabled={actionBusy} onClick={deleteOwnPost} className="flex h-8 w-8 items-center justify-center rounded-md text-muted-foreground hover:bg-destructive/10 hover:text-destructive disabled:opacity-50">
+              <button type="button" aria-label="Delete post" disabled={actionBusy} onClick={deleteOwnPost} className="flex h-8 w-8 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:bg-destructive/10 hover:text-destructive disabled:opacity-50">
                 <Trash2 size={15} />
               </button>
             ) : (
               <>
-                <button type="button" aria-label="Report post" onClick={reportPost} className="flex h-8 w-8 items-center justify-center rounded-md text-muted-foreground hover:bg-muted hover:text-foreground">
+                <button type="button" aria-label="Report post" onClick={reportPost} className="flex h-8 w-8 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground">
                   <Flag size={15} />
                 </button>
-                <button type="button" aria-label="Block member" onClick={blockAuthor} className="flex h-8 w-8 items-center justify-center rounded-md text-muted-foreground hover:bg-muted hover:text-foreground">
+                <button type="button" aria-label="Block member" onClick={blockAuthor} className="flex h-8 w-8 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground">
                   <UserX size={15} />
                 </button>
               </>
@@ -421,21 +425,19 @@ function PostCard({ post, onLike }: { post: Post; onLike: (id: number) => void }
           </div>
         </div>
 
-        {/* Content */}
         <div className="mt-3">
-          <h3 className="font-semibold text-foreground mb-1">{post.title}</h3>
-          <p className="text-sm text-muted-foreground leading-relaxed">{post.body}</p>
+          <h3 className="mb-1 break-words text-base font-bold leading-snug text-foreground">{post.title}</h3>
+          <p className="break-words text-sm leading-relaxed text-foreground/80">{post.body}</p>
         </div>
 
         <ImageGrid urls={post.imageUrls} />
 
-        {/* Actions */}
-        <div className="mt-4 flex flex-wrap items-center gap-4">
+        <div className="mt-4 flex flex-wrap items-center gap-2 border-t border-border pt-3">
           <button
             onClick={handleLike}
             className={cn(
-              'flex items-center gap-1.5 text-sm font-medium transition-colors',
-              liked ? 'text-red-500' : 'text-muted-foreground hover:text-red-500'
+              'flex min-h-9 items-center gap-1.5 rounded-lg px-2.5 text-sm font-semibold transition-colors',
+              liked ? 'bg-red-500/10 text-red-600' : 'text-muted-foreground hover:bg-secondary hover:text-red-600'
             )}
           >
             <Heart size={18} className={liked ? 'fill-current' : ''} />
@@ -443,7 +445,7 @@ function PostCard({ post, onLike }: { post: Post; onLike: (id: number) => void }
           </button>
           <button
             onClick={() => setExpanded(!expanded)}
-            className="flex items-center gap-1.5 text-sm font-medium text-muted-foreground hover:text-primary transition-colors"
+            className="flex min-h-9 items-center gap-1.5 rounded-lg px-2.5 text-sm font-semibold text-muted-foreground transition-colors hover:bg-secondary hover:text-primary"
           >
             <MessageSquare size={18} />
             <span>{post.commentsCount}</span>
@@ -453,7 +455,7 @@ function PostCard({ post, onLike }: { post: Post; onLike: (id: number) => void }
             <button
               onClick={talkInPrivate}
               disabled={startConversation.isPending}
-              className="flex items-center gap-1.5 text-sm font-medium text-muted-foreground transition-colors hover:text-primary disabled:opacity-50"
+              className="flex min-h-9 items-center gap-1.5 rounded-lg px-2.5 text-sm font-semibold text-muted-foreground transition-colors hover:bg-secondary hover:text-primary disabled:opacity-50"
             >
               {startConversation.isPending ? <Loader2 size={18} className="animate-spin" /> : <MessageCircle size={18} />}
               <span>Talk in private</span>
@@ -463,7 +465,7 @@ function PostCard({ post, onLike }: { post: Post; onLike: (id: number) => void }
 
         {expanded && <CommentSection postId={post.id} />}
       </div>
-    </div>
+    </article>
   )
 }
 
@@ -554,77 +556,48 @@ function CreatePostModal({ onClose, initialType = 'general' }: { onClose: () => 
 
   const isComplaint = type === 'complaint'
 
-  const typeOptions: { value: PostType; label: string }[] = [
-    { value: 'general', label: 'General' },
-    { value: 'announcement', label: 'Announcement' },
-    { value: 'safety', label: 'Safety' },
-    { value: 'complaint', label: 'Complaint' },
-    { value: 'lost_found', label: 'Lost & Found' },
-    { value: 'buy_sell', label: 'Buy & Sell' },
-    { value: 'event', label: 'Event' },
-  ]
-
   return (
     <div className="fixed inset-0 z-[80] flex items-stretch justify-center overflow-hidden bg-black/40 p-0 backdrop-blur-sm sm:items-center sm:p-4">
-      <div className="flex h-[100dvh] max-h-[100dvh] w-full max-w-lg flex-col overflow-hidden border-0 bg-card shadow-2xl sm:h-auto sm:max-h-[calc(100dvh-2rem)] sm:rounded-2xl sm:border sm:border-border">
-        {/* Header */}
+      <div className="flex h-[100dvh] max-h-[100dvh] w-full max-w-xl flex-col overflow-hidden border-0 bg-card shadow-2xl sm:h-auto sm:max-h-[calc(100dvh-2rem)] sm:rounded-xl sm:border sm:border-border">
         <div className="flex shrink-0 items-center justify-between border-b border-border px-5 py-4">
-          <h2 className="text-lg font-bold text-foreground">{isComplaint ? 'File Complaint' : 'Create Post'}</h2>
-          <button onClick={onClose} className="flex h-8 w-8 items-center justify-center rounded-lg hover:bg-muted text-muted-foreground transition-colors">
+          <div>
+            <h2 className="text-lg font-bold text-foreground">{isComplaint ? 'File Report' : 'Create Post'}</h2>
+            <p className="text-sm text-muted-foreground">{isComplaint ? 'Send a neighborhood issue to the right people.' : 'Share an update with your community.'}</p>
+          </div>
+          <button onClick={onClose} aria-label="Close composer" className="flex h-8 w-8 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:bg-secondary">
             <X size={18} />
           </button>
         </div>
 
         <div className="min-h-0 flex-1 space-y-4 overflow-y-auto p-4 pb-6 sm:p-5">
-          {/* Author row */}
           <div className="flex items-center gap-3">
             <AvatarInitials name={currentUser?.name ?? 'Resident'} />
             <div>
               <p className="font-semibold text-sm text-foreground">{currentUser?.name ?? 'Resident'}</p>
-              <p className="text-xs text-muted-foreground">{currentUser?.unitNumber || 'No unit set'} · Mohalla Community</p>
+              <p className="text-xs text-muted-foreground">{currentUser?.unitNumber || 'No unit set'} - Mohalla Community</p>
             </div>
           </div>
 
-          {/* Category select */}
           <div>
-            <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-1.5 block">Category</label>
-            <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
-              {typeOptions.map((opt) => (
-                <button
-                  key={opt.value}
-                  onClick={() => setType(opt.value)}
-                  className={cn(
-                    'rounded-xl py-2 px-3 text-sm font-medium border transition-all',
-                    type === opt.value
-                      ? isComplaint
-                        ? 'border-red-500 bg-red-500/10 text-red-700'
-                        : 'border-primary bg-primary/10 text-primary'
-                      : 'border-border bg-background text-muted-foreground hover:border-primary/50'
-                  )}
-                >
-                  {opt.label}
-                </button>
-              ))}
-            </div>
+            <label className="mb-1.5 block text-xs font-bold uppercase text-muted-foreground">Category</label>
+            <PostTypeSelector value={type} onChange={setType} />
           </div>
 
-          {/* Title */}
           <div>
-            <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-1.5 block">
-              {isComplaint ? 'Complaint Title' : 'Title'}
+            <label className="mb-1.5 block text-xs font-bold uppercase text-muted-foreground">
+              {isComplaint ? 'Report Title' : 'Title'}
             </label>
             <input
               type="text"
               placeholder={isComplaint ? 'What needs attention?' : "What's this about?"}
               value={title}
               onChange={(e) => setTitle(e.target.value)}
-              className="w-full rounded-xl border border-border bg-muted/30 px-4 py-2.5 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-primary focus:bg-background transition-colors"
+              className="w-full rounded-lg border border-border bg-muted/30 px-4 py-2.5 text-sm text-foreground transition-colors placeholder:text-muted-foreground focus:border-primary focus:bg-background focus:outline-none"
             />
           </div>
 
-          {/* Body */}
           <div>
-            <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-1.5 block">
+            <label className="mb-1.5 block text-xs font-bold uppercase text-muted-foreground">
               {isComplaint ? 'Details' : 'Message'}
             </label>
             <textarea
@@ -632,13 +605,12 @@ function CreatePostModal({ onClose, initialType = 'general' }: { onClose: () => 
               value={body}
               onChange={(e) => setBody(e.target.value)}
               rows={4}
-              className="w-full rounded-xl border border-border bg-muted/30 px-4 py-2.5 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-primary focus:bg-background transition-colors resize-none"
+              className="w-full resize-none rounded-lg border border-border bg-muted/30 px-4 py-2.5 text-sm text-foreground transition-colors placeholder:text-muted-foreground focus:border-primary focus:bg-background focus:outline-none"
             />
           </div>
 
-          {/* Photo upload */}
           <div>
-            <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-1.5 block">
+            <label className="mb-1.5 block text-xs font-bold uppercase text-muted-foreground">
               Photos ({imageUrls.length}/4)
             </label>
 
@@ -658,7 +630,7 @@ function CreatePostModal({ onClose, initialType = 'general' }: { onClose: () => 
                 onClick={() => fileInputRef.current?.click()}
                 disabled={isUploading}
                 className={cn(
-                  'flex w-full items-center justify-center gap-2 rounded-xl border-2 border-dashed py-3 text-sm font-medium transition-colors',
+                  'flex w-full items-center justify-center gap-2 rounded-lg border-2 border-dashed py-3 text-sm font-semibold transition-colors',
                   isUploading
                     ? 'border-primary/40 bg-primary/5 text-primary cursor-not-allowed'
                     : 'border-border text-muted-foreground hover:border-primary/50 hover:bg-primary/5 hover:text-primary'
@@ -689,7 +661,8 @@ function CreatePostModal({ onClose, initialType = 'general' }: { onClose: () => 
                     <img src={url} alt="" className="h-16 w-16 rounded-lg object-cover border border-border" />
                     <button
                       onClick={() => setImageUrls(imageUrls.filter((_, j) => j !== i))}
-                      className="absolute -top-1.5 -right-1.5 hidden group-hover:flex h-5 w-5 items-center justify-center rounded-full bg-destructive text-white"
+                      aria-label="Remove photo"
+                      className="absolute -right-1.5 -top-1.5 hidden h-5 w-5 items-center justify-center rounded-full bg-destructive text-white group-hover:flex"
                     >
                       <X size={10} />
                     </button>
@@ -700,15 +673,14 @@ function CreatePostModal({ onClose, initialType = 'general' }: { onClose: () => 
           </div>
         </div>
 
-        {/* Footer */}
         <div className="flex shrink-0 items-center justify-end gap-2 border-t border-border bg-muted/20 px-4 pb-[calc(0.75rem+env(safe-area-inset-bottom))] pt-3 sm:px-5 sm:py-4">
-          <Button variant="ghost" onClick={onClose} className="rounded-xl">Cancel</Button>
+          <Button variant="ghost" onClick={onClose} className="rounded-lg">Cancel</Button>
           <Button
             onClick={handleSubmit}
             disabled={!title.trim() || !body.trim() || createPost.isPending || isUploading}
-            className={cn('rounded-xl text-primary-foreground', isComplaint ? 'bg-red-600 hover:bg-red-700' : 'bg-primary hover:bg-primary/90')}
+            className={cn('rounded-lg text-primary-foreground', isComplaint ? 'bg-red-600 hover:bg-red-700' : 'bg-primary hover:bg-primary-hover')}
           >
-            {createPost.isPending ? 'Posting...' : isComplaint ? 'Submit Complaint' : 'Post'}
+            {createPost.isPending ? 'Posting...' : isComplaint ? 'Submit Report' : 'Post'}
           </Button>
         </div>
       </div>
@@ -776,22 +748,15 @@ export default function Feed() {
   const hasMore = data?.hasMore ?? false
 
   return (
-    <div className="portal-shell flex min-h-screen bg-background">
-      {/* Background blobs */}
-      <div className="pointer-events-none fixed inset-0 overflow-hidden">
-        <div className="animate-blob absolute -left-32 top-1/4 h-96 w-96 rounded-full bg-primary/5 blur-3xl" />
-        <div className="animate-blob animation-delay-2000 absolute -right-32 top-1/2 h-96 w-96 rounded-full bg-accent/5 blur-3xl" />
-      </div>
-
+    <div className="portal-shell flex min-h-dvh bg-background">
       <Sidebar />
 
-      <div className="relative flex min-w-0 flex-1 flex-col overflow-hidden">
+      <div className="relative flex h-dvh min-w-0 flex-1 flex-col overflow-hidden">
         <TopNavbar />
 
-        <main className="flex-1 overflow-y-auto">
-          {/* Category filter */}
-          <div className="sticky top-0 z-30 border-b border-border bg-background/90 px-3 py-3 backdrop-blur-md sm:px-6">
-            <div className="no-scrollbar flex items-center gap-2 overflow-x-auto pb-1">
+        <main className="min-w-0 flex-1 overflow-y-auto">
+          <div className="sticky top-0 z-30 border-b border-border bg-background/95 px-3 py-3 backdrop-blur-md sm:px-6">
+            <div className="no-scrollbar mx-auto flex w-full max-w-3xl items-center gap-2 overflow-x-auto pb-1">
               {CATEGORIES.map((cat) => {
                 const Icon = cat.icon
                 return (
@@ -799,10 +764,10 @@ export default function Feed() {
                     key={cat.value}
                     onClick={() => handleCategoryChange(cat.value)}
                     className={cn(
-                      'flex items-center gap-1.5 whitespace-nowrap rounded-full px-4 py-1.5 text-sm font-medium transition-all shrink-0',
+                      'flex min-h-9 shrink-0 items-center gap-1.5 whitespace-nowrap rounded-full px-4 py-1.5 text-sm font-bold transition-all',
                       activeCategory === cat.value
                         ? 'bg-primary text-primary-foreground shadow-sm'
-                        : 'bg-muted/60 text-muted-foreground hover:bg-muted hover:text-foreground'
+                        : 'border border-border bg-card text-muted-foreground hover:border-primary/30 hover:bg-secondary/60 hover:text-foreground'
                     )}
                   >
                     <Icon size={14} className={activeCategory === cat.value ? '' : cat.color} />
@@ -813,7 +778,7 @@ export default function Feed() {
             </div>
           </div>
 
-          <div className="mx-auto w-full max-w-3xl p-3 pb-24 sm:p-6">
+          <div className="mx-auto w-full max-w-3xl p-3 pb-24 sm:p-5">
             <div className="space-y-4">
               <ComplaintBar onCompose={() => openCreatePost('complaint')} />
               <EventWidget />
@@ -821,35 +786,10 @@ export default function Feed() {
 
               {isLoading ? (
                 <div className="space-y-4">
-                  {[1, 2, 3].map((i) => (
-                    <div key={i} className="rounded-2xl border border-border bg-card p-4 animate-pulse">
-                      <div className="flex gap-3">
-                        <div className="h-10 w-10 rounded-full bg-muted" />
-                        <div className="flex-1 space-y-2">
-                          <div className="h-4 w-32 bg-muted rounded" />
-                          <div className="h-3 w-24 bg-muted rounded" />
-                        </div>
-                      </div>
-                      <div className="mt-3 space-y-2">
-                        <div className="h-4 w-3/4 bg-muted rounded" />
-                        <div className="h-3 w-full bg-muted rounded" />
-                        <div className="h-3 w-2/3 bg-muted rounded" />
-                      </div>
-                    </div>
-                  ))}
+                  {[1, 2, 3].map((i) => <FeedPostSkeleton key={i} />)}
                 </div>
               ) : posts.length === 0 ? (
-                <div className="flex flex-col items-center justify-center py-20 text-center">
-                  <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-muted/50 mb-4">
-                    <MessageSquare size={32} className="text-muted-foreground/50" />
-                  </div>
-                  <h3 className="font-semibold text-foreground">No posts yet.</h3>
-                  <p className="text-sm text-muted-foreground mt-1">Be the first to post something!</p>
-                  <Button onClick={() => openCreatePost()} className="mt-4 rounded-xl bg-primary text-primary-foreground">
-                    <Plus size={16} className="mr-2" />
-                    Create Post
-                  </Button>
-                </div>
+                <CommunityEmptyState kind="feed" action="Create Post" onAction={() => openCreatePost()} />
               ) : (
                 <>
                   {posts.map((post) => (
@@ -860,7 +800,7 @@ export default function Feed() {
                     <button
                       onClick={() => setPage((p) => p + 1)}
                       disabled={isFetching}
-                      className="w-full rounded-xl border border-border bg-card py-3 text-sm font-medium text-muted-foreground hover:bg-muted transition-colors"
+                      className="w-full rounded-xl border border-border bg-card py-3 text-sm font-semibold text-muted-foreground transition-colors hover:bg-secondary"
                     >
                       {isFetching ? 'Loading...' : 'Load more posts'}
                     </button>
@@ -872,10 +812,10 @@ export default function Feed() {
         </main>
       </div>
 
-      {/* Floating create button */}
       <button
         onClick={() => openCreatePost()}
-        className="fixed bottom-[calc(5.25rem+env(safe-area-inset-bottom))] right-4 z-40 flex h-14 w-14 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-lg shadow-primary/30 transition-all hover:scale-105 hover:bg-primary/90 md:bottom-8 md:right-8"
+        aria-label="Create post"
+        className="fixed bottom-[calc(5.25rem+env(safe-area-inset-bottom))] right-4 z-40 flex h-14 w-14 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-lg shadow-primary/25 transition-all hover:scale-105 hover:bg-primary-hover md:hidden"
       >
         <Plus size={24} />
       </button>
