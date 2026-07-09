@@ -699,6 +699,18 @@ function toCityPublication(row: any) {
   };
 }
 
+function emptyCityPublicationList(page: number, limit: number, city: string, communities: any[] = []) {
+  return {
+    items: [],
+    total: 0,
+    page,
+    limit,
+    hasMore: false,
+    city,
+    communities,
+  };
+}
+
 function assertSameCommunity(row: any, communityId: string) {
   if (row?.community_id && String(row.community_id) !== String(communityId)) {
     throw new Error("You can only publish items from your own community.");
@@ -1122,7 +1134,10 @@ async function listCityMapCommunities(city: string) {
     .not("latitude", "is", null)
     .not("longitude", "is", null)
     .limit(200);
-  if (error) throw error;
+  if (error) {
+    console.warn("City map communities unavailable", error);
+    return [];
+  }
   return (data ?? []).filter(hasUsablePoint).map(toCityCommunity);
 }
 
@@ -1131,7 +1146,13 @@ async function listCityPublications(params: URLSearchParams) {
   const limit = Number(params.get("limit") ?? 20);
   const search = params.get("search");
   const kind = params.get("sourceType");
-  const community = await currentCommunityContext(false);
+  let community;
+  try {
+    community = await currentCommunityContext(false);
+  } catch (error) {
+    console.warn("City feed community context unavailable", error);
+    return emptyCityPublicationList(page, limit, "your city");
+  }
 
   if (isDemoMode()) {
     let rows = readDemoCityPublications().filter(
@@ -1139,6 +1160,7 @@ async function listCityPublications(params: URLSearchParams) {
     );
     if (kind && kind !== "all") rows = rows.filter((row: any) => row.source_type === kind);
     rows = applySearch(rows, search, ["title", "summary", "community_name", "source_type"]);
+    const communities = await listCityMapCommunities(community.city);
     return {
       items: pageRows(rows, page, limit).map(toCityPublication),
       total: rows.length,
@@ -1146,10 +1168,11 @@ async function listCityPublications(params: URLSearchParams) {
       limit,
       hasMore: page * limit < rows.length,
       city: community.city,
-      communities: await listCityMapCommunities(community.city),
+      communities,
     };
   }
 
+  const communities = await listCityMapCommunities(community.city);
   let query = extendedDb
     .from("city_publications")
     .select("*")
@@ -1161,7 +1184,10 @@ async function listCityPublications(params: URLSearchParams) {
   if (kind && kind !== "all") query = query.eq("source_type", kind);
 
   const { data, error } = await query;
-  if (error) throw error;
+  if (error) {
+    console.warn("City feed publications unavailable", error);
+    return emptyCityPublicationList(page, limit, community.city, communities);
+  }
 
   const rows = applySearch(data ?? [], search, ["title", "summary", "community_name", "source_type"]);
   return {
@@ -1171,7 +1197,7 @@ async function listCityPublications(params: URLSearchParams) {
     limit,
     hasMore: page * limit < rows.length,
     city: community.city,
-    communities: await listCityMapCommunities(community.city),
+    communities,
   };
 }
 
@@ -1179,7 +1205,13 @@ async function getCityPublicationStatus(params: URLSearchParams) {
   const kind = sourceType(params.get("sourceType"));
   const sourceId = String(params.get("sourceId") ?? "").trim();
   if (!sourceId) throw new Error("City feed source id is required.");
-  const community = await currentCommunityContext(false);
+  let community;
+  try {
+    community = await currentCommunityContext(false);
+  } catch (error) {
+    console.warn("City feed status unavailable", error);
+    return { isPublic: false, publication: null };
+  }
 
   if (isDemoMode()) {
     const row = readDemoCityPublications().find(
@@ -1200,7 +1232,10 @@ async function getCityPublicationStatus(params: URLSearchParams) {
     .eq("source_id", sourceId)
     .eq("is_active", true)
     .maybeSingle();
-  if (error) throw error;
+  if (error) {
+    console.warn("City feed status unavailable", error);
+    return { isPublic: false, publication: null };
+  }
   return { isPublic: Boolean(data), publication: data ? toCityPublication(data) : null };
 }
 

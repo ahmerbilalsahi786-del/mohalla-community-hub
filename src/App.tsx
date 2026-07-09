@@ -24,6 +24,7 @@ const MarketplaceListing = lazy(() => import("@/pages/MarketplaceListing"));
 const Safety = lazy(() => import("@/pages/Safety"));
 const Events = lazy(() => import("@/pages/Events"));
 const Polls = lazy(() => import("@/pages/Polls"));
+const Announcements = lazy(() => import("@/pages/Announcements"));
 const Profile = lazy(() => import("@/pages/Profile"));
 const SettingsPage = lazy(() => import("@/pages/Settings"));
 const AdminMembers = lazy(() => import("@/pages/admin/Members"));
@@ -77,6 +78,7 @@ const PMarketplaceListing = ProtectedRoute(MarketplaceListing);
 const PSafety          = ProtectedRoute(Safety);
 const PEvents          = ProtectedRoute(Events);
 const PPolls           = ProtectedRoute(Polls);
+const PAnnouncements   = ProtectedRoute(Announcements);
 const PProfile         = ProtectedRoute(Profile);
 const PSettings        = ProtectedRoute(SettingsPage);
 const PCommunity       = ProtectedRoute(Community);
@@ -122,6 +124,7 @@ function Router() {
       <Route path="/safety" component={PSafety} />
       <Route path="/events" component={PEvents} />
       <Route path="/polls" component={PPolls} />
+      <Route path="/announcements" component={PAnnouncements} />
       <Route path="/profile/:id" component={PProfile} />
       <Route path="/settings" component={PSettings} />
       <Route path="/community" component={PCommunity} />
@@ -131,7 +134,6 @@ function Router() {
       <Route path="/notifications" component={PNotifications} />
 
       {/* Admin-only routes */}
-      <Route path="/announcements" component={AAdminAnnouncements} />
       <Route path="/admin" component={AAdminMembers} />
       <Route path="/admin/members" component={AAdminMembers} />
       <Route path="/admin/posts" component={AAdminPosts} />

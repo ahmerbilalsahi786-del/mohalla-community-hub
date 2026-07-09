@@ -390,6 +390,7 @@ export default function Dashboard() {
           </div>
 
           <aside className="min-w-0 space-y-5 xl:sticky xl:top-24">
+            <EmergencyServicesWidget />
             <HealthScoreCard
               postsThisMonth={stats.postsThisMonth}
               activeSafetyAlerts={activeSafetyAlerts}
@@ -397,7 +398,6 @@ export default function Dashboard() {
               upcomingEvents={upcomingEvents.length}
               verifiedResidents={stats.totalMembers}
             />
-            <EmergencyServicesWidget />
             <SafetyWidget />
             <QuickActions />
             <ActivityCard activities={activities} />

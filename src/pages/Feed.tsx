@@ -756,7 +756,7 @@ export default function Feed() {
 
         <main className="min-w-0 flex-1 overflow-y-auto">
           <div className="sticky top-0 z-30 border-b border-border bg-background/95 px-3 py-3 backdrop-blur-md sm:px-6">
-            <div className="no-scrollbar mx-auto flex w-full max-w-3xl items-center gap-2 overflow-x-auto pb-1">
+            <div className="no-scrollbar mx-auto flex w-full max-w-3xl items-center gap-2 overflow-x-auto pb-1 lg:grid lg:max-w-5xl lg:grid-cols-7 lg:overflow-visible lg:pb-0">
               {CATEGORIES.map((cat) => {
                 const Icon = cat.icon
                 return (
@@ -764,7 +764,7 @@ export default function Feed() {
                     key={cat.value}
                     onClick={() => handleCategoryChange(cat.value)}
                     className={cn(
-                      'flex min-h-9 shrink-0 items-center gap-1.5 whitespace-nowrap rounded-full px-4 py-1.5 text-sm font-bold transition-all',
+                      'flex min-h-9 shrink-0 items-center gap-1.5 whitespace-nowrap rounded-full px-4 py-1.5 text-sm font-bold transition-all lg:w-full lg:shrink lg:justify-center lg:px-3',
                       activeCategory === cat.value
                         ? 'bg-primary text-primary-foreground shadow-sm'
                         : 'border border-border bg-card text-muted-foreground hover:border-primary/30 hover:bg-secondary/60 hover:text-foreground'
