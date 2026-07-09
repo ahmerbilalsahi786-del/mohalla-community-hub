@@ -1,6 +1,6 @@
 import { FormEvent, useEffect, useMemo, useRef, useState } from "react";
 import { Link, useLocation, useRoute } from "wouter";
-import { ArrowLeft, Loader2, MessageCircle, Plus, Search, Send, User } from "lucide-react";
+import { ArrowLeft, Ban, Loader2, MessageCircle, Plus, Search, Send, User } from "lucide-react";
 import { Sidebar } from "@/components/dashboard/sidebar";
 import { TopNavbar } from "@/components/dashboard/top-navbar";
 import { Button } from "@/components/ui/button";
@@ -192,6 +192,7 @@ export default function Messages() {
   const [search, setSearch] = useState("");
   const [showNew, setShowNew] = useState(false);
   const [draft, setDraft] = useState("");
+  const [blocking, setBlocking] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const { toast } = useToast();
   const { data: currentUser } = useCurrentUser();
@@ -266,6 +267,30 @@ export default function Messages() {
   const handleSend = (event: FormEvent) => {
     event.preventDefault();
     submitDraft();
+  };
+
+  const blockParticipant = async () => {
+    const participant = detail?.conversation.participant;
+    if (!participant?.userId || blocking) return;
+    setBlocking(true);
+    try {
+      const response = await fetch("/api/blocks", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ userId: participant.userId }),
+      });
+      if (!response.ok) throw new Error("Could not update block setting.");
+      const result = await response.json();
+      toast({
+        title: result.blocked ? "Member blocked" : "Member unblocked",
+        description: result.blocked ? "They will no longer be able to message you." : "They can message you again.",
+      });
+      navigate("/messages");
+    } catch (error: any) {
+      toast({ title: error?.message ?? "Could not block member", variant: "destructive" });
+    } finally {
+      setBlocking(false);
+    }
   };
 
   return (
@@ -373,6 +398,17 @@ export default function Messages() {
                         {detail.conversation.participant.unitNumber || "Community member"}
                       </p>
                     </div>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      onClick={blockParticipant}
+                      disabled={blocking}
+                      className="rounded-xl text-destructive hover:bg-destructive/10"
+                    >
+                      {blocking ? <Loader2 className="h-4 w-4 animate-spin" /> : <Ban size={14} />}
+                      Block
+                    </Button>
                   </div>
 
                   {detail.conversation.postTitle && (

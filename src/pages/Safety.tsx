@@ -16,6 +16,7 @@ import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
 import { PublicationToggle } from '@/components/city-feed/publication-toggle'
 import LocationPicker, { type PickedLocation } from '@/components/location-picker'
+import { useToast } from '@/hooks/use-toast'
 
 type AlertType = 'theft' | 'suspicious' | 'emergency' | 'power_outage' | 'water_shortage' | 'other'
 type Severity = 'low' | 'medium' | 'high'
@@ -260,12 +261,21 @@ function ReportAlertModal({ onClose }: { onClose: () => void }) {
   const [pickedLocation, setPickedLocation] = useState<PickedLocation | null>(null)
   const [severity, setSeverity] = useState<Severity>('medium')
   const queryClient = useQueryClient()
+  const { toast } = useToast()
 
   const createAlert = useCreateAlert({
     mutation: {
       onSuccess: () => {
         queryClient.invalidateQueries({ queryKey: getListAlertsQueryKey() })
+        toast({ title: 'Safety alert reported' })
         onClose()
+      },
+      onError: (error: any) => {
+        toast({
+          title: 'Could not report alert',
+          description: error?.message ?? 'Please check the details and try again.',
+          variant: 'destructive',
+        })
       },
     },
   })
@@ -387,6 +397,7 @@ function ReportAlertModal({ onClose }: { onClose: () => void }) {
         <div className="flex shrink-0 items-center justify-end gap-2 border-t border-border bg-muted/20 px-4 py-3 sm:px-5 sm:py-4">
           <Button variant="ghost" onClick={onClose} className="rounded-xl">Cancel</Button>
           <Button
+            type="button"
             onClick={() => createAlert.mutate({
               data: {
                 type,

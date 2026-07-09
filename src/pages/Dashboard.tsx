@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
 import { Link } from 'wouter'
+import { useQuery } from '@tanstack/react-query'
 import { formatDistanceToNow } from 'date-fns'
 import { ArrowRight, Calendar, Flame, MessageSquare, ShoppingBag, Sparkles, TrendingUp, UserCheck, Users } from 'lucide-react'
 import { DashboardShell } from '@/components/dashboard/dashboard-shell'
@@ -16,7 +17,6 @@ import { DashboardCardSkeleton } from '@/components/community/skeleton-states'
 import { canManageCommunity, useCurrentUser } from '@/hooks/use-current-user'
 import {
   useAdminGetStats,
-  useAdminListMembers,
   useListAlerts,
   useListEvents,
   useListPosts,
@@ -115,7 +115,15 @@ export default function Dashboard() {
   const { data: eventData, isLoading: eventsLoading } = useListEvents({ communityId: 'default' })
   const { data: postData, isLoading: postsLoading } = useListPosts({ communityId: 'default', page: 1, limit: 5 })
   const { data: alertData = [], isLoading: alertsLoading } = useListAlerts({ communityId: 'default' })
-  const { data: memberData = [], isLoading: membersLoading } = useAdminListMembers({ communityId: 'default' })
+  const { data: memberData = [], isLoading: membersLoading } = useQuery({
+    queryKey: ['dashboard-community-members'],
+    queryFn: async () => {
+      const response = await fetch('/api/community/members?status=approved&limit=8')
+      if (!response.ok) throw new Error('Could not load community members.')
+      return response.json()
+    },
+    refetchInterval: 30000,
+  })
   const statsLoading = eventsLoading || postsLoading || alertsLoading || membersLoading
 
   const stats = statsData ?? {

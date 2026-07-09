@@ -8,7 +8,6 @@ import {
   Home,
   Users,
   Calendar,
-  MessageCircle,
   MessageSquare,
   Settings,
   HelpCircle,
@@ -31,7 +30,6 @@ import { canManageCommunity, useCurrentUser, useLogout } from '@/hooks/use-curre
 const navItems = [
   { name: 'Dashboard', icon: Home, href: '/dashboard', badge: null },
   { name: 'Community Feed', icon: MessageSquare, href: '/feed', badge: null },
-  { name: 'Messages', icon: MessageCircle, href: '/messages', badge: null },
   { name: 'City Feed', icon: Globe2, href: '/city-feed', badge: null },
   { name: 'Safety & Alerts', icon: ShieldAlert, href: '/safety', badge: null },
   { name: 'Events', icon: Calendar, href: '/events', badge: null },

@@ -17,7 +17,7 @@ import {
 type Prefs = {
   notifyComments: boolean; notifyLikes: boolean; notifySafety: boolean;
   notifyAnnouncements: boolean; notifyMarketplace: boolean; notifyApprovals: boolean;
-  notifyEvents: boolean; notifyMessages: boolean;
+  notifyEvents: boolean; notifyMessages: boolean; notifyTexts: boolean;
 }
 
 const PREF_OPTIONS: { key: keyof Prefs; icon: React.ElementType; label: string; description: string }[] = [
@@ -26,6 +26,7 @@ const PREF_OPTIONS: { key: keyof Prefs; icon: React.ElementType; label: string; 
   { key: 'notifySafety',        icon: ShieldAlert,   label: 'Safety alerts',            description: 'High and medium severity community safety reports' },
   { key: 'notifyEvents',        icon: CalendarDays,  label: 'Community events',         description: 'New events published for your society' },
   { key: 'notifyMessages',      icon: MessageSquare, label: 'Private messages',         description: 'When a neighbour sends you a direct message' },
+  { key: 'notifyTexts',         icon: MessageSquare, label: 'Text messages',             description: 'Allow important community updates by SMS/text' },
   { key: 'notifyAnnouncements', icon: Megaphone,     label: 'Community announcements',  description: 'Official pinned posts from community admin' },
   { key: 'notifyMarketplace',   icon: ShoppingBag,   label: 'Marketplace messages',     description: 'Interest in your listings and buy & sell activity' },
   { key: 'notifyApprovals',     icon: UserCheck,     label: 'Membership approvals',     description: 'When your community membership request is approved' },

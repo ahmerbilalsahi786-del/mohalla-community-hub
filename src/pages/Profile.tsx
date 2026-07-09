@@ -7,7 +7,7 @@ import { cn } from '@/lib/utils'
 import {
   User, Edit2, MapPin, Calendar, Phone, MessageSquare, ShoppingBag,
   Heart, Pin, X, Check, Upload, Loader2, ExternalLink, Star, Trophy,
-  AlertTriangle, ShieldCheck, TrendingUp, Award,
+  AlertTriangle, ShieldCheck, TrendingUp, Award, Lock,
 } from 'lucide-react'
 import { useToast } from '@/hooks/use-toast'
 import { uploadImage } from '@/lib/cloudinary'
@@ -18,6 +18,7 @@ const ME = 'ahmed'
 type Profile = {
   userId: string; displayName: string; unitNumber: string;
   avatarUrl?: string | null; whatsappNumber?: string | null; createdAt: string;
+  showUnit?: boolean; showPhone?: boolean; showActivity?: boolean; receiveTexts?: boolean;
 }
 type Post = {
   id: number; title: string; body: string; type: string;
@@ -95,6 +96,10 @@ export default function ProfilePage() {
   const [editUnit, setEditUnit]     = useState('')
   const [editWA, setEditWA]         = useState('')
   const [editAvatar, setEditAvatar] = useState<string | undefined>()
+  const [editShowUnit, setEditShowUnit] = useState(true)
+  const [editShowPhone, setEditShowPhone] = useState(true)
+  const [editShowActivity, setEditShowActivity] = useState(true)
+  const [editReceiveTexts, setEditReceiveTexts] = useState(true)
   const [saving, setSaving]         = useState(false)
   const [saved, setSaved]           = useState(false)
   const [uploading, setUploading]   = useState(false)
@@ -112,6 +117,10 @@ export default function ProfilePage() {
         setEditUnit(data.profile.unitNumber || '')
         setEditWA(data.profile.whatsappNumber || '')
         setEditAvatar(data.profile.avatarUrl ?? undefined)
+        setEditShowUnit(data.profile.showUnit ?? true)
+        setEditShowPhone(data.profile.showPhone ?? true)
+        setEditShowActivity(data.profile.showActivity ?? true)
+        setEditReceiveTexts(data.profile.receiveTexts ?? true)
       })
       .catch(() => {})
       .finally(() => setLoading(false))
@@ -143,7 +152,16 @@ export default function ProfilePage() {
       const res = await fetch(`/api/profile/${userId}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ displayName: editName, unitNumber: editUnit, whatsappNumber: editWA, avatarUrl: editAvatar }),
+        body: JSON.stringify({
+          displayName: editName,
+          unitNumber: editUnit,
+          whatsappNumber: editWA,
+          avatarUrl: editAvatar,
+          showUnit: editShowUnit,
+          showPhone: editShowPhone,
+          showActivity: editShowActivity,
+          receiveTexts: editReceiveTexts,
+        }),
       })
       const updated = await res.json()
       setProfile(updated)
@@ -184,6 +202,9 @@ export default function ProfilePage() {
 
   const displayName = editing ? editName : (profile.displayName || profile.userId)
   const avatarSrc   = editing ? editAvatar : (profile.avatarUrl ?? undefined)
+  const canShowUnit = isMe || profile.showUnit !== false
+  const canShowPhone = isMe || profile.showPhone !== false
+  const canShowActivity = isMe || profile.showActivity !== false
   const totalLikes = posts.reduce((sum, post) => sum + post.likesCount, 0)
   const totalComments = posts.reduce((sum, post) => sum + post.commentsCount, 0)
   const complaintCount = posts.filter((post) => post.type === 'complaint').length
@@ -292,18 +313,39 @@ export default function ProfilePage() {
                           className="w-full rounded-xl border border-border bg-muted/30 px-4 py-2 text-sm focus:outline-none focus:border-primary transition-colors" />
                       </div>
                     </div>
+                    <div className="rounded-xl border border-border bg-muted/20 p-3">
+                      <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-muted-foreground">Profile visibility</p>
+                      <div className="grid gap-2 sm:grid-cols-2">
+                        {[
+                          { label: 'Show unit number', checked: editShowUnit, onChange: setEditShowUnit },
+                          { label: 'Show phone/WhatsApp', checked: editShowPhone, onChange: setEditShowPhone },
+                          { label: 'Show posts and listings', checked: editShowActivity, onChange: setEditShowActivity },
+                          { label: 'Receive texts', checked: editReceiveTexts, onChange: setEditReceiveTexts },
+                        ].map((option) => (
+                          <label key={option.label} className="flex items-center justify-between gap-3 rounded-lg bg-background/70 px-3 py-2 text-sm font-medium text-foreground">
+                            <span>{option.label}</span>
+                            <input
+                              type="checkbox"
+                              checked={option.checked}
+                              onChange={(event) => option.onChange(event.target.checked)}
+                              className="h-4 w-4 accent-primary"
+                            />
+                          </label>
+                        ))}
+                      </div>
+                    </div>
                   </div>
                 ) : (
                   <>
                     <h2 className="text-xl font-bold text-foreground">{profile.displayName || profile.userId}</h2>
                     <div className="mt-2 flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-muted-foreground">
-                      {profile.unitNumber && (
+                      {canShowUnit && profile.unitNumber && (
                         <span className="flex items-center gap-1"><MapPin size={13} />{profile.unitNumber}</span>
                       )}
                       <span className="flex items-center gap-1">
                         <Calendar size={13} />Member since {memberSince(profile.createdAt)}
                       </span>
-                      {profile.whatsappNumber && (
+                      {canShowPhone && profile.whatsappNumber && (
                         <span className="flex items-center gap-1"><Phone size={13} />{profile.whatsappNumber}</span>
                       )}
                     </div>
@@ -317,11 +359,11 @@ export default function ProfilePage() {
               </div>
             </div>
 
-            <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+            {canShowActivity && <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
               {profileStats.map((stat) => (
                 <StatTile key={stat.label} stat={stat} />
               ))}
-            </div>
+            </div>}
 
             <div className="rounded-2xl border border-border bg-card p-4 shadow-sm">
               <div className="mb-3 flex items-center justify-between">
@@ -351,7 +393,7 @@ export default function ProfilePage() {
             </div>
 
             {/* Tabs */}
-            <div className="flex items-center gap-1 border-b border-border">
+            {canShowActivity ? <div className="flex items-center gap-1 border-b border-border">
               <button
                 onClick={() => setTab('posts')}
                 className={cn('flex items-center gap-2 px-4 py-2.5 text-sm font-medium border-b-2 -mb-px transition-colors',
@@ -366,10 +408,16 @@ export default function ProfilePage() {
               >
                 <ShoppingBag size={14} /> Listings ({listings.length})
               </button>
-            </div>
+            </div> : (
+              <div className="rounded-2xl border border-dashed border-border bg-card p-8 text-center">
+                <Lock className="mx-auto h-8 w-8 text-muted-foreground/50" />
+                <p className="mt-3 text-sm font-semibold text-foreground">Activity is private</p>
+                <p className="mt-1 text-sm text-muted-foreground">This resident has chosen not to show posts and listings on their profile.</p>
+              </div>
+            )}
 
             {/* Posts tab */}
-            {tab === 'posts' && (
+            {canShowActivity && tab === 'posts' && (
               <div className="space-y-3">
                 {posts.length === 0 ? (
                   <div className="flex flex-col items-center justify-center py-16 rounded-2xl border border-dashed border-border text-center">
@@ -401,7 +449,7 @@ export default function ProfilePage() {
             )}
 
             {/* Listings tab */}
-            {tab === 'listings' && (
+            {canShowActivity && tab === 'listings' && (
               <div className="grid gap-3 sm:grid-cols-2">
                 {listings.length === 0 ? (
                   <div className="col-span-2 flex flex-col items-center justify-center py-16 rounded-2xl border border-dashed border-border text-center">

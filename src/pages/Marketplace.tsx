@@ -7,7 +7,7 @@ import { TopNavbar } from '@/components/dashboard/top-navbar'
 import {
   Plus, X, Search, Loader2, ChevronDown, ChevronUp,
   Armchair, Tv2, Shirt, Car, Wrench, Gift, Package,
-  Tag, CheckCircle2, Clock, Image as ImageIcon
+  Tag, Image as ImageIcon, Store, MapPin
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { useToast } from '@/hooks/use-toast'
@@ -16,12 +16,14 @@ import { cn } from '@/lib/utils'
 import { PublicationToggle } from '@/components/city-feed/publication-toggle'
 import { CommunityEmptyState } from '@/components/community/community-empty-state'
 import { MarketplaceListingSkeleton } from '@/components/community/skeleton-states'
+import LocationPicker, { type PickedLocation } from '@/components/location-picker'
 
-type Category = 'all' | 'furniture' | 'electronics' | 'clothes' | 'vehicles' | 'services' | 'free' | 'other'
+type Category = 'all' | 'shop' | 'furniture' | 'electronics' | 'clothes' | 'vehicles' | 'services' | 'free' | 'other'
 type Condition = 'new' | 'good' | 'fair'
 
 const CATEGORIES: { value: Category; label: string; icon: React.ElementType }[] = [
   { value: 'all', label: 'All', icon: Package },
+  { value: 'shop', label: 'Shops', icon: Store },
   { value: 'furniture', label: 'Furniture', icon: Armchair },
   { value: 'electronics', label: 'Electronics', icon: Tv2 },
   { value: 'clothes', label: 'Clothes', icon: Shirt },
@@ -70,6 +72,10 @@ interface Listing {
   status: string
   whatsappNumber: string
   createdAt: string
+  listingKind?: string
+  location?: string | null
+  latitude?: number | null
+  longitude?: number | null
 }
 
 function ListingCard({ listing }: { listing: Listing }) {
@@ -126,6 +132,11 @@ function ListingCard({ listing }: { listing: Listing }) {
           </div>
 
           <div className="flex items-center gap-1.5 flex-wrap">
+            {(listing.listingKind === 'shop' || listing.category === 'shop') && (
+              <span className="rounded-full bg-primary/10 px-2 py-0.5 text-xs font-semibold text-primary">
+                Shop
+              </span>
+            )}
             <span className={cn('rounded-full px-2 py-0.5 text-xs font-semibold', cond.bg, cond.text)}>
               {cond.label}
             </span>
@@ -136,9 +147,21 @@ function ListingCard({ listing }: { listing: Listing }) {
           </p>
 
           <div className="flex items-center justify-between text-xs text-muted-foreground">
-            <span>{listing.unitNumber}</span>
+            <span className="truncate">{listing.location || listing.unitNumber}</span>
             <span>{timeAgo(listing.createdAt)}</span>
           </div>
+          {listing.latitude != null && listing.longitude != null && (
+            <a
+              href={`https://www.google.com/maps?q=${listing.latitude},${listing.longitude}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              onClick={(event) => event.stopPropagation()}
+              className="mt-1 inline-flex items-center gap-1 text-xs font-semibold text-primary hover:text-primary/80"
+            >
+              <MapPin size={12} />
+              Open location
+            </a>
+          )}
         </div>
       </div>
     </Link>
@@ -146,12 +169,15 @@ function ListingCard({ listing }: { listing: Listing }) {
 }
 
 function CreateListingModal({ onClose }: { onClose: () => void }) {
+  const [mode, setMode] = useState<'listing' | 'shop'>('listing')
   const [title, setTitle] = useState('')
   const [description, setDescription] = useState('')
   const [pricePkr, setPricePkr] = useState('')
   const [category, setCategory] = useState<Exclude<Category, 'all'>>('other')
   const [condition, setCondition] = useState<Condition>('good')
   const [whatsapp, setWhatsapp] = useState('')
+  const [location, setLocation] = useState('')
+  const [pickedLocation, setPickedLocation] = useState<PickedLocation | null>(null)
   const [imageUrls, setImageUrls] = useState<string[]>([])
   const [isUploading, setIsUploading] = useState(false)
   const fileRef = useRef<HTMLInputElement>(null)
@@ -198,15 +224,20 @@ function CreateListingModal({ onClose }: { onClose: () => void }) {
         title: title.trim(),
         description: description.trim(),
         pricePkr: pricePkr ? parseInt(pricePkr, 10) : undefined,
-        category,
-        condition,
+        category: mode === 'shop' ? 'shop' : category,
+        condition: mode === 'shop' ? 'new' : condition,
         imageUrls,
         whatsappNumber: whatsapp.trim(),
-      },
+        listingKind: mode,
+        location: location.trim(),
+        latitude: pickedLocation?.latitude ?? null,
+        longitude: pickedLocation?.longitude ?? null,
+      } as any,
     })
   }
 
   const catOptions: { value: Exclude<Category, 'all'>; label: string }[] = [
+    { value: 'shop', label: 'Shop' },
     { value: 'furniture', label: 'Furniture' },
     { value: 'electronics', label: 'Electronics' },
     { value: 'clothes', label: 'Clothes' },
@@ -220,18 +251,45 @@ function CreateListingModal({ onClose }: { onClose: () => void }) {
     <div className="fixed inset-0 z-[80] flex items-end justify-center bg-black/40 p-3 backdrop-blur-sm sm:items-center sm:p-4">
       <div className="flex max-h-[calc(100dvh-1.5rem)] w-full max-w-lg flex-col overflow-hidden rounded-2xl border border-border bg-card shadow-2xl">
         <div className="flex items-center justify-between px-5 py-4 border-b border-border shrink-0">
-          <h2 className="text-lg font-bold text-foreground">Add Listing</h2>
+          <h2 className="text-lg font-bold text-foreground">{mode === 'shop' ? 'Register Shop' : 'Add Listing'}</h2>
           <button onClick={onClose} className="flex h-8 w-8 items-center justify-center rounded-lg hover:bg-muted text-muted-foreground">
             <X size={18} />
           </button>
         </div>
 
         <div className="flex-1 space-y-4 overflow-y-auto p-4 sm:p-5">
+          <div>
+            <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-1.5 block">Type</label>
+            <div className="grid grid-cols-2 gap-2">
+              {[
+                { value: 'listing' as const, label: 'Item / service' },
+                { value: 'shop' as const, label: 'Shop / store' },
+              ].map((opt) => (
+                <button
+                  key={opt.value}
+                  type="button"
+                  onClick={() => {
+                    setMode(opt.value)
+                    if (opt.value === 'shop') setCategory('shop')
+                    if (opt.value === 'listing' && category === 'shop') setCategory('other')
+                  }}
+                  className={cn(
+                    'rounded-xl border px-3 py-2 text-sm font-semibold transition-all',
+                    mode === opt.value ? 'border-primary bg-primary/10 text-primary' : 'border-border bg-background text-muted-foreground hover:border-primary/50'
+                  )}
+                >
+                  {opt.label}
+                </button>
+              ))}
+            </div>
+          </div>
+
           {/* Category */}
+          {mode === 'listing' && (
           <div>
             <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-1.5 block">Category</label>
             <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
-              {catOptions.map((opt) => (
+              {catOptions.filter((opt) => opt.value !== 'shop').map((opt) => (
                 <button
                   key={opt.value}
                   onClick={() => setCategory(opt.value)}
@@ -247,13 +305,14 @@ function CreateListingModal({ onClose }: { onClose: () => void }) {
               ))}
             </div>
           </div>
+          )}
 
           {/* Title */}
           <div>
-            <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-1.5 block">Title</label>
+            <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-1.5 block">{mode === 'shop' ? 'Shop name' : 'Title'}</label>
             <input
               type="text"
-              placeholder="What are you selling?"
+              placeholder={mode === 'shop' ? 'e.g. Ahmed General Store' : 'What are you selling?'}
               value={title}
               onChange={(e) => setTitle(e.target.value)}
               className="w-full rounded-xl border border-border bg-muted/30 px-4 py-2.5 text-sm focus:outline-none focus:border-primary transition-colors"
@@ -264,7 +323,7 @@ function CreateListingModal({ onClose }: { onClose: () => void }) {
           <div>
             <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-1.5 block">Description</label>
             <textarea
-              placeholder="Describe the item..."
+              placeholder={mode === 'shop' ? 'Describe what your shop sells, opening hours, and delivery details...' : 'Describe the item...'}
               value={description}
               onChange={(e) => setDescription(e.target.value)}
               rows={3}
@@ -272,7 +331,7 @@ function CreateListingModal({ onClose }: { onClose: () => void }) {
             />
           </div>
 
-          {/* Price + Condition row */}
+          {mode === 'listing' && (
           <div className="grid gap-3 sm:grid-cols-2">
             <div>
               <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-1.5 block">Price (PKR)</label>
@@ -298,6 +357,7 @@ function CreateListingModal({ onClose }: { onClose: () => void }) {
               </select>
             </div>
           </div>
+          )}
 
           {/* WhatsApp */}
           <div>
@@ -312,6 +372,31 @@ function CreateListingModal({ onClose }: { onClose: () => void }) {
                 className="flex-1 rounded-xl border border-border bg-muted/30 px-4 py-2.5 text-sm focus:outline-none focus:border-primary transition-colors"
               />
             </div>
+          </div>
+
+          <div>
+            <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-1.5 block">Location</label>
+            <div className="flex items-center gap-2">
+              <MapPin size={14} className="shrink-0 text-muted-foreground" />
+              <input
+                type="text"
+                placeholder={mode === 'shop' ? 'Shop address or market name' : 'Pickup location'}
+                value={location}
+                onChange={(event) => setLocation(event.target.value)}
+                className="flex-1 rounded-xl border border-border bg-muted/30 px-4 py-2.5 text-sm focus:outline-none focus:border-primary transition-colors"
+              />
+            </div>
+          </div>
+
+          <div>
+            <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-1.5 block">Map Tag (optional)</label>
+            <LocationPicker
+              compact
+              onSelect={(data) => {
+                setPickedLocation(data)
+                if (!location.trim() && data.address) setLocation(data.address)
+              }}
+            />
           </div>
 
           {/* Images */}
@@ -365,7 +450,7 @@ function CreateListingModal({ onClose }: { onClose: () => void }) {
             disabled={!title.trim() || !description.trim() || !whatsapp.trim() || createListing.isPending || isUploading}
             className="rounded-xl bg-primary text-primary-foreground"
           >
-            {createListing.isPending ? 'Posting...' : 'List Item'}
+            {createListing.isPending ? 'Posting...' : mode === 'shop' ? 'Register Shop' : 'List Item'}
           </Button>
         </div>
       </div>
@@ -450,6 +535,18 @@ export default function Marketplace() {
                 <Tag size={14} />
                 Price
                 {showFilters ? <ChevronUp size={13} /> : <ChevronDown size={13} />}
+              </button>
+              <button
+                onClick={() => handleCategoryChange(activeCategory === 'shop' ? 'all' : 'shop')}
+                className={cn(
+                  'flex items-center gap-1.5 rounded-xl border px-3 py-2 text-sm font-semibold transition-colors shrink-0',
+                  activeCategory === 'shop'
+                    ? 'border-primary bg-primary/10 text-primary'
+                    : 'border-border bg-muted/50 text-muted-foreground hover:bg-muted'
+                )}
+              >
+                <Store size={14} />
+                Shops
               </button>
             </div>
 

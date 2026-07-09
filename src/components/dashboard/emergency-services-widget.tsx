@@ -8,6 +8,7 @@ import {
   MapPin,
   Phone,
   PhoneCall,
+  Search,
   Shield,
   ShieldAlert,
   Wrench,
@@ -82,6 +83,8 @@ function ContactRow({ contact, emergency }: { contact: CommunityContact; emergen
       <div className="min-w-0 flex-1">
         <p className="truncate text-sm font-semibold text-foreground">{contact.name || contactLabel(contact.type)}</p>
         <p className="flex items-center gap-1.5 truncate text-xs text-muted-foreground">
+          <span className="truncate font-semibold text-foreground/80">{contactLabel(contact.type)}</span>
+          <span aria-hidden="true">·</span>
           <span className="truncate">{phone || 'Not set'}</span>
           {hasMap && (
             <a
@@ -130,6 +133,7 @@ export function EmergencyServicesWidget() {
   const [servicesOpen, setServicesOpen] = useState(false)
   const [mobileOpen, setMobileOpen] = useState(true)
   const [showAllServices, setShowAllServices] = useState(false)
+  const [search, setSearch] = useState('')
   const communityId = user?.community?.id
   const isAdmin = canManageCommunity(user?.role)
 
@@ -150,7 +154,15 @@ export function EmergencyServicesWidget() {
   const serviceContacts = contacts
     .filter((contact) => !contact.is_emergency && contact.category === 'services')
     .sort((a, b) => (a.display_order ?? 0) - (b.display_order ?? 0))
-  const visibleServices = showAllServices ? serviceContacts : serviceContacts.slice(0, 5)
+  const contactMatches = (contact: CommunityContact) => {
+    const needle = search.trim().toLowerCase()
+    if (!needle) return true
+    return [contact.name, contact.type, contact.category]
+      .some((value) => String(value ?? '').toLowerCase().includes(needle))
+  }
+  const filteredEmergencyContacts = emergencyContacts.filter(contactMatches)
+  const filteredServiceContacts = serviceContacts.filter(contactMatches)
+  const visibleServices = showAllServices || search.trim() ? filteredServiceContacts : filteredServiceContacts.slice(0, 5)
 
   return (
     <section className="portal-panel overflow-hidden rounded-2xl">
@@ -168,6 +180,16 @@ export function EmergencyServicesWidget() {
       </button>
 
       <div className={cn('space-y-4 p-4', !mobileOpen && 'hidden lg:block')}>
+        <div className="relative">
+          <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+          <input
+            type="search"
+            value={search}
+            onChange={(event) => setSearch(event.target.value)}
+            placeholder="Search by name or occupation"
+            className="h-10 w-full rounded-xl border border-border bg-background/70 pl-9 pr-3 text-sm outline-none transition-colors focus:border-primary"
+          />
+        </div>
         <div>
           <div className="mb-2.5 flex items-center justify-between">
             <p className="text-xs font-bold uppercase tracking-wide text-red-600">Emergency</p>
@@ -176,10 +198,12 @@ export function EmergencyServicesWidget() {
           <div className="space-y-2.5">
             {isLoading ? (
               [1, 2, 3].map((item) => <div key={item} className="h-14 animate-pulse rounded-xl bg-muted" />)
-            ) : emergencyContacts.length > 0 ? (
-              emergencyContacts.map((contact) => <ContactRow key={contact.id} contact={contact} emergency />)
+            ) : filteredEmergencyContacts.length > 0 ? (
+              filteredEmergencyContacts.map((contact) => <ContactRow key={contact.id} contact={contact} emergency />)
             ) : (
-              <p className="rounded-xl bg-muted/40 px-3 py-2 text-xs text-muted-foreground">Emergency contacts are being set up.</p>
+              <p className="rounded-xl bg-muted/40 px-3 py-2 text-xs text-muted-foreground">
+                {search.trim() ? 'No emergency contacts match that search.' : 'Emergency contacts are being set up.'}
+              </p>
             )}
           </div>
         </div>
@@ -198,10 +222,10 @@ export function EmergencyServicesWidget() {
 
           {servicesOpen && (
             <div className="space-y-2.5">
-              {serviceContacts.length > 0 ? (
+              {filteredServiceContacts.length > 0 ? (
                 <>
                   {visibleServices.map((contact) => <ContactRow key={contact.id} contact={contact} emergency={false} />)}
-                  {serviceContacts.length > 5 && !showAllServices && (
+                  {filteredServiceContacts.length > 5 && !showAllServices && !search.trim() && (
                     <button onClick={() => setShowAllServices(true)} className="text-xs font-semibold text-primary hover:text-primary/80">
                       View all
                     </button>

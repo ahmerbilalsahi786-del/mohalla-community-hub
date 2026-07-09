@@ -1,10 +1,9 @@
 
 import { useEffect, useState } from 'react'
-import { Building2, Search, Sun, Moon, Plus, ShieldCheck } from 'lucide-react'
+import { Search, Sun, Moon, Plus } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { useLocation } from 'wouter'
 import { NotificationBell } from './notification-bell'
-import { MessageShortcut } from './message-shortcut'
 import { useCurrentUser } from '@/hooks/use-current-user'
 
 const PAGE_META: Record<string, { title: string; subtitle: string }> = {
@@ -45,7 +44,6 @@ export function TopNavbar() {
   const [location, navigate] = useLocation()
   const { data: user } = useCurrentUser()
   const meta = matchPageMeta(location)
-  const logoUrl = user?.community?.logoUrl
 
   useEffect(() => {
     const storedTheme = window.localStorage.getItem('mohalla-theme')
@@ -54,6 +52,31 @@ export function TopNavbar() {
     document.documentElement.classList.toggle('dark', shouldUseDark)
     setDarkMode(shouldUseDark)
   }, [])
+
+  useEffect(() => {
+    const community = user?.community as any
+    if (!community) return
+    const root = document.documentElement
+    const primary = community.themePrimaryColor
+    const secondary = community.themeSecondaryColor
+    const background = community.themeBackgroundColor
+    const banner = community.themeBannerColor
+    const sidebar = community.themeSidebarColor
+
+    if (primary) {
+      root.style.setProperty('--primary', primary)
+      root.style.setProperty('--primary-hover', `color-mix(in oklch, ${primary} 86%, black)`)
+      root.style.setProperty('--ring', primary)
+      root.style.setProperty('--sidebar-primary', primary)
+    }
+    if (secondary) root.style.setProperty('--accent', secondary)
+    if (background) root.style.setProperty('--background', background)
+    if (banner) {
+      root.style.setProperty('--card', banner)
+      root.style.setProperty('--popover', banner)
+    }
+    if (sidebar) root.style.setProperty('--sidebar', sidebar)
+  }, [user?.community])
 
   const toggleDarkMode = () => {
     const next = !darkMode
@@ -74,14 +97,7 @@ export function TopNavbar() {
     <header className="sticky top-0 z-40 border-b portal-soft-rule bg-background/90 px-3 py-3 backdrop-blur-xl sm:px-5 lg:px-7">
       <div className="mx-auto flex min-h-16 w-full max-w-[1360px] items-center gap-3 text-foreground">
       <div className="flex min-w-0 flex-1 items-center gap-3">
-        <div className="hidden h-11 w-11 shrink-0 items-center justify-center overflow-hidden rounded-xl bg-primary text-primary-foreground ring-1 ring-primary/15 sm:flex">
-          {logoUrl ? <img src={logoUrl} alt="" className="h-full w-full object-cover" /> : <Building2 size={20} />}
-        </div>
         <div className="flex min-w-0 flex-col">
-          <div className="portal-chip mb-1 hidden w-fit border-primary/20 bg-primary/10 text-primary xl:inline-flex">
-            <ShieldCheck className="h-3.5 w-3.5" />
-            Verified Portal
-          </div>
           <h1 className="portal-section-title truncate text-lg leading-tight text-foreground sm:text-xl">{meta.title}</h1>
           <p className="hidden truncate text-sm text-muted-foreground sm:block">{meta.subtitle}</p>
         </div>
@@ -136,8 +152,6 @@ export function TopNavbar() {
         >
           {darkMode ? <Sun size={20} /> : <Moon size={20} />}
         </button>
-
-        <MessageShortcut />
       </div>
       </div>
     </header>

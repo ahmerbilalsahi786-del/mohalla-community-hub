@@ -13,6 +13,7 @@ const DEFAULT_PREFS = {
   notifyAnnouncements: true,
   notifyMarketplace: true,
   notifyApprovals: true,
+  notifyTexts: true,
 };
 const TOKEN_KEY = "mohalla_token";
 const DEMO_USER_ID = "ahmed";
@@ -532,6 +533,10 @@ function createDemoListing(payload: JsonBody) {
     image_urls: Array.isArray(payload.imageUrls) ? payload.imageUrls : [],
     status: "available",
     whatsapp_number: payload.whatsappNumber ?? "",
+    listing_kind: payload.listingKind ?? "listing",
+    location: payload.location ?? null,
+    latitude: payload.latitude ?? null,
+    longitude: payload.longitude ?? null,
     created_at: now,
     updated_at: now,
   };
@@ -621,6 +626,10 @@ function toListing(row: any, profile?: any) {
     condition: row.condition ?? "good",
     status: row.status ?? "available",
     whatsappNumber: row.whatsapp_number ?? "",
+    listingKind: row.listing_kind ?? (row.category === "shop" ? "shop" : "listing"),
+    location: row.location ?? null,
+    latitude: row.latitude ?? null,
+    longitude: row.longitude ?? null,
     createdAt: row.created_at ?? new Date().toISOString(),
   };
 }
@@ -930,7 +939,7 @@ async function listListings(params: URLSearchParams) {
   const minPrice = Number(params.get("minPrice") ?? 0);
   const maxPrice = Number(params.get("maxPrice") ?? 0);
   if (isDemoMode()) {
-    let rows = applySearch(readDemoRows(DEMO_LISTINGS_KEY), search, ["title", "description", "category"]);
+    let rows = applySearch(readDemoRows(DEMO_LISTINGS_KEY), search, ["title", "description", "category", "location"]);
     if (category && category !== "all") rows = rows.filter((row: any) => row.category === category);
     if (minPrice) rows = rows.filter((row: any) => Number(row.price_pkr ?? 0) >= minPrice);
     if (maxPrice) rows = rows.filter((row: any) => Number(row.price_pkr ?? 0) <= maxPrice);
@@ -941,7 +950,7 @@ async function listListings(params: URLSearchParams) {
   const { data, error } = await supabase.from("listings").select("*").order("created_at", { ascending: false });
   if (error) throw error;
 
-  let rows = applySearch(data ?? [], search, ["title", "description", "category"]);
+  let rows = applySearch(data ?? [], search, ["title", "description", "category", "location"]);
   if (category && category !== "all") rows = rows.filter((row: any) => row.category === category);
   if (minPrice) rows = rows.filter((row: any) => Number(row.price_pkr ?? 0) >= minPrice);
   if (maxPrice) rows = rows.filter((row: any) => Number(row.price_pkr ?? 0) <= maxPrice);
@@ -1237,34 +1246,41 @@ async function publishCityPublication(payload: JsonBody) {
   const snapshot = await buildRemotePublicationSnapshot(kind, sourceId, community.id);
   const snapshotPoint = snapshot as JsonBody;
   const userId = await requiredUserId();
-  const { data, error } = await extendedDb
+  const row = {
+    community_id: community.id,
+    city: community.city,
+    source_type: snapshot.sourceType,
+    source_id: snapshot.sourceId,
+    title: snapshot.title,
+    summary: snapshot.summary,
+    image_url: snapshot.imageUrl,
+    href: snapshot.href,
+    author_id: snapshot.authorId,
+    author_name: snapshot.authorName,
+    community_name: community.name,
+    community_area: community.area,
+    latitude: snapshotPoint.latitude ?? null,
+    longitude: snapshotPoint.longitude ?? null,
+    published_by: userId,
+    published_at: now,
+    is_active: true,
+    metadata: snapshot.metadata,
+    updated_at: now,
+  };
+
+  const existing = await extendedDb
     .from("city_publications")
-    .upsert(
-      {
-        community_id: community.id,
-        city: community.city,
-        source_type: snapshot.sourceType,
-        source_id: snapshot.sourceId,
-        title: snapshot.title,
-        summary: snapshot.summary,
-        image_url: snapshot.imageUrl,
-        href: snapshot.href,
-        author_id: snapshot.authorId,
-        author_name: snapshot.authorName,
-        community_name: community.name,
-        community_area: community.area,
-        latitude: snapshotPoint.latitude ?? null,
-        longitude: snapshotPoint.longitude ?? null,
-        published_by: userId,
-        published_at: now,
-        is_active: true,
-        metadata: snapshot.metadata,
-        updated_at: now,
-      },
-      { onConflict: "community_id,source_type,source_id" },
-    )
-    .select("*")
-    .single();
+    .select("id")
+    .eq("community_id", community.id)
+    .eq("source_type", snapshot.sourceType)
+    .eq("source_id", snapshot.sourceId)
+    .maybeSingle();
+  if (existing.error) throw existing.error;
+
+  const result = existing.data
+    ? await extendedDb.from("city_publications").update(row).eq("id", existing.data.id).select("*").single()
+    : await extendedDb.from("city_publications").insert(row).select("*").single();
+  const { data, error } = result;
   if (error) throw error;
   return toCityPublication(data);
 }
@@ -1412,7 +1428,7 @@ async function createListing(payload: JsonBody) {
   if (isDemoMode()) return createDemoListing(payload);
 
   const userId = await requiredUserId();
-  const { data, error } = await supabase
+  const { data, error } = await extendedDb
     .from("listings")
     .insert({
       user_id: userId,
@@ -1423,6 +1439,10 @@ async function createListing(payload: JsonBody) {
       condition: payload.condition ?? "good",
       image_urls: payload.imageUrls ?? [],
       whatsapp_number: payload.whatsappNumber ?? null,
+      listing_kind: payload.listingKind ?? "listing",
+      location: payload.location ?? null,
+      latitude: payload.latitude ?? null,
+      longitude: payload.longitude ?? null,
     })
     .select("*")
     .single();
@@ -1690,6 +1710,10 @@ async function saveProfile(userIdParam: string, payload: JsonBody) {
       unitNumber: payload.unitNumber ?? unit(DEMO_PROFILE),
       avatarUrl: payload.avatarUrl ?? null,
       whatsappNumber: payload.whatsappNumber ?? null,
+      showUnit: payload.showUnit ?? true,
+      showPhone: payload.showPhone ?? true,
+      showActivity: payload.showActivity ?? true,
+      receiveTexts: payload.receiveTexts ?? true,
       createdAt: DEMO_PROFILE.created_at,
     };
   }
@@ -1710,9 +1734,17 @@ async function saveProfile(userIdParam: string, payload: JsonBody) {
     .single();
   if (error) throw error;
 
-  await supabase
+  await extendedDb
     .from("private_profiles")
-    .upsert({ id: userId, whatsapp_number: payload.whatsappNumber, updated_at: new Date().toISOString() });
+    .upsert({
+      id: userId,
+      whatsapp_number: payload.whatsappNumber,
+      show_unit: payload.showUnit ?? true,
+      show_phone: payload.showPhone ?? true,
+      show_activity: payload.showActivity ?? true,
+      receive_texts: payload.receiveTexts ?? true,
+      updated_at: new Date().toISOString(),
+    });
 
   return {
     userId,
@@ -1720,6 +1752,10 @@ async function saveProfile(userIdParam: string, payload: JsonBody) {
     unitNumber: unit(data),
     avatarUrl: data.avatar_url,
     whatsappNumber: payload.whatsappNumber ?? null,
+    showUnit: payload.showUnit ?? true,
+    showPhone: payload.showPhone ?? true,
+    showActivity: payload.showActivity ?? true,
+    receiveTexts: payload.receiveTexts ?? true,
     createdAt: data.created_at ?? new Date().toISOString(),
   };
 }
@@ -2335,6 +2371,10 @@ async function getProfile(userIdParam: string) {
         unitNumber: unit(DEMO_PROFILE),
         avatarUrl: null,
         whatsappNumber: null,
+        showUnit: true,
+        showPhone: true,
+        showActivity: true,
+        receiveTexts: true,
         createdAt: DEMO_PROFILE.created_at,
       },
       posts: readDemoPosts().map((row: any) => ({
@@ -2365,6 +2405,7 @@ async function getProfile(userIdParam: string) {
     supabase.from("posts").select("*").eq("user_id", userId).order("created_at", { ascending: false }),
     supabase.from("listings").select("*").eq("user_id", userId).order("created_at", { ascending: false }),
   ]);
+  const privateProfileData = privateProfile as any;
 
   return {
     profile: {
@@ -2372,7 +2413,11 @@ async function getProfile(userIdParam: string) {
       displayName: profileName(profile),
       unitNumber: unit(profile),
       avatarUrl: profile?.avatar_url ?? null,
-      whatsappNumber: privateProfile?.whatsapp_number ?? null,
+      whatsappNumber: privateProfileData?.whatsapp_number ?? null,
+      showUnit: privateProfileData?.show_unit ?? true,
+      showPhone: privateProfileData?.show_phone ?? true,
+      showActivity: privateProfileData?.show_activity ?? true,
+      receiveTexts: privateProfileData?.receive_texts ?? true,
       createdAt: profile?.created_at ?? new Date().toISOString(),
     },
     posts: (postsResult.data ?? []).map((row: any) => ({
@@ -2427,6 +2472,7 @@ function mapPreferences(row?: any) {
     notifyAnnouncements: row?.notify_announcements ?? true,
     notifyMarketplace: row?.notify_marketplace ?? true,
     notifyApprovals: row?.notify_approvals ?? true,
+    notifyTexts: row?.notify_texts ?? true,
   };
 }
 
@@ -2457,6 +2503,7 @@ async function saveNotificationPreferences(payload: JsonBody) {
       notify_announcements: payload.notifyAnnouncements,
       notify_marketplace: payload.notifyMarketplace,
       notify_approvals: payload.notifyApprovals,
+      notify_texts: payload.notifyTexts,
       updated_at: new Date().toISOString(),
     })
     .select("*")
