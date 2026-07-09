@@ -5,7 +5,6 @@ import { Button } from '@/components/ui/button'
 import { useLocation } from 'wouter'
 import { NotificationBell } from './notification-bell'
 import { MessageShortcut } from './message-shortcut'
-import { useCurrentUser } from '@/hooks/use-current-user'
 
 const PAGE_META: Record<string, { title: string; subtitle: string }> = {
   '/dashboard': { title: 'Dashboard', subtitle: 'Your mohalla, organized for today' },
@@ -38,55 +37,11 @@ function matchPageMeta(location: string) {
   return { title: 'Mohalla', subtitle: 'Community Hub' }
 }
 
-const LIGHT_THEME_DEFAULTS = {
-  primary: 'oklch(0.45 0.126 184)',
-  primaryHover: 'oklch(0.39 0.126 185)',
-  primaryForeground: 'oklch(0.99 0.004 97)',
-  accent: 'oklch(0.66 0.135 172)',
-  accentForeground: 'oklch(0.12 0.035 214)',
-  background: 'oklch(0.982 0.010 108)',
-  card: 'oklch(0.998 0.004 108)',
-  popover: 'oklch(0.998 0.004 108)',
-  sidebar: 'oklch(0.992 0.006 108)',
-  sidebarPrimary: 'oklch(0.45 0.126 184)',
-  ring: 'oklch(0.50 0.126 184)',
-}
-
-const MIDNIGHT_THEME = {
-  primary: 'oklch(0.72 0.13 191)',
-  primaryHover: 'oklch(0.65 0.13 192)',
-  primaryForeground: 'oklch(0.12 0.036 255)',
-  accent: 'oklch(0.78 0.138 158)',
-  accentForeground: 'oklch(0.11 0.032 255)',
-  background: 'oklch(0.145 0.038 255)',
-  card: 'oklch(0.195 0.044 252)',
-  popover: 'oklch(0.195 0.044 252)',
-  sidebar: 'oklch(0.125 0.038 258)',
-  sidebarPrimary: 'oklch(0.72 0.13 191)',
-  ring: 'oklch(0.72 0.13 191)',
-}
-
-function setThemeVars(vars: typeof LIGHT_THEME_DEFAULTS) {
-  const root = document.documentElement
-  root.style.setProperty('--primary', vars.primary)
-  root.style.setProperty('--primary-hover', vars.primaryHover)
-  root.style.setProperty('--primary-foreground', vars.primaryForeground)
-  root.style.setProperty('--accent', vars.accent)
-  root.style.setProperty('--accent-foreground', vars.accentForeground)
-  root.style.setProperty('--background', vars.background)
-  root.style.setProperty('--card', vars.card)
-  root.style.setProperty('--popover', vars.popover)
-  root.style.setProperty('--sidebar', vars.sidebar)
-  root.style.setProperty('--sidebar-primary', vars.sidebarPrimary)
-  root.style.setProperty('--ring', vars.ring)
-}
-
 export function TopNavbar() {
   const [darkMode, setDarkMode] = useState(() =>
     typeof document !== 'undefined' ? document.documentElement.classList.contains('dark') : false
   )
   const [location, navigate] = useLocation()
-  const { data: user } = useCurrentUser()
   const meta = matchPageMeta(location)
 
   useEffect(() => {
@@ -96,33 +51,6 @@ export function TopNavbar() {
     document.documentElement.classList.toggle('dark', shouldUseDark)
     setDarkMode(shouldUseDark)
   }, [])
-
-  useEffect(() => {
-    const community = user?.community as any
-    if (darkMode) {
-      setThemeVars(MIDNIGHT_THEME)
-      return
-    }
-
-    const primary = community?.themePrimaryColor
-    const secondary = community?.themeSecondaryColor
-    const background = community?.themeBackgroundColor
-    const banner = community?.themeBannerColor
-    const sidebar = community?.themeSidebarColor
-
-    setThemeVars({
-      ...LIGHT_THEME_DEFAULTS,
-      primary: primary || LIGHT_THEME_DEFAULTS.primary,
-      primaryHover: primary ? `color-mix(in oklch, ${primary} 86%, black)` : LIGHT_THEME_DEFAULTS.primaryHover,
-      accent: secondary || LIGHT_THEME_DEFAULTS.accent,
-      background: background || LIGHT_THEME_DEFAULTS.background,
-      card: banner || LIGHT_THEME_DEFAULTS.card,
-      popover: banner || LIGHT_THEME_DEFAULTS.popover,
-      sidebar: sidebar || LIGHT_THEME_DEFAULTS.sidebar,
-      sidebarPrimary: primary || LIGHT_THEME_DEFAULTS.sidebarPrimary,
-      ring: primary || LIGHT_THEME_DEFAULTS.ring,
-    })
-  }, [darkMode, user?.community])
 
   const toggleDarkMode = () => {
     const next = !darkMode

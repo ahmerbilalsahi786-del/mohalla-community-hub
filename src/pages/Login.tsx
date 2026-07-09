@@ -16,6 +16,7 @@ import {
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
+import { MohallaBrandLink } from '@/components/brand/mohalla-brand'
 import { setDemoToken, setToken } from '@/lib/auth'
 import { useToast } from '@/hooks/use-toast'
 import { supabase } from '@/integrations/supabase/client'
@@ -162,15 +163,10 @@ export default function Login() {
   }
 
   return (
-    <main className="relative min-h-screen overflow-hidden bg-gradient-to-b from-accent/25 via-background to-background">
+    <main className="mohalla-auth-shell relative min-h-screen overflow-hidden bg-gradient-to-b from-accent/25 via-background to-background">
       <div className="relative mx-auto grid min-h-screen w-full max-w-7xl items-center gap-10 px-4 py-10 sm:px-6 lg:grid-cols-[1.05fr_0.95fr] lg:px-8">
         <section className="hidden lg:block">
-          <Link href="/" className="mb-12 inline-flex items-center gap-3">
-            <span className="flex h-11 w-11 items-center justify-center rounded-2xl bg-primary text-xl font-black text-primary-foreground shadow-lg shadow-primary/20">
-              م
-            </span>
-            <span className="font-headings text-2xl font-black text-foreground">Mohalla</span>
-          </Link>
+          <MohallaBrandLink className="mb-12 gap-3" markClassName="rounded-2xl shadow-lg shadow-primary/20" />
 
           <div className="max-w-xl space-y-7">
             <div className="inline-flex items-center gap-2 rounded-full border border-primary/15 bg-primary/10 px-3.5 py-1.5 text-xs font-black uppercase tracking-wide text-primary">
@@ -217,12 +213,7 @@ export default function Login() {
 
         <section className="mx-auto w-full max-w-md">
           <div className="mb-7 text-center lg:hidden">
-            <Link href="/" className="inline-flex items-center gap-2.5">
-              <span className="flex h-11 w-11 items-center justify-center rounded-2xl bg-primary text-xl font-black text-primary-foreground">
-                م
-              </span>
-              <span className="font-headings text-2xl font-black text-foreground">Mohalla</span>
-            </Link>
+            <MohallaBrandLink markClassName="rounded-2xl" />
           </div>
 
           <div className="rounded-[2rem] border border-border bg-white/90 p-5 shadow-2xl shadow-primary/5 backdrop-blur-xl sm:p-7">

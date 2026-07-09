@@ -29,6 +29,7 @@ export interface CurrentUser {
 }
 
 const APP_ROLES = ["super_admin", "admin", "moderator", "user"] as const;
+const DEMO_COMMUNITY_KEY = "mohalla_demo_community";
 
 function trustedAppRole(value: unknown) {
   return typeof value === "string" && APP_ROLES.includes(value as (typeof APP_ROLES)[number])
@@ -36,19 +37,47 @@ function trustedAppRole(value: unknown) {
     : undefined;
 }
 
+function getDemoCommunityForCurrentUser() {
+  const fallback = {
+    id: "default",
+    name: "Mohalla Community Hub",
+    area: "Gulberg",
+    city: "Lahore",
+    logoUrl: null,
+    themePrimaryColor: "#1B5E20",
+    themeSecondaryColor: "#0288D1",
+    themeBackgroundColor: "#FAFDF8",
+    themeBannerColor: "#FFFFFF",
+    themeSidebarColor: "#FFFFFF",
+  };
+  if (typeof window === "undefined") return fallback;
+  try {
+    const saved = JSON.parse(window.localStorage.getItem(DEMO_COMMUNITY_KEY) ?? "{}");
+    return { ...fallback, ...saved };
+  } catch {
+    return fallback;
+  }
+}
+
 async function loadCurrentUser(): Promise<CurrentUser | null> {
   const storedUser = getStoredUser();
   if (storedUser?.userId === "ahmed" && storedUser.email === "demo@mohalla.app") {
+    const community = getDemoCommunityForCurrentUser();
     return {
       ...storedUser,
       membershipStatus: "approved",
       communityStatus: "approved",
       community: {
-        id: "default",
-        name: "Mohalla Community Hub",
-        area: "Gulberg",
-        city: "Lahore",
-        logoUrl: null,
+        id: String(community.id ?? "default"),
+        name: community.name ?? "Mohalla Community Hub",
+        area: community.area ?? null,
+        city: community.city ?? null,
+        logoUrl: community.logoUrl ?? null,
+        themePrimaryColor: community.themePrimaryColor ?? null,
+        themeSecondaryColor: community.themeSecondaryColor ?? null,
+        themeBackgroundColor: community.themeBackgroundColor ?? null,
+        themeBannerColor: community.themeBannerColor ?? null,
+        themeSidebarColor: community.themeSidebarColor ?? null,
       },
     };
   }

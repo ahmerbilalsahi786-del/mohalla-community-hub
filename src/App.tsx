@@ -7,6 +7,7 @@ import { CommunityRulesModal } from "@/components/modals/community-rules-modal";
 import { OnboardingModal } from "@/components/modals/onboarding-modal";
 import { CommandSearch } from "@/components/search/command-search";
 import { MobileNav } from "@/components/dashboard/mobile-nav";
+import { MohallaLoadingScreen } from "@/components/brand/mohalla-brand";
 import { ProtectedRoute, AdminRoute, AuthenticatedRoute, SuperAdminRoute } from "@/components/ProtectedRoute";
 import { InstallAppButton, InstallAppPrompt } from "@/components/pwa/install-app";
 import { clearToken } from "@/lib/auth";
@@ -164,7 +165,7 @@ function AppChrome() {
 
   return (
     <>
-      <Suspense fallback={<div className="flex min-h-screen items-center justify-center bg-background text-sm text-muted-foreground">Loading Mohalla...</div>}>
+      <Suspense fallback={<MohallaLoadingScreen />}>
         <Router />
       </Suspense>
       {(isPublicAuth || isLanding) && <InstallAppButton variant="floating" />}

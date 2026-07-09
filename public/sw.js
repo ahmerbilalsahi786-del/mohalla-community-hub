@@ -1,12 +1,11 @@
-const CACHE_VERSION = "mohalla-v4";
+const CACHE_VERSION = "mohalla-v5";
 const APP_SHELL_CACHE = `${CACHE_VERSION}-shell`;
 const RUNTIME_CACHE = `${CACHE_VERSION}-runtime`;
 
 const APP_SHELL = [
   "/",
   "/manifest.json",
-  "/brand/mohalla-mark.svg",
-  "/brand/mohalla-logo.svg",
+  "/brand/mohalla-brand-mark.png",
   "/pwa-192.png",
   "/pwa-512.png",
   "/pwa-maskable-512.png",

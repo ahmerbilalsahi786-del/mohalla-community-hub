@@ -3,7 +3,6 @@ import { useState } from 'react'
 import { Link, useLocation } from 'wouter'
 import { cn } from '@/lib/utils'
 import {
-  Building2,
   Globe2,
   Home,
   Users,
@@ -25,6 +24,7 @@ import {
   UserCircle,
 } from 'lucide-react'
 import { InstallAppButton } from '@/components/pwa/install-app'
+import { MohallaBrandMark } from '@/components/brand/mohalla-brand'
 import { canManageCommunity, useCurrentUser, useLogout } from '@/hooks/use-current-user'
 
 const navItems = [
@@ -54,7 +54,6 @@ export function Sidebar() {
   const { data: user } = useCurrentUser()
   const logout = useLogout()
   const profileHref = `/profile/${user?.userId ?? 'me'}`
-  const logoUrl = user?.community?.logoUrl
   const societyName = user?.community?.name?.trim() || 'Mohalla'
   const visibleNavItems = navItems.filter((item) => item.href !== '/admin' || canManageCommunity(user?.role))
   const visibleUtilityItems = utilityItems.map((item) => item.href === '/profile/me' ? { ...item, href: profileHref } : item)
@@ -72,13 +71,7 @@ export function Sidebar() {
     >
       <div className="flex min-h-20 items-center justify-between border-b border-sidebar-border bg-sidebar px-4">
         <Link href="/dashboard" className={cn('flex min-w-0 items-center gap-3', collapsed && 'mx-auto')}>
-          <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-primary text-primary-foreground shadow-sm ring-1 ring-primary/15">
-            {logoUrl ? (
-              <img src={logoUrl} alt="" className="h-full w-full rounded-[10px] object-cover" />
-            ) : (
-              <Building2 size={22} />
-            )}
-          </span>
+          <MohallaBrandMark animated className="h-11 w-11 rounded-xl shadow-sm ring-1 ring-primary/15" />
           {!collapsed && (
             <div className="min-w-0 leading-tight">
               <span className="brand-wordmark block truncate text-xl text-sidebar-foreground">Mohalla</span>

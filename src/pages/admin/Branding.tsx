@@ -50,7 +50,27 @@ export default function AdminBranding() {
 
   const update = useAdminUpdateCommunity({
     mutation: {
-      onSuccess: () => {
+      onSuccess: (updated) => {
+        setLogoUrl(updated.logoUrl ?? null);
+        setColors({
+          themePrimaryColor: updated.themePrimaryColor ?? defaults.themePrimaryColor,
+          themeSecondaryColor: updated.themeSecondaryColor ?? defaults.themeSecondaryColor,
+          themeBackgroundColor: updated.themeBackgroundColor ?? defaults.themeBackgroundColor,
+          themeBannerColor: updated.themeBannerColor ?? defaults.themeBannerColor,
+          themeSidebarColor: updated.themeSidebarColor ?? defaults.themeSidebarColor,
+        });
+        qc.setQueriesData({ queryKey: ["current-user"] }, (current: any) => current ? {
+          ...current,
+          community: current.community ? {
+            ...current.community,
+            logoUrl: updated.logoUrl ?? current.community.logoUrl ?? null,
+            themePrimaryColor: updated.themePrimaryColor ?? null,
+            themeSecondaryColor: updated.themeSecondaryColor ?? null,
+            themeBackgroundColor: updated.themeBackgroundColor ?? null,
+            themeBannerColor: updated.themeBannerColor ?? null,
+            themeSidebarColor: updated.themeSidebarColor ?? null,
+          } : current.community,
+        } : current);
         qc.invalidateQueries({ queryKey: getAdminGetCommunityQueryKey() });
         qc.invalidateQueries({ queryKey: ["current-user"] });
         toast({ title: "Your community's branding has been updated" });

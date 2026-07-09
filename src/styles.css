@@ -205,6 +205,107 @@
   display: none;
 }
 
+.mohalla-brand-mark {
+  background: color-mix(in oklch, var(--card) 72%, transparent);
+  box-shadow: 0 8px 18px color-mix(in oklch, var(--foreground) 8%, transparent);
+  isolation: isolate;
+}
+
+.mohalla-brand-mark-transparent {
+  background: transparent;
+  box-shadow: none;
+}
+
+.mohalla-brand-mark img {
+  filter: saturate(1.04) drop-shadow(0 4px 7px color-mix(in oklch, var(--foreground) 9%, transparent));
+}
+
+.mohalla-brand-orbit {
+  position: absolute;
+  inset: 13%;
+  z-index: 2;
+  pointer-events: none;
+  transform-origin: 50% 52%;
+  animation: mohalla-brand-orbit 5.8s linear infinite;
+}
+
+.mohalla-brand-orbit-dot {
+  position: absolute;
+  width: 18%;
+  aspect-ratio: 1;
+  border-radius: 999px;
+  box-shadow: 0 3px 7px color-mix(in oklch, var(--foreground) 16%, transparent);
+}
+
+.mohalla-brand-orbit-dot-top {
+  left: 50%;
+  top: 6%;
+  transform: translate(-50%, -50%);
+  background: #3cc5aa;
+}
+
+.mohalla-brand-orbit-dot-left {
+  left: 12%;
+  top: 82%;
+  transform: translate(-50%, -50%);
+  background: #006b1f;
+}
+
+.mohalla-brand-orbit-dot-right {
+  left: 88%;
+  top: 82%;
+  transform: translate(-50%, -50%);
+  background: #007a22;
+}
+
+.mohalla-loading-screen {
+  position: relative;
+  isolation: isolate;
+  background:
+    radial-gradient(circle at 50% 42%, color-mix(in oklch, var(--primary) 12%, transparent), transparent 32rem),
+    linear-gradient(180deg, color-mix(in oklch, var(--accent) 18%, transparent), transparent 46%),
+    var(--background);
+}
+
+.mohalla-loading-screen::before {
+  content: "";
+  position: absolute;
+  inset: auto -5rem -6rem auto;
+  width: min(36rem, 78vw);
+  aspect-ratio: 1;
+  background: url('/brand/mohalla-brand-mark.png') center / contain no-repeat;
+  opacity: 0.07;
+  pointer-events: none;
+}
+
+.mohalla-loading-card {
+  position: relative;
+  z-index: 1;
+}
+
+.mohalla-auth-shell {
+  isolation: isolate;
+}
+
+.mohalla-auth-shell::before {
+  content: "";
+  position: absolute;
+  right: -6rem;
+  bottom: -6rem;
+  z-index: 0;
+  width: min(34rem, 76vw);
+  aspect-ratio: 1;
+  background: url('/brand/mohalla-brand-mark.png') center / contain no-repeat;
+  opacity: 0.07;
+  pointer-events: none;
+}
+
+@keyframes mohalla-brand-orbit {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
 h1,
 h2,
 h3,
@@ -256,15 +357,20 @@ h6 {
   position: fixed;
   inset: 0;
   z-index: -1;
-  background:
+  background-image:
+    url('/brand/mohalla-brand-mark.png'),
     linear-gradient(180deg, color-mix(in oklch, var(--card) 58%, transparent), transparent 46%),
     linear-gradient(90deg, transparent, color-mix(in oklch, var(--card) 26%, transparent), transparent);
+  background-position: right 4rem bottom 5.25rem, 0 0, 0 0;
+  background-repeat: no-repeat, no-repeat, no-repeat;
+  background-size: min(24vw, 18rem) auto, auto, auto;
   opacity: 0.62;
   pointer-events: none;
 }
 
 .dark .portal-shell::after {
-  background:
+  background-image:
+    url('/brand/mohalla-brand-mark.png'),
     linear-gradient(180deg, color-mix(in oklch, oklch(0.24 0.055 252) 48%, transparent), transparent 42%),
     linear-gradient(90deg, transparent, color-mix(in oklch, var(--primary) 9%, transparent), transparent);
   opacity: 0.7;
@@ -429,6 +535,7 @@ h6 {
   .premium-card:hover,
   .feed-card-enter,
   .notification-drawer,
+  .mohalla-brand-orbit,
   :where(.portal-shell) :where(button:active, [data-slot="button"]:active, a[class*="rounded"]:active) {
     animation: none;
     transform: none;

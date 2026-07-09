@@ -1,5 +1,5 @@
 import { useEffect } from "react";
-import { Link, useLocation } from "wouter";
+import { useLocation } from "wouter";
 import {
   AlertTriangle,
   Building2,
@@ -11,6 +11,7 @@ import {
   XCircle,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { MohallaBrandLink } from "@/components/brand/mohalla-brand";
 import { useCurrentUser, useLogout } from "@/hooks/use-current-user";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -67,14 +68,9 @@ export default function MembershipPending() {
   }, [navigate, refetch, user?.communityStatus, user?.membershipStatus]);
 
   return (
-    <main className="relative min-h-screen overflow-hidden bg-gradient-to-b from-accent/25 via-background to-background px-4 py-8">
+    <main className="mohalla-auth-shell relative min-h-screen overflow-hidden bg-gradient-to-b from-accent/25 via-background to-background px-4 py-8">
       <div className="relative mx-auto flex min-h-[calc(100vh-4rem)] max-w-5xl flex-col items-center justify-center">
-        <Link href="/" className="mb-8 inline-flex items-center gap-2.5">
-          <span className="flex h-11 w-11 items-center justify-center rounded-2xl bg-primary text-xl font-black text-primary-foreground shadow-lg shadow-primary/20">
-            م
-          </span>
-          <span className="font-headings text-2xl font-black text-foreground">Mohalla</span>
-        </Link>
+        <MohallaBrandLink className="mb-8" markClassName="rounded-2xl shadow-lg shadow-primary/20" />
 
         <section className="w-full max-w-2xl overflow-hidden rounded-[2rem] border border-border bg-white/90 shadow-2xl shadow-primary/5 backdrop-blur-xl">
           <div className={`p-7 text-center sm:p-9 ${blocked ? "bg-destructive/5" : "bg-primary/5"}`}>

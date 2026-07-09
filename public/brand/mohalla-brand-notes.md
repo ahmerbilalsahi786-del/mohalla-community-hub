@@ -2,22 +2,21 @@
 
 ## Direction
 
-The logo uses a compact neighbourhood mark: two homes around a shared lane with a small signal dot. It is meant to feel local, trustworthy, warm, and app-ready without leaning on flags, badges, or generic network symbols.
+The active Mohalla logo is the three-point community mark supplied on July 2, 2026. It should feel simple, local, connected, and app-ready.
 
 ## Files
 
-- `mohalla-logo.svg`: full horizontal lockup for headers, Canva, pitch decks, and social templates.
-- `mohalla-mark.svg`: compact mark for favicon, app icon, avatars, and collapsed navigation.
+- `mohalla-brand-source.png`: original uploaded brand image.
+- `mohalla-brand-mark.png`: cropped app-ready mark used in the web UI, loading states, favicon, and brand moments.
+- `mohalla-logo.svg` and `mohalla-mark.svg`: older concept files kept for reference only.
 
 ## Palette
 
-- Deep teal: `#0f766e`
-- Charcoal green: `#123b3a`
-- Warm coral: `#f97357`
-- Saffron accent: `#f9b233`
-- Soft mint: `#bfe9d6`
-- Warm white: `#f8faf7`
+- Aqua: `#3cc5aa`
+- Deep green: `#006b1f`
+- Soft connector green: `#7ad083`
+- Warm white: `#ffffff`
 
 ## Usage
 
-Use the full lockup when the brand name needs to be read. Use the mark alone only when the surrounding UI already says Mohalla or space is tight.
+Use the mark beside the Mohalla wordmark for home links and use the animated orbit version for loading screens and brand-led UI moments.

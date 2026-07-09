@@ -3,6 +3,7 @@
 import React, { useState } from 'react';
 import { Link } from 'wouter';
 import { Button } from '@/components/ui/button';
+import { MohallaBrandLink, MohallaBrandMark } from '@/components/brand/mohalla-brand';
 import { 
   ShieldCheck, 
   ShoppingBag, 
@@ -26,12 +27,7 @@ function Navbar() {
   return (
     <header className="sticky top-0 z-40 border-b border-border/70 bg-background/85 backdrop-blur-xl">
       <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
-        <Link href="/" className="flex items-center gap-2.5">
-          <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-primary text-sm font-black text-primary-foreground">
-            م
-          </div>
-          <span className="font-headings text-xl font-black tracking-tight text-foreground">Mohalla</span>
-        </Link>
+        <MohallaBrandLink markClassName="h-9 w-9 rounded-xl" labelClassName="text-xl tracking-tight" />
         <nav className="hidden items-center gap-6 text-sm font-bold text-muted-foreground md:flex">
           <a href="#preview" className="hover:text-foreground">Preview</a>
           <a href="#safety" className="hover:text-foreground">Safety</a>
@@ -153,9 +149,7 @@ export default function Home() {
                 {/* Mock Phone/UI Header */}
                 <div className="flex items-center justify-between border-b border-border/60 pb-4 mb-4">
                   <div className="flex items-center gap-2.5">
-                    <div className="w-9 h-9 rounded-xl bg-primary flex items-center justify-center text-white font-black text-sm">
-                      M
-                    </div>
+                    <MohallaBrandMark animated className="h-9 w-9 rounded-xl" />
                     <div>
                       <h4 className="font-headings font-black text-sm text-foreground">Mohalla App</h4>
                       <p className="text-[10px] font-semibold text-muted-foreground">Askari 11, Lahore</p>
