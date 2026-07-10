@@ -26,7 +26,7 @@ const typeMeta = {
 
 export function ActivityCard({ activities }: ActivityCardProps) {
   return (
-    <div className="relative overflow-hidden rounded-xl border portal-soft-rule bg-card shadow-sm">
+    <div className="delight-hover-lift relative overflow-hidden rounded-xl border portal-soft-rule bg-card shadow-sm">
       <div className="flex items-center justify-between gap-3 border-b portal-soft-rule px-5 py-4">
         <div className="min-w-0">
           <h3 className="portal-section-title text-lg text-card-foreground">Recent Activity</h3>
@@ -52,7 +52,7 @@ export function ActivityCard({ activities }: ActivityCardProps) {
               key={activity.id}
               className="flex items-start gap-3 p-4 transition-colors hover:bg-secondary/45"
             >
-              <div className={cn('flex h-10 w-10 shrink-0 items-center justify-center rounded-lg', meta.className)}>
+              <div className={cn('delight-swing-on-hover flex h-10 w-10 shrink-0 items-center justify-center rounded-lg', meta.className)}>
                 <Icon size={18} />
               </div>
 

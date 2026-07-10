@@ -165,13 +165,13 @@ export function EmergencyServicesWidget() {
   const visibleServices = showAllServices || search.trim() ? filteredServiceContacts : filteredServiceContacts.slice(0, 5)
 
   return (
-    <section className="portal-panel overflow-hidden rounded-2xl">
+    <section className="portal-panel delight-hover-lift overflow-hidden rounded-2xl">
       <button
         onClick={() => setMobileOpen((open) => !open)}
         className="flex w-full items-center justify-between gap-3 border-b portal-soft-rule px-4 py-4 text-left lg:cursor-default"
       >
         <span className="flex items-center gap-2 text-base font-semibold text-foreground">
-          <span className="flex h-8 w-8 items-center justify-center rounded-xl bg-red-500/10 text-red-600">
+          <span className="delight-swing-soft flex h-8 w-8 items-center justify-center rounded-xl bg-red-500/10 text-red-600">
             <Phone size={16} />
           </span>
           Emergency & services

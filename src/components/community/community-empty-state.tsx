@@ -1,6 +1,7 @@
 import { ArrowRight, CalendarPlus, Megaphone, PackagePlus, Search, ShieldAlert, Users } from 'lucide-react'
 import { Link } from 'wouter'
 import { Empty, EmptyContent, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle } from '@/components/ui/empty'
+import { CommunityCharacter } from '@/components/community/community-delight'
 import { cn } from '@/lib/utils'
 
 type EmptyKind = 'feed' | 'marketplace' | 'events' | 'members' | 'notifications' | 'safety' | 'search' | 'generic'
@@ -56,6 +57,17 @@ const KIND_META: Record<EmptyKind, { icon: React.ElementType; title: string; des
   },
 }
 
+const CHARACTER_BY_KIND: Record<EmptyKind, React.ComponentProps<typeof CommunityCharacter>['variant']> = {
+  feed: 'wave',
+  marketplace: 'shop',
+  events: 'calendar',
+  members: 'wave',
+  notifications: 'wave',
+  safety: 'helper',
+  search: 'helper',
+  generic: 'wave',
+}
+
 export function CommunityEmptyState({
   kind = 'generic',
   title,
@@ -81,11 +93,17 @@ export function CommunityEmptyState({
   const actionHref = href ?? meta.href
 
   return (
-    <Empty className={cn('border border-dashed border-border bg-card/70 shadow-sm', compact && 'py-8', className)}>
+    <Empty className={cn('relative overflow-hidden border border-dashed border-border bg-card/70 shadow-sm', compact && 'py-8', className)}>
       <EmptyHeader>
-        <EmptyMedia variant="icon" className="rounded-xl bg-primary/10 text-primary">
-          <Icon />
-        </EmptyMedia>
+        <div className="relative mb-1">
+          <CommunityCharacter
+            variant={CHARACTER_BY_KIND[kind]}
+            className="mohalla-empty-character delight-float-soft"
+          />
+          <EmptyMedia variant="icon" className="absolute -bottom-1 -right-1 rounded-xl border border-border bg-card text-primary shadow-sm">
+            <Icon />
+          </EmptyMedia>
+        </div>
         <EmptyTitle className="font-bold text-foreground">{title ?? meta.title}</EmptyTitle>
         <EmptyDescription>{description ?? meta.description}</EmptyDescription>
       </EmptyHeader>

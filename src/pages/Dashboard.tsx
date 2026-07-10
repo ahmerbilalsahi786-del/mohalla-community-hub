@@ -64,7 +64,7 @@ function TrendingTopicsSlideshow({ topics }: { topics: TrendingTopic[] }) {
       data-topic-slideshow
       data-active-page={page}
       data-page-count={pages.length}
-      className="max-w-3xl rounded-xl border portal-soft-rule bg-card p-3 shadow-sm"
+      className="delight-float-soft max-w-3xl rounded-xl border portal-soft-rule bg-card p-3 shadow-sm"
     >
       <div className="mb-3 flex items-center justify-between gap-3">
         <div className="flex min-w-0 items-center gap-2">
@@ -276,7 +276,7 @@ export default function Dashboard() {
   return (
     <DashboardShell>
       <div className="space-y-5">
-        <section className="overflow-hidden rounded-xl border portal-soft-rule bg-card p-5 shadow-sm sm:p-6">
+        <section className="relative overflow-hidden rounded-xl border portal-soft-rule bg-card p-5 shadow-sm sm:p-6">
           <div className="grid gap-6 xl:grid-cols-[minmax(0,1.2fr)_minmax(320px,0.8fr)] xl:items-stretch">
             <div className="space-y-5">
               <div className="portal-chip w-fit border-primary/20 bg-primary/10 text-primary">
@@ -305,24 +305,24 @@ export default function Dashboard() {
             </div>
 
             <div className="grid gap-3 sm:grid-cols-3 xl:grid-cols-1">
-              <div className="rounded-xl border portal-soft-rule bg-background/70 p-4 shadow-xs">
-                <div className="mb-3 flex h-11 w-11 items-center justify-center rounded-lg bg-primary/10 text-primary">
+              <div className="delight-hover-lift rounded-xl border portal-soft-rule bg-background/70 p-4 shadow-xs">
+                <div className="delight-swing-on-hover mb-3 flex h-11 w-11 items-center justify-center rounded-lg bg-primary/10 text-primary">
                   <TrendingUp className="h-5 w-5" />
                 </div>
                 <p className="text-xs font-black uppercase text-muted-foreground">Community Pulse</p>
                 <p className="mt-2 text-2xl font-black text-foreground">{stats.postsThisMonth}</p>
                 <p className="mt-1 text-sm text-muted-foreground">community updates this month</p>
               </div>
-              <div className="rounded-xl border portal-soft-rule bg-background/70 p-4 shadow-xs">
-                <div className="mb-3 flex h-11 w-11 items-center justify-center rounded-lg bg-accent/10 text-accent">
+              <div className="delight-hover-lift rounded-xl border portal-soft-rule bg-background/70 p-4 shadow-xs">
+                <div className="delight-swing-on-hover mb-3 flex h-11 w-11 items-center justify-center rounded-lg bg-accent/10 text-accent">
                   <Calendar className="h-5 w-5" />
                 </div>
                 <p className="text-xs font-black uppercase text-muted-foreground">Upcoming Events</p>
                 <p className="mt-2 text-2xl font-black text-foreground">{upcomingEvents.length}</p>
                 <p className="mt-1 text-sm text-muted-foreground">{upcomingEvents.length > 0 ? `${upcomingEvents.length} ${eventLabel} scheduled` : 'No upcoming events'}</p>
               </div>
-              <div className="rounded-xl border portal-soft-rule bg-background/70 p-4 shadow-xs">
-                <div className="mb-3 flex h-11 w-11 items-center justify-center rounded-lg bg-amber-500/10 text-amber-600">
+              <div className="delight-hover-lift rounded-xl border portal-soft-rule bg-background/70 p-4 shadow-xs">
+                <div className="delight-swing-on-hover mb-3 flex h-11 w-11 items-center justify-center rounded-lg bg-amber-500/10 text-amber-600">
                   <Users className="h-5 w-5" />
                 </div>
                 <p className="text-xs font-black uppercase text-muted-foreground">Verified Residents</p>

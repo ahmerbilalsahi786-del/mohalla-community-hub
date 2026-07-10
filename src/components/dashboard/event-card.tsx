@@ -31,8 +31,8 @@ const categoryColors: Record<string, string> = {
 export function EventCard({ event, variant = 'default' }: EventCardProps) {
   if (variant === 'compact') {
     return (
-      <div className="group flex items-center gap-4 rounded-xl border portal-soft-rule bg-card p-4 shadow-sm transition-all hover:border-primary/30 hover:bg-secondary/35">
-        <div className="flex h-14 w-14 shrink-0 flex-col items-center justify-center rounded-lg border border-primary/15 bg-primary/10">
+      <div className="group delight-hover-lift flex items-center gap-4 rounded-xl border portal-soft-rule bg-card p-4 shadow-sm transition-all hover:border-primary/30 hover:bg-secondary/35">
+        <div className="delight-swing-on-hover flex h-14 w-14 shrink-0 flex-col items-center justify-center rounded-lg border border-primary/15 bg-primary/10">
           <span className="text-xs font-bold text-primary">
             {new Date(event.date).toLocaleDateString('en-US', { month: 'short' })}
           </span>
@@ -66,7 +66,7 @@ export function EventCard({ event, variant = 'default' }: EventCardProps) {
   }
 
   return (
-    <div className="group relative overflow-hidden rounded-xl border portal-soft-rule bg-card shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:border-primary/30 hover:shadow-md">
+    <div className="group delight-hover-lift relative overflow-hidden rounded-xl border portal-soft-rule bg-card shadow-sm transition-all duration-200 hover:border-primary/30">
       <div className="relative h-28 bg-secondary">
         <div className="absolute inset-0 bg-[linear-gradient(135deg,color-mix(in_oklch,var(--primary)_16%,transparent),transparent_58%),linear-gradient(90deg,color-mix(in_oklch,var(--chart-4)_18%,transparent),transparent_65%)]" />
         <div className="absolute left-4 top-4">
@@ -78,7 +78,7 @@ export function EventCard({ event, variant = 'default' }: EventCardProps) {
           </span>
         </div>
 
-        <div className="absolute -bottom-6 right-4 flex h-16 w-16 flex-col items-center justify-center rounded-lg border border-border bg-card shadow-md">
+        <div className="delight-swing-soft absolute -bottom-6 right-4 flex h-16 w-16 flex-col items-center justify-center rounded-lg border border-border bg-card shadow-md">
           <span className="text-xs font-bold text-primary">
             {new Date(event.date).toLocaleDateString('en-US', { month: 'short' })}
           </span>

@@ -122,6 +122,10 @@ export interface Listing {
   condition: string;
   status: string;
   whatsappNumber: string;
+  listingKind?: string;
+  location?: string | null;
+  latitude?: number | null;
+  longitude?: number | null;
   createdAt: string;
 }
 
@@ -145,6 +149,10 @@ export interface ListingInput {
   imageUrls?: string[];
   condition?: string;
   whatsappNumber: string;
+  listingKind?: string;
+  location?: string | null;
+  latitude?: number | null;
+  longitude?: number | null;
 }
 
 export interface ListingStatusUpdate {

@@ -61,7 +61,7 @@ function EventCard({ event, isPast }: { event: EventItem; isPast?: boolean }) {
 
   return (
     <div className={cn(
-      'overflow-hidden rounded-2xl border bg-card shadow-sm transition-all hover:shadow-md',
+      'delight-hover-lift overflow-hidden rounded-2xl border bg-card shadow-sm transition-all hover:shadow-md',
       isPast ? 'border-border opacity-70' : soon ? 'border-primary/30' : 'border-border'
     )}>
       {event.imageUrl && (
@@ -73,8 +73,8 @@ function EventCard({ event, isPast }: { event: EventItem; isPast?: boolean }) {
 
       <div className="p-4">
         {soon && !isPast && (
-          <span className="mb-2 inline-flex items-center gap-1 rounded-full bg-primary/10 px-2 py-0.5 text-xs font-semibold text-primary">
-            🔥 Coming up soon
+          <span className="delight-breathe mb-2 inline-flex items-center gap-1 rounded-full bg-primary/10 px-2 py-0.5 text-xs font-semibold text-primary">
+            Coming up soon
           </span>
         )}
 
@@ -124,7 +124,7 @@ function EventCard({ event, isPast }: { event: EventItem; isPast?: boolean }) {
                     key={opt.status}
                     onClick={() => rsvp.mutate({ eventId: event.id, data: { status: opt.status } })}
                     disabled={rsvp.isPending}
-                    className={cn(
+                  className={cn(
                       'flex items-center gap-1 rounded-xl px-2.5 py-1.5 text-xs font-medium transition-all',
                       active ? opt.active : opt.inactive
                     )}
@@ -357,7 +357,7 @@ export default function Events() {
 
       <button
         onClick={() => setShowCreate(true)}
-        className="fixed bottom-[calc(5.25rem+env(safe-area-inset-bottom))] right-4 z-40 flex h-14 w-14 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-lg shadow-primary/30 transition-all hover:scale-105 hover:bg-primary/90 md:bottom-8 md:right-8"
+        className="delight-breathe fixed bottom-[calc(5.25rem+env(safe-area-inset-bottom))] right-4 z-40 flex h-14 w-14 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-lg shadow-primary/30 transition-all hover:scale-105 hover:bg-primary/90 md:bottom-8 md:right-8"
       >
         <Plus size={24} />
       </button>

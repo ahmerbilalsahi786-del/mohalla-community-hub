@@ -55,6 +55,7 @@ export function Sidebar() {
   const logout = useLogout()
   const profileHref = `/profile/${user?.userId ?? 'me'}`
   const societyName = user?.community?.name?.trim() || 'Mohalla'
+  const societyLogo = user?.community?.logoUrl
   const visibleNavItems = navItems.filter((item) => item.href !== '/admin' || canManageCommunity(user?.role))
   const visibleUtilityItems = utilityItems.map((item) => item.href === '/profile/me' ? { ...item, href: profileHref } : item)
 
@@ -95,7 +96,11 @@ export function Sidebar() {
         <div className="mx-3 mt-3 rounded-xl border border-sidebar-border bg-secondary/55 px-3 py-3">
           <div className="flex items-center gap-2">
             <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-card text-primary">
-              <Landmark size={16} />
+              {societyLogo ? (
+                <img src={societyLogo} alt="" className="h-full w-full rounded-lg object-cover" />
+              ) : (
+                <Landmark size={16} />
+              )}
             </span>
             <div className="min-w-0">
               <p className="truncate text-sm font-bold text-sidebar-foreground">{societyName}</p>

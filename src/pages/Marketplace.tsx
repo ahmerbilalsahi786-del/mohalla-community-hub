@@ -1,5 +1,5 @@
-import { useState, useRef } from 'react'
-import { Link } from 'wouter'
+import { type MouseEvent, useEffect, useState, useRef } from 'react'
+import { Link, useSearch } from 'wouter'
 import { useListListings, useCreateListing, getListListingsQueryKey } from '@/lib/generated/api'
 import { useQueryClient } from '@tanstack/react-query'
 import { Sidebar } from '@/components/dashboard/sidebar'
@@ -7,7 +7,7 @@ import { TopNavbar } from '@/components/dashboard/top-navbar'
 import {
   Plus, X, Search, Loader2, ChevronDown, ChevronUp,
   Armchair, Tv2, Shirt, Car, Wrench, Gift, Package,
-  Tag, Image as ImageIcon, Store, MapPin
+  Tag, Image as ImageIcon, Store, MapPin, Trash2
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { useToast } from '@/hooks/use-toast'
@@ -17,6 +17,8 @@ import { PublicationToggle } from '@/components/city-feed/publication-toggle'
 import { CommunityEmptyState } from '@/components/community/community-empty-state'
 import { MarketplaceListingSkeleton } from '@/components/community/skeleton-states'
 import LocationPicker, { type PickedLocation } from '@/components/location-picker'
+import { canManageCommunity, useCurrentUser } from '@/hooks/use-current-user'
+import { customFetch } from '@/lib/custom-fetch'
 
 type Category = 'all' | 'shop' | 'furniture' | 'electronics' | 'clothes' | 'vehicles' | 'services' | 'free' | 'other'
 type Condition = 'new' | 'good' | 'fair'
@@ -78,15 +80,33 @@ interface Listing {
   longitude?: number | null
 }
 
-function ListingCard({ listing }: { listing: Listing }) {
+function ListingCard({
+  listing,
+  canManage,
+  onDelete,
+  deleting,
+}: {
+  listing: Listing
+  canManage: boolean
+  onDelete: (listing: Listing) => void
+  deleting: boolean
+}) {
   const cond = CONDITION_BADGE[listing.condition] || CONDITION_BADGE.good
   const status = STATUS_BADGE[listing.status] || STATUS_BADGE.available
   const isSold = listing.status !== 'available'
+  const { data: user } = useCurrentUser()
+  const canDelete = canManage || user?.userId === listing.userId
+
+  const handleDelete = (event: MouseEvent<HTMLButtonElement>) => {
+    event.preventDefault()
+    event.stopPropagation()
+    onDelete(listing)
+  }
 
   return (
     <Link href={`/marketplace/${listing.id}`}>
       <div className={cn(
-        'group relative flex flex-col overflow-hidden rounded-2xl border border-border bg-card shadow-sm hover:shadow-md transition-all cursor-pointer',
+        'group delight-hover-lift relative flex flex-col overflow-hidden rounded-2xl border border-border bg-card shadow-sm hover:shadow-md transition-all cursor-pointer',
         isSold && 'opacity-60'
       )}>
         <PublicationToggle
@@ -96,6 +116,18 @@ function ListingCard({ listing }: { listing: Listing }) {
           stopNavigation
           className="absolute right-2 top-2 z-10 bg-background/90 shadow-sm backdrop-blur"
         />
+        {canDelete && (
+          <button
+            type="button"
+            onClick={handleDelete}
+            disabled={deleting}
+            aria-label={`Delete ${listing.title}`}
+            title="Delete listing"
+            className="absolute left-2 top-2 z-10 flex h-8 w-8 items-center justify-center rounded-lg bg-background/90 text-muted-foreground shadow-sm backdrop-blur transition-colors hover:bg-destructive/10 hover:text-destructive disabled:opacity-50"
+          >
+            {deleting ? <Loader2 size={14} className="animate-spin" /> : <Trash2 size={14} />}
+          </button>
+        )}
         {/* Image */}
         <div className="relative aspect-[4/3] bg-muted/50 overflow-hidden">
           {listing.imageUrls.length > 0 ? (
@@ -106,7 +138,7 @@ function ListingCard({ listing }: { listing: Listing }) {
             />
           ) : (
             <div className="w-full h-full flex items-center justify-center">
-              <Package size={40} className="text-muted-foreground/30" />
+              <Package size={40} className="delight-swing-soft text-muted-foreground/30" />
             </div>
           )}
           {isSold && (
@@ -168,8 +200,8 @@ function ListingCard({ listing }: { listing: Listing }) {
   )
 }
 
-function CreateListingModal({ onClose }: { onClose: () => void }) {
-  const [mode, setMode] = useState<'listing' | 'shop'>('listing')
+function CreateListingModal({ onClose, initialMode = 'listing' }: { onClose: () => void; initialMode?: 'listing' | 'shop' }) {
+  const [mode, setMode] = useState<'listing' | 'shop'>(initialMode)
   const [title, setTitle] = useState('')
   const [description, setDescription] = useState('')
   const [pricePkr, setPricePkr] = useState('')
@@ -188,7 +220,15 @@ function CreateListingModal({ onClose }: { onClose: () => void }) {
     mutation: {
       onSuccess: () => {
         queryClient.invalidateQueries({ queryKey: getListListingsQueryKey() })
+        toast({ title: mode === 'shop' ? 'Shop registered.' : 'Marketplace post created.' })
         onClose()
+      },
+      onError: (error) => {
+        toast({
+          title: mode === 'shop' ? 'Could not register shop.' : 'Could not create marketplace post.',
+          description: error instanceof Error ? error.message : 'Please check the required fields and try again.',
+          variant: 'destructive',
+        })
       },
     },
   })
@@ -218,7 +258,14 @@ function CreateListingModal({ onClose }: { onClose: () => void }) {
   }
 
   const handleSubmit = () => {
-    if (!title.trim() || !description.trim() || !whatsapp.trim()) return
+    if (!title.trim() || !description.trim() || !whatsapp.trim()) {
+      toast({
+        title: 'Missing details',
+        description: mode === 'shop' ? 'Add shop name, description, and WhatsApp number.' : 'Add title, description, and WhatsApp number.',
+        variant: 'destructive',
+      })
+      return
+    }
     createListing.mutate({
       data: {
         title: title.trim(),
@@ -466,8 +513,25 @@ export default function Marketplace() {
   const [maxPrice, setMaxPrice] = useState('')
   const [showFilters, setShowFilters] = useState(false)
   const [showCreate, setShowCreate] = useState(false)
+  const [createMode, setCreateMode] = useState<'listing' | 'shop'>('listing')
   const [page, setPage] = useState(1)
+  const [deletingId, setDeletingId] = useState<number | null>(null)
   const searchTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const queryClient = useQueryClient()
+  const query = useSearch()
+  const { toast } = useToast()
+  const { data: user } = useCurrentUser()
+  const canManage = canManageCommunity(user?.role)
+
+  useEffect(() => {
+    const params = new URLSearchParams(query)
+    const create = params.get('create')
+    if (create === '1' || create === 'listing' || create === 'shop') {
+      setCreateMode(create === 'shop' ? 'shop' : 'listing')
+      setShowCreate(true)
+      window.history.replaceState(null, '', window.location.pathname)
+    }
+  }, [query])
 
   const handleSearchChange = (val: string) => {
     setSearch(val)
@@ -494,6 +558,31 @@ export default function Marketplace() {
   const handleCategoryChange = (cat: Category) => {
     setActiveCategory(cat)
     setPage(1)
+  }
+
+  const openCreate = (mode: 'listing' | 'shop') => {
+    setCreateMode(mode)
+    setShowCreate(true)
+  }
+
+  const handleDeleteListing = async (listing: Listing) => {
+    const kind = listing.listingKind === 'shop' || listing.category === 'shop' ? 'shop' : 'listing'
+    if (!window.confirm(`Delete ${kind} "${listing.title}"?`)) return
+
+    setDeletingId(listing.id)
+    try {
+      await customFetch(`/api/marketplace/${listing.id}`, { method: 'DELETE' })
+      queryClient.invalidateQueries({ queryKey: getListListingsQueryKey() })
+      toast({ title: kind === 'shop' ? 'Shop deleted.' : 'Listing deleted.' })
+    } catch (error) {
+      toast({
+        title: kind === 'shop' ? 'Could not delete shop.' : 'Could not delete listing.',
+        description: error instanceof Error ? error.message : 'Please try again.',
+        variant: 'destructive',
+      })
+    } finally {
+      setDeletingId(null)
+    }
   }
 
   return (
@@ -547,6 +636,20 @@ export default function Marketplace() {
               >
                 <Store size={14} />
                 Shops
+              </button>
+              <button
+                onClick={() => openCreate('shop')}
+                className="flex shrink-0 items-center gap-1.5 rounded-xl border border-primary/30 bg-primary/10 px-3 py-2 text-sm font-semibold text-primary transition-colors hover:bg-primary/15"
+              >
+                <Store size={14} />
+                Register Shop
+              </button>
+              <button
+                onClick={() => openCreate('listing')}
+                className="flex shrink-0 items-center gap-1.5 rounded-xl bg-primary px-3 py-2 text-sm font-semibold text-primary-foreground shadow-sm transition-colors hover:bg-primary-hover"
+              >
+                <Plus size={14} />
+                Post Item
               </button>
             </div>
 
@@ -621,14 +724,20 @@ export default function Marketplace() {
                 title={debouncedSearch || activeCategory !== 'all' || minPrice || maxPrice ? 'No listings found' : undefined}
                 description={debouncedSearch || activeCategory !== 'all' || minPrice || maxPrice ? 'Try different filters, or add the first helpful listing for your neighbours.' : undefined}
                 action="Add Listing"
-                onAction={() => setShowCreate(true)}
+                onAction={() => openCreate('listing')}
               />
             ) : (
               <>
                 <p className="text-sm text-muted-foreground mb-4">{data?.total ?? 0} listings</p>
                 <div className="grid grid-cols-1 gap-3 min-[380px]:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 sm:gap-4">
                   {listings.map((l) => (
-                    <ListingCard key={l.id} listing={l as any} />
+                    <ListingCard
+                      key={l.id}
+                      listing={l as any}
+                      canManage={canManage}
+                      onDelete={handleDeleteListing}
+                      deleting={deletingId === l.id}
+                    />
                   ))}
                 </div>
 
@@ -649,13 +758,13 @@ export default function Marketplace() {
 
       {/* FAB */}
       <button
-        onClick={() => setShowCreate(true)}
-        className="fixed bottom-[calc(5.25rem+env(safe-area-inset-bottom))] right-4 z-40 flex h-14 w-14 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-lg shadow-primary/30 transition-all hover:scale-105 hover:bg-primary/90 md:bottom-8 md:right-8"
+        onClick={() => openCreate('listing')}
+        className="delight-breathe fixed bottom-[calc(5.25rem+env(safe-area-inset-bottom))] right-4 z-40 flex h-14 w-14 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-lg shadow-primary/30 transition-all hover:scale-105 hover:bg-primary/90 md:bottom-8 md:right-8"
       >
         <Plus size={24} />
       </button>
 
-      {showCreate && <CreateListingModal onClose={() => setShowCreate(false)} />}
+      {showCreate && <CreateListingModal initialMode={createMode} onClose={() => setShowCreate(false)} />}
     </div>
   )
 }

@@ -49,9 +49,10 @@
     <script>
       (function () {
         try {
+          var isLanding = window.location.pathname === "/" || window.location.pathname === "";
           var storedTheme = window.localStorage.getItem("mohalla-theme");
           var prefersDark = window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches;
-          if (storedTheme ? storedTheme === "dark" : prefersDark) {
+          if (!isLanding && (storedTheme ? storedTheme === "dark" : prefersDark)) {
             document.documentElement.classList.add("dark");
           }
         } catch (error) {

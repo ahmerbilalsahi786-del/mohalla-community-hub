@@ -487,12 +487,122 @@ h6 {
   box-shadow: 0 14px 32px color-mix(in oklch, var(--foreground) 9%, transparent);
 }
 
+.delight-hover-lift {
+  transition: transform 220ms ease, box-shadow 220ms ease, border-color 220ms ease, background-color 220ms ease;
+}
+
+.delight-hover-lift:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 16px 34px color-mix(in oklch, var(--foreground) 10%, transparent), inset 0 1px 0 var(--glass-highlight);
+}
+
+.delight-float-soft {
+  animation: delight-float-soft 7.8s ease-in-out infinite;
+}
+
+.delight-float-slow {
+  animation: delight-float-soft 11s ease-in-out infinite;
+}
+
+.delight-swing-soft {
+  transform-origin: 50% 8%;
+  animation: delight-swing-soft 5.4s ease-in-out infinite;
+}
+
+.delight-breathe {
+  animation: delight-breathe 4.8s ease-in-out infinite;
+}
+
+.group:hover .delight-swing-on-hover,
+.delight-swing-on-hover:hover {
+  transform: rotate(-4deg) scale(1.04);
+}
+
+.delight-swing-on-hover {
+  transform-origin: 50% 12%;
+  transition: transform 220ms ease;
+}
+
+.mohalla-character {
+  filter: drop-shadow(0 12px 18px color-mix(in oklch, var(--foreground) 10%, transparent));
+  isolation: isolate;
+}
+
+.mohalla-character-arm {
+  transform-origin: 34px 72px;
+  animation: delight-wave 4.8s ease-in-out infinite;
+  animation-delay: var(--delight-delay, 0s);
+}
+
+.mohalla-character-prop {
+  transform-origin: 84px 84px;
+  animation: delight-prop-bob 5.2s ease-in-out infinite;
+  animation-delay: var(--delight-delay, 0s);
+}
+
+.mohalla-empty-character {
+  height: 6.25rem;
+  width: 6.25rem;
+}
+
+.mohalla-click-layer {
+  pointer-events: none;
+  position: fixed;
+  inset: 0;
+  z-index: 120;
+}
+
+.mohalla-click-burst {
+  position: fixed;
+  height: 1px;
+  width: 1px;
+  transform: translate(-50%, -50%);
+  animation: delight-click-burst 920ms ease-out forwards;
+}
+
+.mohalla-click-burst i {
+  position: absolute;
+  left: 0;
+  top: 0;
+  height: 0.38rem;
+  width: 0.38rem;
+  border-radius: 999px;
+  background: var(--primary);
+  box-shadow: 0 0 10px color-mix(in oklch, var(--primary) 32%, transparent);
+  animation: delight-click-spark 920ms ease-out forwards;
+}
+
+.mohalla-click-burst i:nth-child(2) {
+  background: var(--accent);
+  transform: rotate(72deg);
+}
+
+.mohalla-click-burst i:nth-child(3) {
+  background: var(--chart-4);
+  transform: rotate(144deg);
+}
+
+.mohalla-click-burst i:nth-child(4) {
+  background: var(--chart-5);
+  transform: rotate(216deg);
+}
+
+.mohalla-click-burst i:nth-child(5) {
+  background: var(--chart-2);
+  transform: rotate(288deg);
+}
+
 :where(.portal-shell) :where(button, [data-slot="button"], a[class*="rounded"]) {
   transition-duration: 180ms;
 }
 
 :where(.portal-shell) :where(button:active, [data-slot="button"]:active, a[class*="rounded"]:active) {
   transform: scale(0.985);
+}
+
+:where(.portal-shell) :where(button:not(:disabled):active svg, [data-slot="button"]:not(:disabled):active svg, a[class*="rounded"]:active svg) {
+  transform: scale(0.92) rotate(-4deg);
+  transition: transform 140ms ease;
 }
 
 .feed-card-enter {
@@ -530,9 +640,94 @@ h6 {
   }
 }
 
+@keyframes delight-float-soft {
+  0%,
+  100% {
+    transform: translate3d(0, 0, 0) rotate(0deg);
+  }
+  50% {
+    transform: translate3d(0, -8px, 0) rotate(1deg);
+  }
+}
+
+@keyframes delight-swing-soft {
+  0%,
+  100% {
+    transform: rotate(-1.5deg);
+  }
+  50% {
+    transform: rotate(1.5deg);
+  }
+}
+
+@keyframes delight-breathe {
+  0%,
+  100% {
+    transform: scale(1);
+    box-shadow: 0 0 0 color-mix(in oklch, var(--primary) 0%, transparent);
+  }
+  50% {
+    transform: scale(1.025);
+    box-shadow: 0 12px 26px color-mix(in oklch, var(--primary) 13%, transparent);
+  }
+}
+
+@keyframes delight-wave {
+  0%,
+  100% {
+    transform: rotate(0deg);
+  }
+  45% {
+    transform: rotate(-8deg);
+  }
+  60% {
+    transform: rotate(4deg);
+  }
+}
+
+@keyframes delight-prop-bob {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-2px);
+  }
+}
+
+@keyframes delight-click-burst {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}
+
+@keyframes delight-click-spark {
+  from {
+    opacity: 1;
+    translate: 0 0;
+  }
+  to {
+    opacity: 0;
+    translate: 1.15rem 0;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .premium-card,
   .premium-card:hover,
+  .delight-hover-lift,
+  .delight-hover-lift:hover,
+  .delight-float-soft,
+  .delight-float-slow,
+  .delight-swing-soft,
+  .delight-breathe,
+  .mohalla-character-arm,
+  .mohalla-character-prop,
+  .mohalla-click-burst,
+  .mohalla-click-burst i,
   .feed-card-enter,
   .notification-drawer,
   .mohalla-brand-orbit,
@@ -540,6 +735,10 @@ h6 {
     animation: none;
     transform: none;
     transition: none;
+  }
+
+  .mohalla-click-layer {
+    display: none;
   }
 }
 

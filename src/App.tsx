@@ -8,6 +8,7 @@ import { OnboardingModal } from "@/components/modals/onboarding-modal";
 import { CommandSearch } from "@/components/search/command-search";
 import { MobileNav } from "@/components/dashboard/mobile-nav";
 import { MohallaLoadingScreen } from "@/components/brand/mohalla-brand";
+import { AppDelightLayer } from "@/components/community/community-delight";
 import { ProtectedRoute, AdminRoute, AuthenticatedRoute, SuperAdminRoute } from "@/components/ProtectedRoute";
 import { InstallAppButton, InstallAppPrompt } from "@/components/pwa/install-app";
 import { clearToken } from "@/lib/auth";
@@ -158,10 +159,10 @@ function Router() {
 function AppChrome() {
   const [location] = useLocation();
   const { data: user } = useCurrentUser();
-  useCommunityTheme(user?.community);
   const isPublicAuth = location === "/login" || location === "/register" || location === "/reset-password" || location === "/pending" || location === "/pending-approval";
   const isLanding = location === "/";
   const isPlatformArea = location.startsWith("/super-admin");
+  useCommunityTheme(isLanding ? null : user?.community, { forceLight: isLanding });
 
   return (
     <>
@@ -171,6 +172,7 @@ function AppChrome() {
       {(isPublicAuth || isLanding) && <InstallAppButton variant="floating" />}
       {!isPublicAuth && !isLanding && !isPlatformArea && (
         <>
+          <AppDelightLayer />
           <MobileNav />
           <CommunityRulesModal />
           <OnboardingModal />

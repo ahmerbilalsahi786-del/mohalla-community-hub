@@ -44,13 +44,13 @@ export function HealthScoreCard({
   ]
 
   return (
-    <section className={cn('overflow-hidden rounded-xl border portal-soft-rule bg-card p-5 shadow-sm premium-card', className)}>
+    <section className={cn('delight-hover-lift relative overflow-hidden rounded-xl border portal-soft-rule bg-card p-5 shadow-sm', className)}>
       <div className="flex items-start justify-between gap-4">
         <div>
           <p className="text-xs font-black uppercase text-muted-foreground">Mohalla Health Score</p>
           <h3 className="mt-1 text-lg font-black text-foreground">Community trust and momentum</h3>
         </div>
-        <div className="relative flex h-24 w-24 shrink-0 items-center justify-center rounded-full bg-secondary">
+        <div className="delight-breathe relative flex h-24 w-24 shrink-0 items-center justify-center rounded-full bg-secondary">
           <div
             className="absolute inset-0 rounded-full"
             style={{
@@ -68,8 +68,8 @@ export function HealthScoreCard({
         {breakdown.map((item) => {
           const Icon = item.icon
           return (
-            <div key={item.label} className="grid grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-3">
-              <div className={cn('flex h-9 w-9 items-center justify-center rounded-lg', item.color)}>
+            <div key={item.label} className="group grid grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-3">
+              <div className={cn('delight-swing-on-hover flex h-9 w-9 items-center justify-center rounded-lg', item.color)}>
                 <Icon className="h-4 w-4" />
               </div>
               <div className="min-w-0">

@@ -286,6 +286,32 @@ function sourceType(value?: unknown) {
   return next;
 }
 
+function textFromError(error: unknown) {
+  if (!error || typeof error !== "object") return String(error ?? "");
+  const record = error as Record<string, unknown>;
+  return [record.code, record.message, record.details, record.hint]
+    .filter(Boolean)
+    .map(String)
+    .join(" ")
+    .toLowerCase();
+}
+
+function isCityPublicationStoreError(error: unknown) {
+  const text = textFromError(error);
+  return (
+    text.includes("42p01") ||
+    text.includes("pgrst205") ||
+    text.includes("pgrst106") ||
+    text.includes("city_publications") ||
+    text.includes("my_community_city_key") ||
+    (text.includes("schema cache") && text.includes("public"))
+  );
+}
+
+function cityPublicationStoreSetupError() {
+  return new Error("City Feed database setup is not available yet. Please run the latest Supabase migrations, then try again.");
+}
+
 function defaultDemoCityPublications() {
   const now = new Date().toISOString();
   const city = getDemoCommunity().city || "Lahore";
@@ -1310,13 +1336,19 @@ async function publishCityPublication(payload: JsonBody) {
     .eq("source_type", snapshot.sourceType)
     .eq("source_id", snapshot.sourceId)
     .maybeSingle();
-  if (existing.error) throw existing.error;
+  if (existing.error) {
+    if (isCityPublicationStoreError(existing.error)) throw cityPublicationStoreSetupError();
+    throw existing.error;
+  }
 
   const result = existing.data
     ? await extendedDb.from("city_publications").update(row).eq("id", existing.data.id).select("*").single()
     : await extendedDb.from("city_publications").insert(row).select("*").single();
   const { data, error } = result;
-  if (error) throw error;
+  if (error) {
+    if (isCityPublicationStoreError(error)) throw cityPublicationStoreSetupError();
+    throw error;
+  }
   return toCityPublication(data);
 }
 
@@ -1343,7 +1375,10 @@ async function unpublishCityPublication(payload: JsonBody) {
     .eq("community_id", community.id)
     .eq("source_type", kind)
     .eq("source_id", sourceId);
-  if (error) throw error;
+  if (error) {
+    if (isCityPublicationStoreError(error)) throw cityPublicationStoreSetupError();
+    throw error;
+  }
   return { ok: true };
 }
 
@@ -1516,6 +1551,20 @@ async function updateListingStatus(listingId: string, payload: JsonBody) {
   if (error) throw error;
   const profiles = await profilesById([data.user_id]);
   return toListing(data, profiles.get(data.user_id));
+}
+
+async function deleteListing(listingId: string) {
+  if (isDemoMode()) {
+    const rows = readDemoRows(DEMO_LISTINGS_KEY);
+    const next = rows.filter((row: any) => String(row.id) !== listingId);
+    if (next.length === rows.length) throw new Error("Listing not found.");
+    writeDemoRows(DEMO_LISTINGS_KEY, next, 40);
+    return { ok: true };
+  }
+
+  const { error } = await supabase.from("listings").delete().eq("id", listingId);
+  if (error) throw error;
+  return { ok: true };
 }
 
 async function createEvent(payload: JsonBody) {
@@ -2655,6 +2704,7 @@ export async function handleSupabaseApi<T = unknown>(url: string, method = "GET"
   if (path === "/api/marketplace" && method === "GET") return listListings(requestUrl.searchParams) as T;
   if (path === "/api/marketplace" && method === "POST") return createListing(payload) as T;
   if (/^\/api\/marketplace\/[^/]+$/.test(path) && method === "GET") return getListingById(path.split("/")[3]) as T;
+  if (/^\/api\/marketplace\/[^/]+$/.test(path) && method === "DELETE") return deleteListing(path.split("/")[3]) as T;
   if (/^\/api\/marketplace\/[^/]+\/status$/.test(path) && method === "PATCH") return updateListingStatus(path.split("/")[3], payload) as T;
   if (path === "/api/listings" && method === "GET") return listListings(requestUrl.searchParams) as T;
   if (path === "/api/events" && method === "GET") return listEvents() as T;

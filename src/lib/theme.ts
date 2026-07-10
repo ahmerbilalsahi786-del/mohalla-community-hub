@@ -64,21 +64,12 @@ const midnight = {
   chart2: "oklch(0.78 0.138 158)",
 };
 
-const legacyDefaults = {
-  primary: "#1B5E20",
-  secondary: "#0288D1",
-  background: "#FAFDF8",
-  banner: "#FFFFFF",
-  sidebar: "#FFFFFF",
-};
-
 function isHexColor(value?: string | null) {
   return Boolean(value && /^#[0-9a-f]{6}$/i.test(value));
 }
 
-function safeColor(value: string | null | undefined, fallback: string, legacyFallback?: string) {
-  if (!isHexColor(value)) return fallback;
-  return value!.toLowerCase() === legacyFallback?.toLowerCase() ? fallback : value!;
+function safeColor(value: string | null | undefined, fallback: string) {
+  return isHexColor(value) ? value! : fallback;
 }
 
 function foregroundFor(hex: string, fallback = defaults.foreground) {
@@ -133,15 +124,20 @@ function applyTheme(vars: typeof defaults) {
   root.style.setProperty("--chart-2", vars.chart2);
 }
 
-export function useCommunityTheme(community: CommunityTheme | null | undefined) {
+export function useCommunityTheme(
+  community: CommunityTheme | null | undefined,
+  options: { forceLight?: boolean } = {},
+) {
   useEffect(() => {
     const root = document.documentElement;
-    applyStoredThemePreference(root);
-    const primary = safeColor(community?.themePrimaryColor, defaults.primary, legacyDefaults.primary);
-    const accent = safeColor(community?.themeSecondaryColor, defaults.accent, legacyDefaults.secondary);
-    const background = safeColor(community?.themeBackgroundColor, defaults.background, legacyDefaults.background);
-    const banner = safeColor(community?.themeBannerColor, defaults.banner, legacyDefaults.banner);
-    const sidebar = safeColor(community?.themeSidebarColor, defaults.sidebar, legacyDefaults.sidebar);
+    const forceLight = Boolean(options.forceLight);
+    if (forceLight) root.classList.remove("dark");
+    else applyStoredThemePreference(root);
+    const primary = safeColor(community?.themePrimaryColor, defaults.primary);
+    const accent = safeColor(community?.themeSecondaryColor, defaults.accent);
+    const background = safeColor(community?.themeBackgroundColor, defaults.background);
+    const banner = safeColor(community?.themeBannerColor, defaults.banner);
+    const sidebar = safeColor(community?.themeSidebarColor, defaults.sidebar);
     const primaryForeground = isHexColor(primary) ? foregroundFor(primary) : defaults.primaryForeground;
     const accentForeground = isHexColor(accent) ? foregroundFor(accent, defaults.accentForeground) : defaults.accentForeground;
     const foreground = foregroundFor(background);
@@ -159,7 +155,11 @@ export function useCommunityTheme(community: CommunityTheme | null | undefined) 
     root.style.setProperty("--community-sidebar-foreground", sidebarForeground);
 
     const applySemanticTheme = () => {
-      if (root.classList.contains("dark")) {
+      if (forceLight && root.classList.contains("dark")) {
+        root.classList.remove("dark");
+      }
+
+      if (!forceLight && root.classList.contains("dark")) {
         applyTheme(midnight);
         return;
       }
@@ -200,5 +200,5 @@ export function useCommunityTheme(community: CommunityTheme | null | undefined) 
     observer.observe(root, { attributes: true, attributeFilter: ["class"] });
 
     return () => observer.disconnect();
-  }, [community]);
+  }, [community, options.forceLight]);
 }

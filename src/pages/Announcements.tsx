@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button'
 import { useListPosts } from '@/lib/generated/api'
 import { CommunityEmptyState } from '@/components/community/community-empty-state'
 import { FeedPostSkeleton } from '@/components/community/skeleton-states'
+import { canManageCommunity, useCurrentUser } from '@/hooks/use-current-user'
 
 function timeAgo(dateStr: string) {
   const diff = Math.floor((Date.now() - new Date(dateStr).getTime()) / 1000)
@@ -19,6 +20,8 @@ function buildShareText(title: string) {
 }
 
 export default function Announcements() {
+  const { data: user } = useCurrentUser()
+  const canCreateAnnouncement = canManageCommunity(user?.role)
   const { data, isLoading } = useListPosts({
     communityId: 'default',
     category: 'announcement',
@@ -45,12 +48,22 @@ export default function Announcements() {
                 Important updates from the society team, organized separately from daily feed conversations.
               </p>
             </div>
-            <Link href="/feed?category=announcement">
-              <Button variant="outline" className="gap-2 rounded-xl">
-                <Search size={16} />
-                View in Feed
-              </Button>
-            </Link>
+            <div className="flex flex-wrap gap-2">
+              {canCreateAnnouncement && (
+                <Link href="/feed?compose=1&type=announcement">
+                  <Button className="gap-2 rounded-xl bg-primary text-primary-foreground">
+                    <Megaphone size={16} />
+                    Create Announcement
+                  </Button>
+                </Link>
+              )}
+              <Link href="/feed?category=announcement">
+                <Button variant="outline" className="gap-2 rounded-xl">
+                  <Search size={16} />
+                  View in Feed
+                </Button>
+              </Link>
+            </div>
           </div>
         </section>
 
@@ -63,6 +76,8 @@ export default function Announcements() {
             kind="generic"
             title="No announcements yet"
             description="Official notices from your community admins will appear here."
+            action={canCreateAnnouncement ? 'Create Announcement' : undefined}
+            href={canCreateAnnouncement ? '/feed?compose=1&type=announcement' : undefined}
             className="min-h-[360px]"
           />
         ) : (

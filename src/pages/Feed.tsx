@@ -382,7 +382,7 @@ function PostCard({ post, onLike }: { post: Post; onLike: (id: number) => void }
   }
 
   return (
-    <article className="feed-card-enter premium-card relative overflow-hidden rounded-xl border border-border bg-card shadow-sm transition-all hover:border-primary/25 hover:shadow-md">
+    <article className="feed-card-enter delight-hover-lift relative overflow-hidden rounded-xl border border-border bg-card shadow-sm transition-all hover:border-primary/25">
       {post.isPinned && (
         <div className="flex items-center gap-1.5 border-b border-border/50 bg-primary/10 px-4 py-2">
           <Pin size={13} className="text-primary" />
@@ -815,7 +815,7 @@ export default function Feed() {
       <button
         onClick={() => openCreatePost()}
         aria-label="Create post"
-        className="fixed bottom-[calc(5.25rem+env(safe-area-inset-bottom))] right-4 z-40 flex h-14 w-14 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-lg shadow-primary/25 transition-all hover:scale-105 hover:bg-primary-hover md:hidden"
+        className="delight-breathe fixed bottom-[calc(5.25rem+env(safe-area-inset-bottom))] right-4 z-40 flex h-14 w-14 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-lg shadow-primary/25 transition-all hover:scale-105 hover:bg-primary-hover md:hidden"
       >
         <Plus size={24} />
       </button>

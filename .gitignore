@@ -23,6 +23,7 @@ node_modules
 .tanstack
 .wrangler
 .vercel
+supabase/.temp/
 artifacts
 attached_assets
 scripts/node_modules
