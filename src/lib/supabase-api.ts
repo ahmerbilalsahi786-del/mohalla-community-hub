@@ -302,9 +302,10 @@ function isCityPublicationStoreError(error: unknown) {
     text.includes("42p01") ||
     text.includes("pgrst205") ||
     text.includes("pgrst106") ||
-    text.includes("city_publications") ||
-    text.includes("my_community_city_key") ||
-    (text.includes("schema cache") && text.includes("public"))
+    text.includes("does not exist") ||
+    text.includes("could not find the table") ||
+    text.includes("could not find the function") ||
+    (text.includes("schema cache") && (text.includes("city_publications") || text.includes("my_community_city_key")))
   );
 }
 
@@ -1871,7 +1872,7 @@ async function listAdminMembers(params: URLSearchParams) {
   const communityId = await requireCommunityManager();
   let query = extendedDb
     .from("profiles")
-    .select("*, private_profiles(*), user_roles(*)")
+    .select("*")
     .eq("community_id", communityId)
     .limit(limit);
   const status = params.get("status");
@@ -1879,7 +1880,43 @@ async function listAdminMembers(params: URLSearchParams) {
   const { data, error } = await query;
   if (error) throw error;
 
-  return (data ?? []).map((profile: any) => toMember(profile, true));
+  const profiles = data ?? [];
+  const profileIds = profiles.map((profile: any) => profile.id).filter(Boolean);
+  if (!profileIds.length) return [];
+
+  const [{ data: privateProfiles, error: privateError }, { data: userRoles, error: roleError }] = await Promise.all([
+    extendedDb
+      .from("private_profiles")
+      .select("*")
+      .in("id", profileIds),
+    extendedDb
+      .from("user_roles")
+      .select("*")
+      .in("user_id", profileIds),
+  ]);
+
+  if (privateError) {
+    console.warn("Private member details could not be loaded:", privateError);
+  }
+  if (roleError) {
+    console.warn("Member roles could not be loaded:", roleError);
+  }
+
+  const privateProfilesById = new Map((privateProfiles ?? []).map((row: any) => [row.id, row]));
+  const rolePriority: Record<string, number> = { super_admin: 0, admin: 1, moderator: 2, user: 3 };
+  const rolesByUserId = new Map<string, any[]>();
+  for (const row of userRoles ?? []) {
+    const rows = rolesByUserId.get(row.user_id) ?? [];
+    rows.push(row);
+    rows.sort((a, b) => (rolePriority[a.role] ?? 99) - (rolePriority[b.role] ?? 99));
+    rolesByUserId.set(row.user_id, rows);
+  }
+
+  return profiles.map((profile: any) => toMember({
+    ...profile,
+    private_profiles: privateProfilesById.get(profile.id) ?? null,
+    user_roles: rolesByUserId.get(profile.id) ?? [],
+  }, true));
 }
 
 async function listCommunityMembers(params: URLSearchParams) {
