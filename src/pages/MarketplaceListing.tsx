@@ -1,15 +1,18 @@
 import { useState } from 'react'
-import { Link } from 'wouter'
+import { Link, useLocation } from 'wouter'
 import { useGetListing, useUpdateListingStatus, getListListingsQueryKey } from '@/lib/generated/api'
 import { useQueryClient } from '@tanstack/react-query'
 import { Sidebar } from '@/components/dashboard/sidebar'
 import { TopNavbar } from '@/components/dashboard/top-navbar'
 import {
   ArrowLeft, MessageCircle, CheckCircle2, Clock, Package,
-  ChevronLeft, ChevronRight, User, MapPin, Share2
+  ChevronLeft, ChevronRight, Loader2, MapPin, Share2, Trash2
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
+import { canManageCommunity, useCurrentUser } from '@/hooks/use-current-user'
+import { useToast } from '@/hooks/use-toast'
+import { customFetch } from '@/lib/custom-fetch'
 
 const CONDITION_BADGE: Record<string, { label: string; bg: string; text: string }> = {
   new: { label: 'New', bg: 'bg-emerald-500/10', text: 'text-emerald-700' },
@@ -55,8 +58,12 @@ interface Props {
 export default function MarketplaceListing({ params }: Props) {
   const listingId = parseInt(params.id, 10)
   const queryClient = useQueryClient()
+  const [, navigate] = useLocation()
+  const { data: user } = useCurrentUser()
+  const { toast } = useToast()
   const [activeImg, setActiveImg] = useState(0)
   const [statusLoading, setStatusLoading] = useState(false)
+  const [deleteLoading, setDeleteLoading] = useState(false)
 
   const { data: listing, isLoading, error } = useGetListing(listingId)
 
@@ -113,7 +120,7 @@ export default function MarketplaceListing({ params }: Props) {
   const cond = CONDITION_BADGE[listing.condition] || CONDITION_BADGE.good
   const statusCfg = STATUS_CONFIG[listing.status] || STATUS_CONFIG.available
   const StatusIcon = statusCfg.icon
-  const isCurrentUser = listing.userId === 'ahmed'
+  const canManageListing = listing.userId === user?.userId || canManageCommunity(user?.role)
   const isSold = listing.status === 'sold'
 
   const handleMarkSold = () => {
@@ -127,6 +134,26 @@ export default function MarketplaceListing({ params }: Props) {
   const handleMarkAvailable = () => {
     setStatusLoading(true)
     updateStatus.mutate({ listingId: listing.id, data: { status: 'available' } })
+  }
+  const handleDelete = async () => {
+    const kind = listing.listingKind === 'shop' || listing.category === 'shop' ? 'shop' : 'listing'
+    if (!window.confirm(`Delete ${kind} "${listing.title}"?`)) return
+
+    setDeleteLoading(true)
+    try {
+      await customFetch(`/api/marketplace/${listing.id}`, { method: 'DELETE' })
+      queryClient.invalidateQueries({ queryKey: getListListingsQueryKey() })
+      toast({ title: kind === 'shop' ? 'Shop deleted.' : 'Listing deleted.' })
+      navigate('/marketplace')
+    } catch (error) {
+      toast({
+        title: kind === 'shop' ? 'Could not delete shop.' : 'Could not delete listing.',
+        description: error instanceof Error ? error.message : 'Please try again.',
+        variant: 'destructive',
+      })
+    } finally {
+      setDeleteLoading(false)
+    }
   }
 
   return (
@@ -297,7 +324,7 @@ export default function MarketplaceListing({ params }: Props) {
                   </a>
                 
 
-                  {isCurrentUser && !isSold && (
+                  {canManageListing && !isSold && (
                     <div className="flex gap-2">
                       {listing.status !== 'reserved' && (
                         <button
@@ -320,7 +347,7 @@ export default function MarketplaceListing({ params }: Props) {
                     </div>
                   )}
 
-                  {isCurrentUser && listing.status !== 'available' && (
+                  {canManageListing && listing.status !== 'available' && (
                     <button
                       onClick={handleMarkAvailable}
                       disabled={statusLoading}
@@ -328,6 +355,18 @@ export default function MarketplaceListing({ params }: Props) {
                     >
                       <CheckCircle2 size={15} />
                       Mark Available Again
+                    </button>
+                  )}
+
+                  {canManageListing && (
+                    <button
+                      type="button"
+                      onClick={handleDelete}
+                      disabled={deleteLoading}
+                      className="flex w-full items-center justify-center gap-1.5 rounded-xl border border-destructive/25 bg-destructive/10 py-2.5 text-sm font-semibold text-destructive transition-colors hover:bg-destructive/15 disabled:opacity-50"
+                    >
+                      {deleteLoading ? <Loader2 size={15} className="animate-spin" /> : <Trash2 size={15} />}
+                      Delete {listing.listingKind === 'shop' || listing.category === 'shop' ? 'Shop' : 'Listing'}
                     </button>
                   )}
                 </div>

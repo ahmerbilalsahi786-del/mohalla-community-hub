@@ -3,7 +3,7 @@ import { AdminLayout } from './AdminLayout'
 import { useAdminDeleteMember, useAdminVerifyMember, useAdminSetMemberRole } from '@/lib/generated/api'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import {
-  CheckCircle2, XCircle, Trash2, BadgeCheck, ChevronDown, Clock, Users
+  CheckCircle2, XCircle, Trash2, BadgeCheck, Clock, Loader2
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { supabase } from '@/integrations/supabase/client'
@@ -26,6 +26,12 @@ const ROLE_COLORS: Record<string, string> = {
   admin:     'bg-purple-500/10 text-purple-700',
   moderator: 'bg-blue-500/10 text-blue-700',
   user:      'bg-muted text-muted-foreground',
+}
+
+const ROLE_DESCRIPTIONS: Record<string, string> = {
+  user: 'Resident',
+  moderator: 'Can moderate content',
+  admin: 'Can manage society settings',
 }
 
 function rowId(value: string) {
@@ -77,7 +83,35 @@ function MemberRow({ member, refetch }: { member: Member; refetch: () => void })
 
   const del     = useAdminDeleteMember({ mutation: { onSuccess: inv } })
   const verify  = useAdminVerifyMember({ mutation: { onSuccess: inv } })
-  const setRole = useAdminSetMemberRole({ mutation: { onSuccess: inv } })
+  const setRole = useAdminSetMemberRole({
+    mutation: {
+      onMutate: async ({ memberId, data }) => {
+        await qc.cancelQueries({ queryKey: ['admin-members'] })
+        const previous = qc.getQueriesData<Member[]>({ queryKey: ['admin-members'] })
+        qc.setQueriesData<Member[]>({ queryKey: ['admin-members'] }, (current) =>
+          current?.map((item) => item.id === memberId ? { ...item, role: data.role } : item)
+        )
+        return { previous }
+      },
+      onError: (error, _variables, context) => {
+        context?.previous?.forEach(([queryKey, data]) => qc.setQueryData(queryKey, data))
+        toast({
+          title: 'Could not update role.',
+          description: error instanceof Error ? error.message : 'Please try again.',
+          variant: 'destructive',
+        })
+      },
+      onSuccess: () => {
+        toast({ title: 'Member role updated.' })
+        inv()
+      },
+    },
+  })
+
+  const updateRole = (role: string) => {
+    if (role === member.role || setRole.isPending) return
+    setRole.mutate({ memberId: member.id, data: { role } })
+  }
 
   const updateMembership = async (status: 'approved' | 'rejected') => {
     qc.setQueriesData<Member[]>({ queryKey: ['admin-members'] }, (current) =>
@@ -136,7 +170,9 @@ function MemberRow({ member, refetch }: { member: Member; refetch: () => void })
               <span className="text-sm font-medium text-foreground">{member.name}</span>
               {member.isVerified && <BadgeCheck size={13} className="text-blue-500" />}
             </div>
-            <span className="text-xs text-muted-foreground">{member.userId}</span>
+            <span className="text-xs text-muted-foreground">
+              {[member.unitNumber, member.phone].filter(Boolean).join(' · ') || 'Community member'}
+            </span>
             <ResidentBadgeGroup
               role={member.role}
               isVerified={member.isVerified}
@@ -202,15 +238,30 @@ function MemberRow({ member, refetch }: { member: Member; refetch: () => void })
                 <BadgeCheck size={12} />
                 {member.isVerified ? 'Verified' : 'Verify'}
               </button>
-              <div className="relative">
-                <select
-                  value={member.role}
-                  onChange={e => setRole.mutate({ memberId: member.id, data: { role: e.target.value } })}
-                  className="appearance-none rounded-lg border border-border bg-background px-2 py-1 pr-6 text-xs text-foreground focus:outline-none focus:border-primary cursor-pointer"
-                >
-                  {ROLE_OPTIONS.map(r => <option key={r} value={r}>{titleCaseWord(r)}</option>)}
-                </select>
-                <ChevronDown size={10} className="pointer-events-none absolute right-1.5 top-1/2 -translate-y-1/2 text-muted-foreground" />
+              <div className="rounded-xl border border-border bg-background/80 p-1 shadow-xs">
+                <div className="flex gap-1">
+                  {ROLE_OPTIONS.map((role) => {
+                    const active = member.role === role
+                    return (
+                      <button
+                        key={role}
+                        type="button"
+                        onClick={() => updateRole(role)}
+                        disabled={setRole.isPending}
+                        title={ROLE_DESCRIPTIONS[role]}
+                        className={cn(
+                          'min-h-7 rounded-lg px-2.5 text-xs font-bold transition-all disabled:opacity-60',
+                          active
+                            ? 'bg-primary text-primary-foreground shadow-sm'
+                            : 'text-muted-foreground hover:bg-secondary hover:text-foreground'
+                        )}
+                      >
+                        {titleCaseWord(role)}
+                      </button>
+                    )
+                  })}
+                  {setRole.isPending && <Loader2 size={14} className="mx-1 self-center animate-spin text-muted-foreground" />}
+                </div>
               </div>
             </>
           )}
