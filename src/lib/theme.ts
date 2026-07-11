@@ -8,6 +8,8 @@ export interface CommunityTheme {
   themeSidebarColor?: string | null;
 }
 
+export const COMMUNITY_THEME_CHANGE_EVENT = "mohalla-community-theme-change";
+
 const defaults = {
   primary: "oklch(0.45 0.126 184)",
   primaryHover: "oklch(0.39 0.126 185)",
@@ -124,6 +126,71 @@ function applyTheme(vars: typeof defaults) {
   root.style.setProperty("--chart-2", vars.chart2);
 }
 
+export function applyCommunityTheme(
+  community: CommunityTheme | null | undefined,
+  options: { forceLight?: boolean } = {},
+) {
+  const root = document.documentElement;
+  const forceLight = Boolean(options.forceLight);
+  if (forceLight) root.classList.remove("dark");
+  else applyStoredThemePreference(root);
+
+  const primary = safeColor(community?.themePrimaryColor, defaults.primary);
+  const accent = safeColor(community?.themeSecondaryColor, defaults.accent);
+  const background = safeColor(community?.themeBackgroundColor, defaults.background);
+  const banner = safeColor(community?.themeBannerColor, defaults.banner);
+  const sidebar = safeColor(community?.themeSidebarColor, defaults.sidebar);
+  const primaryForeground = isHexColor(primary) ? foregroundFor(primary) : defaults.primaryForeground;
+  const accentForeground = isHexColor(accent) ? foregroundFor(accent, defaults.accentForeground) : defaults.accentForeground;
+  const foreground = foregroundFor(background);
+  const bannerForeground = foregroundFor(banner, defaults.bannerForeground);
+  const sidebarForeground = foregroundFor(sidebar, defaults.sidebarForeground);
+
+  root.style.setProperty("--community-primary", primary);
+  root.style.setProperty("--community-secondary", accent);
+  root.style.setProperty("--community-background", background);
+  root.style.setProperty("--community-banner", banner);
+  root.style.setProperty("--community-sidebar", sidebar);
+  root.style.setProperty("--community-primary-foreground", primaryForeground);
+  root.style.setProperty("--community-secondary-foreground", accentForeground);
+  root.style.setProperty("--community-banner-foreground", bannerForeground);
+  root.style.setProperty("--community-sidebar-foreground", sidebarForeground);
+
+  if (!forceLight && root.classList.contains("dark")) {
+    applyTheme(midnight);
+    return;
+  }
+
+  applyTheme({
+    ...defaults,
+    primary,
+    primaryHover: isHexColor(primary) ? `color-mix(in oklch, ${primary} 86%, black)` : defaults.primaryHover,
+    primaryForeground,
+    secondary: mix(accent, 15, banner),
+    secondaryHover: mix(accent, 24, banner),
+    secondaryForeground: bannerForeground,
+    accent,
+    accentForeground,
+    background,
+    foreground,
+    banner,
+    bannerForeground,
+    muted: mix(primary, 6, background),
+    mutedForeground: mix(foreground, 72, background),
+    border: mix(primary, 18, background),
+    input: mix(primary, 16, background),
+    sidebar,
+    sidebarForeground,
+    sidebarAccent: mix(primary, 14, sidebar),
+    sidebarAccentForeground: sidebarForeground,
+    sidebarBorder: mix(primary, 16, sidebar),
+    sidebarPrimaryForeground: primaryForeground,
+    ring: primary,
+    chart1: primary,
+    chart2: accent,
+  });
+}
+
 export function useCommunityTheme(
   community: CommunityTheme | null | undefined,
   options: { forceLight?: boolean } = {},
@@ -131,74 +198,22 @@ export function useCommunityTheme(
   useEffect(() => {
     const root = document.documentElement;
     const forceLight = Boolean(options.forceLight);
-    if (forceLight) root.classList.remove("dark");
-    else applyStoredThemePreference(root);
-    const primary = safeColor(community?.themePrimaryColor, defaults.primary);
-    const accent = safeColor(community?.themeSecondaryColor, defaults.accent);
-    const background = safeColor(community?.themeBackgroundColor, defaults.background);
-    const banner = safeColor(community?.themeBannerColor, defaults.banner);
-    const sidebar = safeColor(community?.themeSidebarColor, defaults.sidebar);
-    const primaryForeground = isHexColor(primary) ? foregroundFor(primary) : defaults.primaryForeground;
-    const accentForeground = isHexColor(accent) ? foregroundFor(accent, defaults.accentForeground) : defaults.accentForeground;
-    const foreground = foregroundFor(background);
-    const bannerForeground = foregroundFor(banner, defaults.bannerForeground);
-    const sidebarForeground = foregroundFor(sidebar, defaults.sidebarForeground);
-
-    root.style.setProperty("--community-primary", primary);
-    root.style.setProperty("--community-secondary", accent);
-    root.style.setProperty("--community-background", background);
-    root.style.setProperty("--community-banner", banner);
-    root.style.setProperty("--community-sidebar", sidebar);
-    root.style.setProperty("--community-primary-foreground", primaryForeground);
-    root.style.setProperty("--community-secondary-foreground", accentForeground);
-    root.style.setProperty("--community-banner-foreground", bannerForeground);
-    root.style.setProperty("--community-sidebar-foreground", sidebarForeground);
-
-    const applySemanticTheme = () => {
-      if (forceLight && root.classList.contains("dark")) {
-        root.classList.remove("dark");
-      }
-
-      if (!forceLight && root.classList.contains("dark")) {
-        applyTheme(midnight);
-        return;
-      }
-
-      applyTheme({
-        ...defaults,
-        primary,
-        primaryHover: isHexColor(primary) ? `color-mix(in oklch, ${primary} 86%, black)` : defaults.primaryHover,
-        primaryForeground,
-        secondary: mix(accent, 15, banner),
-        secondaryHover: mix(accent, 24, banner),
-        secondaryForeground: bannerForeground,
-        accent,
-        accentForeground,
-        background,
-        foreground,
-        banner,
-        bannerForeground,
-        muted: mix(primary, 6, background),
-        mutedForeground: mix(foreground, 72, background),
-        border: mix(primary, 18, background),
-        input: mix(primary, 16, background),
-        sidebar,
-        sidebarForeground,
-        sidebarAccent: mix(primary, 14, sidebar),
-        sidebarAccentForeground: sidebarForeground,
-        sidebarBorder: mix(primary, 16, sidebar),
-        sidebarPrimaryForeground: primaryForeground,
-        ring: primary,
-        chart1: primary,
-        chart2: accent,
-      });
+    let activeCommunity = community;
+    const applySemanticTheme = () => applyCommunityTheme(activeCommunity, { forceLight });
+    const applySavedTheme = (event: Event) => {
+      activeCommunity = (event as CustomEvent<CommunityTheme>).detail;
+      applySemanticTheme();
     };
 
     applySemanticTheme();
 
     const observer = new MutationObserver(applySemanticTheme);
     observer.observe(root, { attributes: true, attributeFilter: ["class"] });
+    window.addEventListener(COMMUNITY_THEME_CHANGE_EVENT, applySavedTheme);
 
-    return () => observer.disconnect();
+    return () => {
+      observer.disconnect();
+      window.removeEventListener(COMMUNITY_THEME_CHANGE_EVENT, applySavedTheme);
+    };
   }, [community, options.forceLight]);
 }

@@ -11,6 +11,7 @@ import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { uploadImage } from "@/lib/cloudinary";
 import { cn } from "@/lib/utils";
+import { COMMUNITY_THEME_CHANGE_EVENT } from "@/lib/theme";
 
 const defaults = {
   themePrimaryColor: "#1B5E20",
@@ -73,7 +74,15 @@ export default function AdminBranding() {
         } : current);
         qc.invalidateQueries({ queryKey: getAdminGetCommunityQueryKey() });
         qc.invalidateQueries({ queryKey: ["current-user"] });
+        window.dispatchEvent(new CustomEvent(COMMUNITY_THEME_CHANGE_EVENT, { detail: updated }));
         toast({ title: "Your community's branding has been updated" });
+      },
+      onError: (error) => {
+        toast({
+          title: "Branding could not be saved",
+          description: error instanceof Error ? error.message : "Please try again.",
+          variant: "destructive",
+        });
       },
     },
   });
