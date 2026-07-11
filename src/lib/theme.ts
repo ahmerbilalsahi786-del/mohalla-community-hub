@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useLayoutEffect } from "react";
 
 export interface CommunityTheme {
   themePrimaryColor?: string | null;
@@ -195,7 +195,7 @@ export function useCommunityTheme(
   community: CommunityTheme | null | undefined,
   options: { forceLight?: boolean } = {},
 ) {
-  useEffect(() => {
+  useLayoutEffect(() => {
     const root = document.documentElement;
     const forceLight = Boolean(options.forceLight);
     let activeCommunity = community;

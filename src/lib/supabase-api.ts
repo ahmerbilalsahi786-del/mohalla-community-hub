@@ -1499,10 +1499,12 @@ async function createListing(payload: JsonBody) {
   if (isDemoMode()) return createDemoListing(payload);
 
   const userId = await requiredUserId();
+  const communityId = await currentCommunityId();
   const { data, error } = await extendedDb
     .from("listings")
     .insert({
       user_id: userId,
+      community_id: communityId,
       title: payload.title,
       description: payload.description,
       price_pkr: payload.pricePkr ?? null,

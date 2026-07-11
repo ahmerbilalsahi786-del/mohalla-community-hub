@@ -290,8 +290,8 @@ function ReportAlertModal({ onClose }: { onClose: () => void }) {
   ]
 
   return (
-    <div className="fixed inset-0 z-[80] flex items-end justify-center bg-black/40 p-3 backdrop-blur-sm sm:items-center sm:p-4">
-      <div className="flex max-h-[calc(100dvh-1.5rem)] w-full max-w-lg flex-col overflow-hidden rounded-2xl border border-border bg-card shadow-2xl">
+    <div className="fixed inset-0 z-[80] flex items-stretch justify-center overflow-hidden bg-black/40 p-0 backdrop-blur-sm sm:items-center sm:p-4">
+      <div className="flex h-dvh w-full max-w-lg flex-col overflow-hidden border-0 border-border bg-card shadow-2xl sm:h-auto sm:max-h-[calc(100dvh-2rem)] sm:rounded-2xl sm:border">
         <div className="flex items-center justify-between px-5 py-4 border-b border-border shrink-0">
           <h2 className="text-lg font-bold text-foreground">Report Safety Alert</h2>
           <button onClick={onClose} className="flex h-8 w-8 items-center justify-center rounded-lg hover:bg-muted text-muted-foreground">
@@ -394,7 +394,7 @@ function ReportAlertModal({ onClose }: { onClose: () => void }) {
           </div>
         </div>
 
-        <div className="flex shrink-0 items-center justify-end gap-2 border-t border-border bg-muted/20 px-4 py-3 sm:px-5 sm:py-4">
+        <div className="flex shrink-0 items-center justify-end gap-2 border-t border-border bg-muted/20 px-4 pb-[calc(0.75rem+env(safe-area-inset-bottom))] pt-3 sm:px-5 sm:py-4">
           <Button variant="ghost" onClick={onClose} className="rounded-xl">Cancel</Button>
           <Button
             type="button"

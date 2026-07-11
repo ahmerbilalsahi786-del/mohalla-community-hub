@@ -158,6 +158,29 @@
   --glass-button-shadow: 0 8px 18px color-mix(in oklch, oklch(0 0 0) 24%, transparent);
 }
 
+.landing-light {
+  color-scheme: light;
+  --background: oklch(0.982 0.010 108);
+  --foreground: oklch(0.22 0.042 238);
+  --card: oklch(0.998 0.004 108);
+  --card-foreground: oklch(0.22 0.042 238);
+  --popover: oklch(0.998 0.004 108);
+  --popover-foreground: oklch(0.22 0.042 238);
+  --primary: oklch(0.45 0.126 184);
+  --primary-hover: oklch(0.39 0.126 185);
+  --primary-foreground: oklch(0.99 0.004 97);
+  --secondary: oklch(0.945 0.032 163);
+  --secondary-hover: oklch(0.90 0.042 164);
+  --secondary-foreground: oklch(0.235 0.048 238);
+  --muted: oklch(0.95 0.014 104);
+  --muted-foreground: oklch(0.48 0.034 233);
+  --accent: oklch(0.66 0.135 172);
+  --accent-foreground: oklch(0.12 0.035 214);
+  --border: oklch(0.885 0.021 216);
+  --input: oklch(0.91 0.018 214);
+  --ring: oklch(0.50 0.126 184);
+}
+
 @layer base {
   * {
     border-color: var(--color-border);

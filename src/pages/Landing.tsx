@@ -77,7 +77,7 @@ export default function Home() {
   ];
 
   return (
-    <div className="flex flex-col min-h-screen bg-background">
+    <div className="landing-light flex min-h-screen flex-col bg-background">
       <Navbar />
       
       {/* 1. Hero Section */}
