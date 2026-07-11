@@ -1640,10 +1640,12 @@ async function createSafetyAlert(payload: JsonBody) {
   if (isDemoMode()) return createDemoAlert(payload);
 
   const userId = await requiredUserId();
+  const communityId = await currentCommunityId();
   const { data, error } = await extendedDb
     .from("safety_alerts")
     .insert({
       user_id: userId,
+      community_id: communityId,
       alert_type: payload.type ?? "general",
       title: payload.title,
       description: payload.description,

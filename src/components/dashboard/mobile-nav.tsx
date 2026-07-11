@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import { Link, useLocation } from 'wouter'
 import { Home, MessageCircle, MessageSquare, ShoppingBag, ShieldAlert, Calendar, Menu, Users, Megaphone, MapPin, Heart, BarChart2, Settings, HelpCircle, ShieldCheck, LogOut, Globe2 } from 'lucide-react'
 import { cn } from '@/lib/utils'
@@ -29,6 +30,7 @@ const MORE_LINKS = [
 
 export function MobileNav() {
   const [location] = useLocation()
+  const [moreOpen, setMoreOpen] = useState(false)
   const { data: user } = useCurrentUser()
   const logout = useLogout()
   const profileHref = `/profile/${user?.userId ?? 'me'}`
@@ -55,7 +57,7 @@ export function MobileNav() {
           </Link>
         )
       })}
-      <Sheet>
+      <Sheet open={moreOpen} onOpenChange={setMoreOpen}>
         <SheetTrigger asChild>
           <button className="flex h-16 min-w-0 flex-1 flex-col items-center justify-center gap-0.5">
             <div className={cn(
@@ -79,7 +81,12 @@ export function MobileNav() {
             {moreLinks.map((item) => {
               const Icon = item.icon
               return (
-                <Link key={item.href} href={item.href} className="flex items-center gap-3 rounded-xl border border-border bg-card px-4 py-3 shadow-xs transition-colors hover:bg-secondary/60">
+                <Link
+                  key={item.href}
+                  href={item.href}
+                  onClick={() => setMoreOpen(false)}
+                  className="flex items-center gap-3 rounded-xl border border-border bg-card px-4 py-3 shadow-xs transition-colors hover:bg-secondary/60"
+                >
                   <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary/10 text-primary">
                     <Icon size={16} />
                   </div>
@@ -87,7 +94,13 @@ export function MobileNav() {
                 </Link>
               )
             })}
-            <button onClick={logout} className="flex items-center gap-3 rounded-xl border border-border bg-card px-4 py-3 text-left shadow-xs transition-colors hover:bg-destructive/10">
+            <button
+              onClick={() => {
+                setMoreOpen(false)
+                logout()
+              }}
+              className="flex items-center gap-3 rounded-xl border border-border bg-card px-4 py-3 text-left shadow-xs transition-colors hover:bg-destructive/10"
+            >
               <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-destructive/10 text-destructive">
                 <LogOut size={16} />
               </div>
