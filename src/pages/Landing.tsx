@@ -4,6 +4,7 @@ import React, { useState } from 'react';
 import { Link } from 'wouter';
 import { Button } from '@/components/ui/button';
 import { MohallaBrandLink, MohallaBrandMark } from '@/components/brand/mohalla-brand';
+import { InstallAppButton } from '@/components/pwa/install-app';
 import { 
   ShieldCheck, 
   ShoppingBag, 
@@ -123,6 +124,10 @@ export default function Home() {
                     Join existing
                   </Button>
                 </Link>
+              </div>
+
+              <div className="flex justify-center lg:justify-start">
+                <InstallAppButton variant="landing" />
               </div>
 
               {/* Trust Indicators */}

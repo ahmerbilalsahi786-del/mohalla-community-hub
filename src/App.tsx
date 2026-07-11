@@ -169,7 +169,7 @@ function AppChrome() {
       <Suspense fallback={<MohallaLoadingScreen />}>
         <Router />
       </Suspense>
-      {(isPublicAuth || isLanding) && <InstallAppButton variant="floating" />}
+      {isPublicAuth && <InstallAppButton variant="floating" />}
       {!isPublicAuth && !isLanding && !isPlatformArea && (
         <>
           <AppDelightLayer />

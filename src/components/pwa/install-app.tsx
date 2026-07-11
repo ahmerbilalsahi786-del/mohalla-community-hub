@@ -8,7 +8,7 @@ import { dismissInstallPrompt, useInstallPrompt } from "@/hooks/use-install-prom
 type InstallAppButtonProps = {
   collapsed?: boolean;
   className?: string;
-  variant?: "sidebar" | "mobile" | "floating";
+  variant?: "sidebar" | "mobile" | "floating" | "landing";
 };
 
 function useInstallAction() {
@@ -66,6 +66,22 @@ export function InstallAppButton({ collapsed, className, variant = "sidebar" }: 
           <Download size={16} />
         </div>
         <span className="text-sm font-medium text-foreground">Install App</span>
+      </button>
+    );
+  }
+
+  if (variant === "landing") {
+    return (
+      <button
+        type="button"
+        onClick={runInstall}
+        className={cn(
+          "inline-flex min-h-11 items-center justify-center gap-2 rounded-xl border border-border bg-card/80 px-4 text-sm font-bold text-foreground shadow-sm backdrop-blur-sm transition-colors hover:border-primary/30 hover:bg-card",
+          className,
+        )}
+      >
+        <Download size={17} />
+        Install Mohalla App
       </button>
     );
   }
