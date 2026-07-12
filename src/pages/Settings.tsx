@@ -8,10 +8,17 @@ import { cn } from '@/lib/utils'
 import { useCurrentUser, useLogout } from '@/hooks/use-current-user'
 import { useToast } from '@/hooks/use-toast'
 import { getUser } from '@/lib/auth'
+import {
+  disableMobilePushNotifications,
+  enableMobilePushNotifications,
+  getMobilePushState,
+  type MobilePushState,
+  type MobilePushStatus,
+} from '@/lib/mobile-push'
 import { supabase } from '@/integrations/supabase/client'
 import {
   CalendarDays, MessageSquare, Heart, ShieldAlert, Megaphone, ShoppingBag, UserCheck,
-  Lock, Trash2, ChevronRight, Loader2, Check, Download, Eye, EyeOff,
+  Lock, Trash2, ChevronRight, Loader2, Check, Download, Eye, EyeOff, BellOff, BellRing, Smartphone,
 } from 'lucide-react'
 
 type Prefs = {
@@ -31,6 +38,15 @@ const PREF_OPTIONS: { key: keyof Prefs; icon: React.ElementType; label: string; 
   { key: 'notifyMarketplace',   icon: ShoppingBag,   label: 'Marketplace messages',     description: 'Interest in your listings and buy & sell activity' },
   { key: 'notifyApprovals',     icon: UserCheck,     label: 'Membership approvals',     description: 'When your community membership request is approved' },
 ]
+
+const PUSH_STATUS_LABELS: Record<MobilePushStatus, string> = {
+  unsupported: "This browser does not support device notifications.",
+  "missing-key": "Device notifications are not configured for this build.",
+  blocked: "Device notifications are blocked in this browser.",
+  prompt: "This device is not enabled yet.",
+  disabled: "Notifications are allowed, but this device is not enabled yet.",
+  enabled: "This device is enabled for community alerts and private messages.",
+}
 
 function Toggle({ checked, onChange }: { checked: boolean; onChange: (v: boolean) => void }) {
   return (
@@ -75,6 +91,8 @@ export default function Settings() {
   const [confirmPassword, setConfirmPassword] = useState("")
   const [passwordVisible, setPasswordVisible] = useState(false)
   const [accountBusy, setAccountBusy] = useState(false)
+  const [pushState, setPushState] = useState<MobilePushState | null>(null)
+  const [pushBusy, setPushBusy] = useState(false)
   const { data: user } = useCurrentUser()
   const logout = useLogout()
   const { toast } = useToast()
@@ -86,6 +104,12 @@ export default function Settings() {
       .then(setPrefs)
       .catch(() => {})
       .finally(() => setLoading(false))
+  }, [])
+
+  useEffect(() => {
+    getMobilePushState()
+      .then(setPushState)
+      .catch(() => setPushState({ status: "unsupported", permission: "unsupported", subscribed: false }))
   }, [])
 
   const update = async (key: keyof Prefs, value: boolean) => {
@@ -103,6 +127,48 @@ export default function Settings() {
       setTimeout(() => setSaved(false), 2000)
     } catch {}
     setSaving(false)
+  }
+
+  const enableDeviceNotifications = async () => {
+    setPushBusy(true)
+    try {
+      const state = await enableMobilePushNotifications()
+      setPushState(state)
+      if (state.status === "enabled") {
+        toast({ title: "Device notifications enabled." })
+      } else if (state.status === "blocked") {
+        toast({ title: "Notifications are blocked in this browser.", variant: "destructive" })
+      } else if (state.status === "unsupported") {
+        toast({ title: "This browser does not support device notifications.", variant: "destructive" })
+      } else {
+        toast({ title: "Device notifications were not enabled." })
+      }
+    } catch (error) {
+      toast({
+        title: "Could not enable device notifications.",
+        description: error instanceof Error ? error.message : undefined,
+        variant: "destructive",
+      })
+    } finally {
+      setPushBusy(false)
+    }
+  }
+
+  const disableDeviceNotifications = async () => {
+    setPushBusy(true)
+    try {
+      const state = await disableMobilePushNotifications()
+      setPushState(state)
+      toast({ title: "Device notifications turned off." })
+    } catch (error) {
+      toast({
+        title: "Could not turn off device notifications.",
+        description: error instanceof Error ? error.message : undefined,
+        variant: "destructive",
+      })
+    } finally {
+      setPushBusy(false)
+    }
   }
 
   const changePassword = async () => {
@@ -222,6 +288,47 @@ export default function Settings() {
                 </span>
               )}
             </div>
+
+            <Section title="Device Notifications">
+              <div className="px-5 py-4">
+                <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+                  <div className="flex items-start gap-3">
+                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-muted/50 text-muted-foreground">
+                      {pushState?.status === "enabled" ? <BellRing size={18} /> : <Smartphone size={18} />}
+                    </div>
+                    <div>
+                      <p className="text-sm font-medium text-foreground">This device</p>
+                      <p className="mt-0.5 text-xs text-muted-foreground">
+                        {pushState ? PUSH_STATUS_LABELS[pushState.status] : "Checking this device..."}
+                      </p>
+                    </div>
+                  </div>
+                  <Button
+                    type="button"
+                    variant={pushState?.status === "enabled" ? "outline" : "default"}
+                    size="sm"
+                    disabled={
+                      pushBusy ||
+                      !pushState ||
+                      pushState.status === "unsupported" ||
+                      pushState.status === "missing-key" ||
+                      pushState.status === "blocked"
+                    }
+                    onClick={pushState?.status === "enabled" ? disableDeviceNotifications : enableDeviceNotifications}
+                    className="w-full shrink-0 rounded-xl sm:w-auto"
+                  >
+                    {pushBusy ? (
+                      <Loader2 size={14} className="mr-1.5 animate-spin" />
+                    ) : pushState?.status === "enabled" ? (
+                      <BellOff size={14} className="mr-1.5" />
+                    ) : (
+                      <BellRing size={14} className="mr-1.5" />
+                    )}
+                    {pushState?.status === "enabled" ? "Turn off" : "Enable"}
+                  </Button>
+                </div>
+              </div>
+            </Section>
 
             {/* Notification Preferences */}
             <Section title="Notification Preferences">

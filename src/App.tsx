@@ -1,4 +1,4 @@
-import { lazy, Suspense } from "react";
+import { lazy, Suspense, useEffect } from "react";
 import { Redirect, Route, Router as WouterRouter, Switch, useLocation } from "wouter";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
@@ -14,6 +14,7 @@ import { InstallAppButton, InstallAppPrompt } from "@/components/pwa/install-app
 import { clearToken, isLoggedIn } from "@/lib/auth";
 import { useCurrentUser } from "@/hooks/use-current-user";
 import { useCommunityTheme } from "@/lib/theme";
+import { syncMobilePushSubscription } from "@/lib/mobile-push";
 
 const NotFound = lazy(() => import("@/pages/not-found"));
 const Landing = lazy(() => import("@/pages/Landing"));
@@ -170,6 +171,11 @@ function AppChrome() {
   const isPlatformArea = location.startsWith("/super-admin");
   const { data: user } = useCurrentUser({ enabled: !isPublicAuth && !isLanding });
   useCommunityTheme(isLanding ? null : user?.community, { forceLight: isLanding });
+
+  useEffect(() => {
+    if (isPublicAuth || isLanding || isPlatformArea || !user?.userId || user.email === "demo@mohalla.app") return;
+    syncMobilePushSubscription().catch(() => {});
+  }, [isLanding, isPlatformArea, isPublicAuth, user?.email, user?.userId]);
 
   return (
     <>

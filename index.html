@@ -48,14 +48,25 @@
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@700;800;900&display=swap" rel="stylesheet">
     <script>
       (function () {
+        var isLanding = window.location.pathname === "/" || window.location.pathname === "";
         try {
-          var isLanding = window.location.pathname === "/" || window.location.pathname === "";
           var storedTheme = window.localStorage.getItem("mohalla-theme");
           var prefersDark = window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches;
+          if (isLanding) {
+            document.documentElement.classList.add("landing-light-root");
+            document.documentElement.classList.remove("dark");
+          } else {
+            document.documentElement.classList.remove("landing-light-root");
+          }
           if (!isLanding && (storedTheme ? storedTheme === "dark" : prefersDark)) {
             document.documentElement.classList.add("dark");
           }
         } catch (error) {
+          if (isLanding) {
+            document.documentElement.classList.add("landing-light-root");
+          } else {
+            document.documentElement.classList.remove("landing-light-root");
+          }
           document.documentElement.classList.remove("dark");
         }
       })();

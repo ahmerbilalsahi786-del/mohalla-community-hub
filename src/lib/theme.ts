@@ -9,6 +9,7 @@ export interface CommunityTheme {
 }
 
 export const COMMUNITY_THEME_CHANGE_EVENT = "mohalla-community-theme-change";
+const LANDING_LIGHT_ROOT_CLASS = "landing-light-root";
 
 const defaults = {
   primary: "oklch(0.45 0.126 184)",
@@ -132,8 +133,13 @@ export function applyCommunityTheme(
 ) {
   const root = document.documentElement;
   const forceLight = Boolean(options.forceLight);
-  if (forceLight) root.classList.remove("dark");
-  else applyStoredThemePreference(root);
+  if (forceLight) {
+    root.classList.add(LANDING_LIGHT_ROOT_CLASS);
+    root.classList.remove("dark");
+  } else {
+    root.classList.remove(LANDING_LIGHT_ROOT_CLASS);
+    applyStoredThemePreference(root);
+  }
 
   const primary = safeColor(community?.themePrimaryColor, defaults.primary);
   const accent = safeColor(community?.themeSecondaryColor, defaults.accent);
@@ -214,6 +220,7 @@ export function useCommunityTheme(
     return () => {
       observer.disconnect();
       window.removeEventListener(COMMUNITY_THEME_CHANGE_EVENT, applySavedTheme);
+      if (forceLight) root.classList.remove(LANDING_LIGHT_ROOT_CLASS);
     };
   }, [community, options.forceLight]);
 }
