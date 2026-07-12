@@ -175,11 +175,12 @@ async function loadCurrentUser(): Promise<CurrentUser | null> {
   };
 }
 
-export function useCurrentUser() {
+export function useCurrentUser(options: { enabled?: boolean } = {}) {
   const token = getToken();
   return useQuery({
     queryKey: ["current-user", token],
     queryFn: loadCurrentUser,
+    enabled: options.enabled ?? true,
     staleTime: 0,
     refetchOnMount: "always",
     refetchOnWindowFocus: true,

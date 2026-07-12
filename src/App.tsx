@@ -1,5 +1,5 @@
 import { lazy, Suspense } from "react";
-import { Route, Router as WouterRouter, Switch, useLocation } from "wouter";
+import { Redirect, Route, Router as WouterRouter, Switch, useLocation } from "wouter";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -11,7 +11,7 @@ import { MohallaLoadingScreen } from "@/components/brand/mohalla-brand";
 import { AppDelightLayer } from "@/components/community/community-delight";
 import { ProtectedRoute, AdminRoute, AuthenticatedRoute, SuperAdminRoute } from "@/components/ProtectedRoute";
 import { InstallAppButton, InstallAppPrompt } from "@/components/pwa/install-app";
-import { clearToken } from "@/lib/auth";
+import { clearToken, isLoggedIn } from "@/lib/auth";
 import { useCurrentUser } from "@/hooks/use-current-user";
 import { useCommunityTheme } from "@/lib/theme";
 
@@ -102,6 +102,11 @@ const SAdminDashboard     = SuperAdminRoute(SuperAdminDashboard);
 const SAdminCommunities   = SuperAdminRoute(SuperAdminCommunities);
 const SAdminCommunityDetail = SuperAdminRoute(SuperAdminCommunityDetail);
 
+function LandingEntry() {
+  if (isLoggedIn()) return <Redirect to="/dashboard" />;
+  return <Landing />;
+}
+
 function Router() {
   return (
     <Switch>
@@ -113,7 +118,7 @@ function Router() {
       <Route path="/pending-approval" component={PMembershipPending} />
       <Route path="/privacy" component={Privacy} />
       <Route path="/terms" component={Terms} />
-      <Route path="/" component={Landing} />
+      <Route path="/" component={LandingEntry} />
 
       {/* Protected routes */}
       <Route path="/dashboard" component={PDashboard} />
@@ -158,10 +163,10 @@ function Router() {
 
 function AppChrome() {
   const [location] = useLocation();
-  const { data: user } = useCurrentUser();
   const isPublicAuth = location === "/login" || location === "/register" || location === "/reset-password" || location === "/pending" || location === "/pending-approval";
   const isLanding = location === "/";
   const isPlatformArea = location.startsWith("/super-admin");
+  const { data: user } = useCurrentUser({ enabled: !isPublicAuth && !isLanding });
   useCommunityTheme(isLanding ? null : user?.community, { forceLight: isLanding });
 
   return (
