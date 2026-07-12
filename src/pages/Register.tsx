@@ -18,10 +18,11 @@ import {
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { MohallaBrandLink } from '@/components/brand/mohalla-brand'
-import { setToken } from '@/lib/auth'
+import { clearToken, setToken } from '@/lib/auth'
 import { sendPendingApprovalEmail } from '@/lib/approval-email'
 import { useToast } from '@/hooks/use-toast'
 import { supabase } from '@/integrations/supabase/client'
+import { hasVerifiedMohallaEmail, sendEmailVerification, verificationPath } from '@/lib/email-verification'
 import {
   type JoinableCommunity,
   inviteLoginPath,
@@ -328,6 +329,27 @@ export default function Register() {
       return true
     }
 
+    const emailVerified = await hasVerifiedMohallaEmail(data.user.id)
+    if (!emailVerified) {
+      try {
+        await sendEmailVerification({ userId: data.user.id, email: data.user.email ?? form.email })
+        toast({
+          title: 'Confirm your email first',
+          description: 'We sent a verification link before this account can continue.',
+        })
+      } catch (error) {
+        toast({
+          title: 'Confirm your email first',
+          description: error instanceof Error ? error.message : 'Use the resend button on the next page.',
+          variant: 'destructive',
+        })
+      }
+      await supabase.auth.signOut()
+      clearToken()
+      navigate(verificationPath(data.user.email ?? form.email))
+      return true
+    }
+
     setToken(data.session.access_token)
     await requestSignedInMemberJoin()
     return true
@@ -410,19 +432,21 @@ export default function Register() {
         return
       }
 
-      if (data.session?.access_token) {
-        setToken(data.session.access_token)
-        if (registerMode === 'join') {
-          await requestSignedInMemberJoin()
-          return
-        }
+      if (data.user?.id) {
         try {
-          if (data.user?.id) await sendPendingApprovalEmail(data.user.id)
+          await sendEmailVerification({ userId: data.user.id, email: data.user.email ?? form.email })
         } catch (error) {
-          console.warn('Pending approval email could not be sent:', error)
+          toast({
+            title: 'Account created, but verification email failed',
+            description: error instanceof Error ? error.message : 'Please use the resend button on the next page.',
+            variant: 'destructive',
+          })
         }
-        navigate('/pending-approval')
-        return
+      }
+
+      if (data.session?.access_token) {
+        await supabase.auth.signOut()
+        clearToken()
       }
 
       if (registerMode === 'join' && data.user && Array.isArray(data.user.identities) && data.user.identities.length === 0) {
@@ -431,11 +455,10 @@ export default function Register() {
       }
 
       toast({
-        title: registerMode === 'join'
-          ? 'Account created. Sign in to finish the join request.'
-          : 'Account created. Sign in to continue.',
+        title: 'Check your email',
+        description: 'Open the verification link before signing in to Mohalla.',
       })
-      navigate(loginLink)
+      navigate(verificationPath(data.user?.email ?? form.email))
     } catch (error) {
       toast({
         title: 'Registration failed',

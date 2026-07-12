@@ -116,6 +116,21 @@ export async function updateCommunityStatus(id: string, status: Exclude<Communit
   }
 }
 
+export async function removePlatformCommunityAdmin(id: string) {
+  const { error } = await db.rpc("platform_remove_community_admin", {
+    target_community: id,
+  });
+  if (error) throw error;
+}
+
+export async function deletePlatformCommunity(id: string, confirmName: string) {
+  const { error } = await db.rpc("platform_delete_community", {
+    target_community: id,
+    confirm_name: confirmName,
+  });
+  if (error) throw error;
+}
+
 export async function fetchPlatformCommunity(id: string) {
   const { data, error } = await db.from("community_settings").select("*").eq("id", id).maybeSingle();
   if (error) throw error;

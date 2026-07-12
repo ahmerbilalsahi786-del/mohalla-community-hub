@@ -1,14 +1,28 @@
 import { useEffect, useState } from "react";
-import { Link, useParams } from "wouter";
+import { Link, useLocation, useParams } from "wouter";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { ArrowLeft, Building2, FileText, ImagePlus, Loader2, Save, ShoppingBag, Users } from "lucide-react";
+import { AlertTriangle, ArrowLeft, Building2, FileText, ImagePlus, Loader2, Save, ShoppingBag, Trash2, UserMinus, Users } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
 import { Spinner } from "@/components/ui/spinner";
 import { useToast } from "@/hooks/use-toast";
 import { uploadImage } from "@/lib/cloudinary";
 import { SuperAdminLayout } from "./SuperAdminLayout";
-import { fetchPlatformCommunity, updatePlatformCommunityBranding } from "./platform-api";
+import {
+  deletePlatformCommunity,
+  fetchPlatformCommunity,
+  removePlatformCommunityAdmin,
+  updatePlatformCommunityBranding,
+} from "./platform-api";
 
 const defaults = {
   themePrimaryColor: "#1B5E20",
@@ -29,6 +43,7 @@ const colorFields = [
 export default function SuperAdminCommunityDetail() {
   const params = useParams<{ id: string }>();
   const id = params.id ?? "";
+  const [, navigate] = useLocation();
   const qc = useQueryClient();
   const { toast } = useToast();
   const { data, isLoading } = useQuery({
@@ -39,6 +54,9 @@ export default function SuperAdminCommunityDetail() {
   const [logoUrl, setLogoUrl] = useState<string | null>(null);
   const [colors, setColors] = useState(defaults);
   const [uploading, setUploading] = useState(false);
+  const [removeAdminOpen, setRemoveAdminOpen] = useState(false);
+  const [deleteOpen, setDeleteOpen] = useState(false);
+  const [confirmName, setConfirmName] = useState("");
 
   useEffect(() => {
     if (!data?.community) return;
@@ -58,6 +76,27 @@ export default function SuperAdminCommunityDetail() {
       qc.invalidateQueries({ queryKey: ["platform-community", id] });
       qc.invalidateQueries({ queryKey: ["platform-communities"] });
       toast({ title: "Community branding updated" });
+    },
+  });
+
+  const removeAdmin = useMutation({
+    mutationFn: () => removePlatformCommunityAdmin(id),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["platform-community", id] });
+      qc.invalidateQueries({ queryKey: ["platform-communities"] });
+      qc.invalidateQueries({ queryKey: ["platform-dashboard"] });
+      toast({ title: "Admin access removed" });
+      setRemoveAdminOpen(false);
+    },
+  });
+
+  const deleteCommunity = useMutation({
+    mutationFn: () => deletePlatformCommunity(id, confirmName.trim()),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["platform-communities"] });
+      qc.invalidateQueries({ queryKey: ["platform-dashboard"] });
+      toast({ title: "Society deleted" });
+      navigate("/super-admin/communities");
     },
   });
 
@@ -215,11 +254,100 @@ export default function SuperAdminCommunityDetail() {
                 </div>
               </div>
             </section>
+
+            <section className="rounded-lg border border-destructive/20 bg-card p-5 shadow-sm">
+              <div className="mb-4 flex items-start gap-3">
+                <AlertTriangle className="mt-0.5 h-5 w-5 shrink-0 text-destructive" />
+                <div>
+                  <h2 className="font-semibold text-foreground">Admin controls</h2>
+                  <p className="mt-1 text-sm text-muted-foreground">Remove this society admin or delete the society from Mohalla.</p>
+                </div>
+              </div>
+              <div className="space-y-3">
+                <Button
+                  type="button"
+                  variant="outline"
+                  className="w-full justify-start rounded-xl"
+                  disabled={!data.community.adminId}
+                  onClick={() => setRemoveAdminOpen(true)}
+                >
+                  <UserMinus size={16} />
+                  Remove Admin
+                </Button>
+                <Button
+                  type="button"
+                  variant="destructive"
+                  className="w-full justify-start rounded-xl"
+                  onClick={() => setDeleteOpen(true)}
+                >
+                  <Trash2 size={16} />
+                  Delete Society
+                </Button>
+              </div>
+            </section>
           </aside>
         </div>
       ) : (
         <div className="rounded-lg border border-border bg-card p-8 text-center text-sm text-muted-foreground">Community not found.</div>
       )}
+
+      <Dialog open={removeAdminOpen} onOpenChange={setRemoveAdminOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Remove society admin</DialogTitle>
+            <DialogDescription>
+              This removes admin access from {data?.community.adminName ?? "the assigned admin"}. The society remains active.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button type="button" variant="outline" onClick={() => setRemoveAdminOpen(false)}>Cancel</Button>
+            <Button type="button" onClick={() => removeAdmin.mutate()} disabled={removeAdmin.isPending || !data?.community.adminId}>
+              {removeAdmin.isPending ? <Spinner className="mr-2" /> : null}
+              Confirm
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog
+        open={deleteOpen}
+        onOpenChange={(open) => {
+          setDeleteOpen(open);
+          if (!open) setConfirmName("");
+        }}
+      >
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Delete society</DialogTitle>
+            <DialogDescription>
+              This removes {data?.community.name ?? "this society"} from Mohalla and unassigns its residents. Type the society name to confirm.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-2">
+            <label htmlFor="detail-delete-community-name" className="text-sm font-semibold text-foreground">
+              Society name
+            </label>
+            <Input
+              id="detail-delete-community-name"
+              value={confirmName}
+              onChange={(event) => setConfirmName(event.target.value)}
+              placeholder={data?.community.name ?? "Society name"}
+            />
+          </div>
+          <DialogFooter>
+            <Button type="button" variant="outline" onClick={() => setDeleteOpen(false)}>Cancel</Button>
+            <Button
+              type="button"
+              variant="destructive"
+              onClick={() => deleteCommunity.mutate()}
+              disabled={deleteCommunity.isPending || !data?.community.name || confirmName.trim() !== data.community.name}
+            >
+              {deleteCommunity.isPending ? <Spinner className="mr-2" /> : null}
+              Delete Society
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </SuperAdminLayout>
   );
 }

@@ -130,6 +130,12 @@ async function loadCurrentUser(): Promise<CurrentUser | null> {
     trustedAppRole(user.app_metadata?.role) ??
     "user";
 
+  if ("email_verified_at" in (typedProfile ?? {}) && role !== "super_admin" && !typedProfile?.email_verified_at) {
+    await supabase.auth.signOut();
+    clearToken();
+    return null;
+  }
+
   return {
     userId: user.id,
     email: user.email ?? storedUser?.email ?? "",

@@ -17,9 +17,10 @@ import {
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { MohallaBrandLink } from '@/components/brand/mohalla-brand'
-import { setDemoToken, setToken } from '@/lib/auth'
+import { clearToken, setDemoToken, setToken } from '@/lib/auth'
 import { useToast } from '@/hooks/use-toast'
 import { supabase } from '@/integrations/supabase/client'
+import { hasVerifiedMohallaEmail, sendEmailVerification, verificationPath } from '@/lib/email-verification'
 import { inviteRegisterPath, requestMemberJoin } from '@/lib/member-join'
 
 function passwordResetRedirectTo() {
@@ -65,6 +66,32 @@ export default function Login() {
 
       if (error || !data.session?.access_token) {
         toast({ title: error?.message || 'Login failed', variant: 'destructive' })
+        return
+      }
+
+      const emailVerified = await hasVerifiedMohallaEmail(data.user.id)
+      if (!emailVerified) {
+        let verificationSent = true
+        try {
+          await sendEmailVerification({ userId: data.user.id, email: data.user.email ?? email })
+        } catch (verificationError) {
+          verificationSent = false
+          toast({
+            title: "Could not send verification email",
+            description: verificationError instanceof Error ? verificationError.message : "Use the resend button on the next page.",
+            variant: "destructive",
+          })
+        }
+        await supabase.auth.signOut()
+        clearToken()
+        queryClient.clear()
+        if (verificationSent) {
+          toast({
+            title: "Confirm your email first",
+            description: "We sent a fresh verification link to your inbox.",
+          })
+        }
+        navigate(verificationPath(data.user.email ?? email))
         return
       }
 

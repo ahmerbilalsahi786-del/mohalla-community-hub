@@ -1,7 +1,7 @@
 import { useMemo, useState } from "react";
 import { Link } from "wouter";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Building2, CheckCircle2, Eye, PauseCircle, RotateCcw, XCircle } from "lucide-react";
+import { Building2, CheckCircle2, Eye, PauseCircle, RotateCcw, Trash2, UserMinus, XCircle } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -12,11 +12,19 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
 import { Spinner } from "@/components/ui/spinner";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
 import { SuperAdminLayout } from "./SuperAdminLayout";
-import { CommunityStatus, fetchPlatformCommunities, PlatformCommunity, updateCommunityStatus } from "./platform-api";
+import {
+  CommunityStatus,
+  deletePlatformCommunity,
+  fetchPlatformCommunities,
+  PlatformCommunity,
+  removePlatformCommunityAdmin,
+  updateCommunityStatus,
+} from "./platform-api";
 
 const tabs: Array<{ label: string; value: CommunityStatus | "all" }> = [
   { label: "Pending", value: "pending" },
@@ -27,6 +35,7 @@ const tabs: Array<{ label: string; value: CommunityStatus | "all" }> = [
 ];
 
 type Action = "approved" | "rejected" | "suspended";
+type DangerAction = "remove-admin" | "delete";
 
 function StatusBadge({ status }: { status: string }) {
   const className =
@@ -59,7 +68,9 @@ function nextActions(community: PlatformCommunity): Array<{ label: string; actio
 export default function SuperAdminCommunities() {
   const [status, setStatus] = useState<CommunityStatus | "all">("pending");
   const [actionTarget, setActionTarget] = useState<{ community: PlatformCommunity; action: Action; label: string } | null>(null);
+  const [dangerTarget, setDangerTarget] = useState<{ community: PlatformCommunity; action: DangerAction } | null>(null);
   const [reason, setReason] = useState("");
+  const [confirmName, setConfirmName] = useState("");
   const qc = useQueryClient();
   const { toast } = useToast();
   const { data = [], isLoading } = useQuery<PlatformCommunity[]>({
@@ -79,6 +90,26 @@ export default function SuperAdminCommunities() {
       toast({ title: "Community status updated" });
       setActionTarget(null);
       setReason("");
+    },
+  });
+
+  const dangerMutation = useMutation({
+    mutationFn: async () => {
+      if (!dangerTarget) return;
+      if (dangerTarget.action === "remove-admin") {
+        await removePlatformCommunityAdmin(dangerTarget.community.id);
+        return;
+      }
+      await deletePlatformCommunity(dangerTarget.community.id, confirmName.trim());
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["platform-communities"] });
+      qc.invalidateQueries({ queryKey: ["platform-dashboard"] });
+      toast({
+        title: dangerTarget?.action === "delete" ? "Society deleted" : "Admin access removed",
+      });
+      setDangerTarget(null);
+      setConfirmName("");
     },
   });
 
@@ -165,6 +196,26 @@ export default function SuperAdminCommunities() {
                             {label}
                           </Button>
                         ))}
+                        {community.adminId && (
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            className="gap-1 rounded-xl"
+                            onClick={() => setDangerTarget({ community, action: "remove-admin" })}
+                          >
+                            <UserMinus size={15} />
+                            Remove Admin
+                          </Button>
+                        )}
+                        <Button
+                          size="sm"
+                          variant="destructive"
+                          className="gap-1 rounded-xl"
+                          onClick={() => setDangerTarget({ community, action: "delete" })}
+                        >
+                          <Trash2 size={15} />
+                          Delete
+                        </Button>
                       </div>
                     </td>
                   </tr>
@@ -201,6 +252,66 @@ export default function SuperAdminCommunities() {
               onClick={() => mutation.mutate()}
             >
               {mutation.isPending ? <Spinner className="mr-2" /> : null}
+              Confirm
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog
+        open={Boolean(dangerTarget)}
+        onOpenChange={(open) => {
+          if (!open) {
+            setDangerTarget(null);
+            setConfirmName("");
+          }
+        }}
+      >
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>
+              {dangerTarget?.action === "delete" ? "Delete society" : "Remove society admin"}
+            </DialogTitle>
+            <DialogDescription>
+              {dangerTarget?.action === "delete"
+                ? `This removes ${dangerTarget.community.name} from Mohalla and unassigns its residents from the society. Type the society name to confirm.`
+                : `This removes admin access from ${dangerTarget?.community.adminName}. The society will remain active but without an assigned admin.`}
+            </DialogDescription>
+          </DialogHeader>
+          {dangerTarget?.action === "delete" && (
+            <div className="space-y-2">
+              <label htmlFor="delete-community-name" className="text-sm font-semibold text-foreground">
+                Society name
+              </label>
+              <Input
+                id="delete-community-name"
+                value={confirmName}
+                onChange={(event) => setConfirmName(event.target.value)}
+                placeholder={dangerTarget.community.name}
+              />
+            </div>
+          )}
+          <DialogFooter>
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => {
+                setDangerTarget(null);
+                setConfirmName("");
+              }}
+            >
+              Cancel
+            </Button>
+            <Button
+              type="button"
+              variant={dangerTarget?.action === "delete" ? "destructive" : "default"}
+              disabled={
+                dangerMutation.isPending ||
+                (dangerTarget?.action === "delete" && confirmName.trim() !== dangerTarget.community.name)
+              }
+              onClick={() => dangerMutation.mutate()}
+            >
+              {dangerMutation.isPending ? <Spinner className="mr-2" /> : null}
               Confirm
             </Button>
           </DialogFooter>

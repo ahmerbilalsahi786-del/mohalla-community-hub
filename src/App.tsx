@@ -46,6 +46,7 @@ const Help = lazy(() => import("@/pages/Help"));
 const Login = lazy(() => import("@/pages/Login"));
 const Register = lazy(() => import("@/pages/Register"));
 const ResetPassword = lazy(() => import("@/pages/ResetPassword"));
+const VerifyEmail = lazy(() => import("@/pages/VerifyEmail"));
 const MembershipPending = lazy(() => import("@/pages/MembershipPending"));
 const Notifications = lazy(() => import("@/pages/Notifications"));
 const Privacy = lazy(() => import("@/pages/Privacy"));
@@ -114,6 +115,7 @@ function Router() {
       <Route path="/login" component={Login} />
       <Route path="/register" component={Register} />
       <Route path="/reset-password" component={ResetPassword} />
+      <Route path="/verify-email" component={VerifyEmail} />
       <Route path="/pending" component={PMembershipPending} />
       <Route path="/pending-approval" component={PMembershipPending} />
       <Route path="/privacy" component={Privacy} />
@@ -163,7 +165,7 @@ function Router() {
 
 function AppChrome() {
   const [location] = useLocation();
-  const isPublicAuth = location === "/login" || location === "/register" || location === "/reset-password" || location === "/pending" || location === "/pending-approval";
+  const isPublicAuth = location === "/login" || location === "/register" || location === "/reset-password" || location === "/verify-email" || location === "/pending" || location === "/pending-approval";
   const isLanding = location === "/";
   const isPlatformArea = location.startsWith("/super-admin");
   const { data: user } = useCurrentUser({ enabled: !isPublicAuth && !isLanding });
