@@ -9,6 +9,7 @@ export interface CommunityTheme {
 }
 
 export const COMMUNITY_THEME_CHANGE_EVENT = "mohalla-community-theme-change";
+export const THEME_PREFERENCE_CHANGE_EVENT = "mohalla-theme-preference-change";
 const LANDING_LIGHT_ROOT_CLASS = "landing-light-root";
 
 const defaults = {
@@ -88,10 +89,20 @@ function mix(color: string, amount: number, base: string) {
   return `color-mix(in oklch, ${color} ${amount}%, ${base})`;
 }
 
-function applyStoredThemePreference(root: HTMLElement) {
+export function shouldUseDarkTheme() {
   const storedTheme = window.localStorage.getItem("mohalla-theme");
   const prefersDark = window.matchMedia?.("(prefers-color-scheme: dark)").matches ?? false;
-  root.classList.toggle("dark", storedTheme ? storedTheme === "dark" : prefersDark);
+  return storedTheme ? storedTheme === "dark" : prefersDark;
+}
+
+function applyStoredThemePreference(root: HTMLElement) {
+  root.classList.toggle("dark", shouldUseDarkTheme());
+}
+
+export function setStoredThemePreference(useDark: boolean) {
+  window.localStorage.setItem("mohalla-theme", useDark ? "dark" : "light");
+  document.documentElement.classList.toggle("dark", useDark);
+  window.dispatchEvent(new Event(THEME_PREFERENCE_CHANGE_EVENT));
 }
 
 function applyTheme(vars: typeof defaults) {
@@ -213,13 +224,12 @@ export function useCommunityTheme(
 
     applySemanticTheme();
 
-    const observer = new MutationObserver(applySemanticTheme);
-    observer.observe(root, { attributes: true, attributeFilter: ["class"] });
     window.addEventListener(COMMUNITY_THEME_CHANGE_EVENT, applySavedTheme);
+    window.addEventListener(THEME_PREFERENCE_CHANGE_EVENT, applySemanticTheme);
 
     return () => {
-      observer.disconnect();
       window.removeEventListener(COMMUNITY_THEME_CHANGE_EVENT, applySavedTheme);
+      window.removeEventListener(THEME_PREFERENCE_CHANGE_EVENT, applySemanticTheme);
       if (forceLight) root.classList.remove(LANDING_LIGHT_ROOT_CLASS);
     };
   }, [community, options.forceLight]);

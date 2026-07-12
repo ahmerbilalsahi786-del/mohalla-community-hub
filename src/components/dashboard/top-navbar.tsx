@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button'
 import { useLocation } from 'wouter'
 import { NotificationBell } from './notification-bell'
 import { MessageShortcut } from './message-shortcut'
+import { setStoredThemePreference, shouldUseDarkTheme } from '@/lib/theme'
 
 const PAGE_META: Record<string, { title: string; subtitle: string }> = {
   '/dashboard': { title: 'Dashboard', subtitle: 'Your mohalla, organized for today' },
@@ -45,17 +46,12 @@ export function TopNavbar() {
   const meta = matchPageMeta(location)
 
   useEffect(() => {
-    const storedTheme = window.localStorage.getItem('mohalla-theme')
-    const prefersDark = window.matchMedia?.('(prefers-color-scheme: dark)').matches ?? false
-    const shouldUseDark = storedTheme ? storedTheme === 'dark' : prefersDark
-    document.documentElement.classList.toggle('dark', shouldUseDark)
-    setDarkMode(shouldUseDark)
+    setDarkMode(shouldUseDarkTheme())
   }, [])
 
   const toggleDarkMode = () => {
     const next = !darkMode
-    document.documentElement.classList.toggle('dark', next)
-    window.localStorage.setItem('mohalla-theme', next ? 'dark' : 'light')
+    setStoredThemePreference(next)
     setDarkMode(next)
   }
 
