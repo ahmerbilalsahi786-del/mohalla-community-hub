@@ -1,12 +1,12 @@
 import { useState } from 'react'
 import { Link, useLocation } from 'wouter'
-import { useGetListing, useUpdateListingStatus, getListListingsQueryKey } from '@/lib/generated/api'
-import { useQueryClient } from '@tanstack/react-query'
+import { getListListingsQueryKey } from '@/lib/generated/api'
+import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { Sidebar } from '@/components/dashboard/sidebar'
 import { TopNavbar } from '@/components/dashboard/top-navbar'
 import {
   ArrowLeft, MessageCircle, CheckCircle2, Clock, Package,
-  ChevronLeft, ChevronRight, Loader2, MapPin, Share2, Trash2
+  ChevronLeft, ChevronRight, Loader2, MapPin, Share2, Trash2, Store
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
@@ -27,8 +27,29 @@ const STATUS_CONFIG: Record<string, { label: string; icon: React.ElementType; bg
 }
 
 const CATEGORY_LABELS: Record<string, string> = {
+  shop: 'Shop',
   furniture: 'Furniture', electronics: 'Electronics', clothes: 'Clothes',
   vehicles: 'Vehicles', services: 'Services', free: 'Free', other: 'Other',
+}
+
+type Listing = {
+  id: string | number
+  userId: string
+  userName: string
+  unitNumber: string
+  title: string
+  description: string
+  pricePkr?: number | null
+  category: string
+  imageUrls?: string[]
+  condition: string
+  status: string
+  whatsappNumber: string
+  createdAt: string
+  listingKind?: string
+  location?: string | null
+  latitude?: number | null
+  longitude?: number | null
 }
 
 function formatPrice(pkr: number | null | undefined) {
@@ -56,7 +77,7 @@ interface Props {
 }
 
 export default function MarketplaceListing({ params }: Props) {
-  const listingId = parseInt(params.id, 10)
+  const listingId = params.id
   const queryClient = useQueryClient()
   const [, navigate] = useLocation()
   const { data: user } = useCurrentUser()
@@ -65,16 +86,19 @@ export default function MarketplaceListing({ params }: Props) {
   const [statusLoading, setStatusLoading] = useState(false)
   const [deleteLoading, setDeleteLoading] = useState(false)
 
-  const { data: listing, isLoading, error } = useGetListing(listingId)
-
-  const updateStatus = useUpdateListingStatus({
-    mutation: {
-      onSuccess: () => {
-        queryClient.invalidateQueries({ queryKey: getListListingsQueryKey() })
-        setStatusLoading(false)
-      },
-      onError: () => setStatusLoading(false),
-    },
+  const { data: listing, isLoading, error } = useQuery({
+    queryKey: ['/api/marketplace', listingId],
+    queryFn: () => customFetch<Listing>(`/api/marketplace/${encodeURIComponent(listingId)}`, { method: 'GET' }),
+    enabled: Boolean(listingId),
+  })
+  const isShop = listing?.listingKind === 'shop' || listing?.category === 'shop'
+  const { data: shopListingsData } = useQuery({
+    queryKey: ['/api/marketplace/shop-items', listing?.userId, listing?.id],
+    queryFn: () => customFetch<{ listings: Listing[] }>(`/api/marketplace?limit=12&sellerId=${encodeURIComponent(String(listing?.userId ?? ''))}`, { method: 'GET' }),
+    enabled: Boolean(isShop && listing?.userId),
+    select: (data) => ({
+      listings: (data.listings ?? []).filter((item) => String(item.userId) === String(listing?.userId) && String(item.id) !== String(listing?.id)),
+    }),
   })
 
   if (isLoading) {
@@ -122,26 +146,39 @@ export default function MarketplaceListing({ params }: Props) {
   const StatusIcon = statusCfg.icon
   const canManageListing = listing.userId === user?.userId || canManageCommunity(user?.role)
   const isSold = listing.status === 'sold'
+  const shopItems = shopListingsData?.listings ?? []
 
-  const handleMarkSold = () => {
+  const updateStatus = async (status: 'sold' | 'reserved' | 'available') => {
     setStatusLoading(true)
-    updateStatus.mutate({ listingId: listing.id, data: { status: 'sold' } })
+    try {
+      await customFetch(`/api/marketplace/${encodeURIComponent(String(listing.id))}/status`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ status }),
+      })
+      queryClient.invalidateQueries({ queryKey: getListListingsQueryKey() })
+      queryClient.invalidateQueries({ queryKey: ['/api/marketplace', listingId] })
+    } catch (error) {
+      toast({
+        title: 'Could not update listing.',
+        description: error instanceof Error ? error.message : 'Please try again.',
+        variant: 'destructive',
+      })
+    } finally {
+      setStatusLoading(false)
+    }
   }
-  const handleMarkReserved = () => {
-    setStatusLoading(true)
-    updateStatus.mutate({ listingId: listing.id, data: { status: 'reserved' } })
-  }
-  const handleMarkAvailable = () => {
-    setStatusLoading(true)
-    updateStatus.mutate({ listingId: listing.id, data: { status: 'available' } })
-  }
+
+  const handleMarkSold = () => updateStatus('sold')
+  const handleMarkReserved = () => updateStatus('reserved')
+  const handleMarkAvailable = () => updateStatus('available')
   const handleDelete = async () => {
     const kind = listing.listingKind === 'shop' || listing.category === 'shop' ? 'shop' : 'listing'
     if (!window.confirm(`Delete ${kind} "${listing.title}"?`)) return
 
     setDeleteLoading(true)
     try {
-      await customFetch(`/api/marketplace/${listing.id}`, { method: 'DELETE' })
+      await customFetch(`/api/marketplace/${encodeURIComponent(String(listing.id))}`, { method: 'DELETE' })
       queryClient.invalidateQueries({ queryKey: getListListingsQueryKey() })
       toast({ title: kind === 'shop' ? 'Shop deleted.' : 'Listing deleted.' })
       navigate('/marketplace')
@@ -220,7 +257,7 @@ export default function MarketplaceListing({ params }: Props) {
                     </>
                   ) : (
                     <div className="w-full h-full flex items-center justify-center">
-                      <Package size={64} className="text-muted-foreground/20" />
+                      {isShop ? <Store size={64} className="text-muted-foreground/20" /> : <Package size={64} className="text-muted-foreground/20" />}
                     </div>
                   )}
 
@@ -270,9 +307,11 @@ export default function MarketplaceListing({ params }: Props) {
                 </div>
 
                 {/* Price */}
-                <p className="text-3xl font-bold text-primary">
-                  {formatPrice(listing.pricePkr)}
-                </p>
+                {!isShop && (
+                  <p className="text-3xl font-bold text-primary">
+                    {formatPrice(listing.pricePkr)}
+                  </p>
+                )}
 
                 {/* Description */}
                 <div>
@@ -282,7 +321,7 @@ export default function MarketplaceListing({ params }: Props) {
 
                 {/* Seller info */}
                 <div className="rounded-2xl border border-border bg-muted/30 p-4 space-y-2">
-                  <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">Seller</h3>
+                  <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">{isShop ? 'Shop contact' : 'Seller'}</h3>
                   <div className="flex items-center gap-3">
                     <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-br from-primary/60 to-accent/60 font-bold text-white text-sm shrink-0">
                       {listing.userName.split(' ').map((n) => n[0]).join('').slice(0, 2).toUpperCase()}
@@ -308,13 +347,13 @@ export default function MarketplaceListing({ params }: Props) {
                       className="flex w-full items-center justify-center gap-2 rounded-xl bg-[#25D366] py-3 text-sm font-semibold text-white hover:bg-[#1ebe5d] transition-colors"
                     >
                       <MessageCircle size={18} />
-                      Contact on WhatsApp
+                      {isShop ? 'Message Shop on WhatsApp' : 'Contact on WhatsApp'}
                     </a>
                   )}
 
                   {/* Share via WhatsApp */}
                   <a
-                    href={`https://wa.me/?text=${encodeURIComponent(`Check out this listing on Mohalla: "${listing.title}" – ${listing.pricePkr ? `Rs ${listing.pricePkr.toLocaleString()}` : 'Free'} (${listing.unitNumber}). Open the Mohalla app for details.`)}`}
+                    href={`https://wa.me/?text=${encodeURIComponent(isShop ? `Check out this shop on Mohalla: "${listing.title}" (${listing.location || listing.unitNumber}). Open the Mohalla app for details.` : `Check out this listing on Mohalla: "${listing.title}" – ${listing.pricePkr ? `Rs ${listing.pricePkr.toLocaleString()}` : 'Free'} (${listing.unitNumber}). Open the Mohalla app for details.`)}`}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="flex w-full items-center justify-center gap-2 rounded-xl border border-border bg-muted/40 py-2.5 text-sm font-medium text-foreground hover:bg-muted transition-colors"
@@ -324,7 +363,7 @@ export default function MarketplaceListing({ params }: Props) {
                   </a>
                 
 
-                  {canManageListing && !isSold && (
+                  {canManageListing && !isSold && !isShop && (
                     <div className="flex gap-2">
                       {listing.status !== 'reserved' && (
                         <button
@@ -347,7 +386,7 @@ export default function MarketplaceListing({ params }: Props) {
                     </div>
                   )}
 
-                  {canManageListing && listing.status !== 'available' && (
+                  {canManageListing && listing.status !== 'available' && !isShop && (
                     <button
                       onClick={handleMarkAvailable}
                       disabled={statusLoading}
@@ -372,6 +411,35 @@ export default function MarketplaceListing({ params }: Props) {
                 </div>
               </div>
             </div>
+
+            {isShop && (
+              <section className="mt-8 rounded-2xl border border-border bg-card p-4 shadow-sm">
+                <div className="mb-4 flex items-center justify-between gap-3">
+                  <div>
+                    <h2 className="text-lg font-bold text-foreground">Listed items</h2>
+                    <p className="text-sm text-muted-foreground">Items and services shared by this shop.</p>
+                  </div>
+                  <Link href="/marketplace?create=listing">
+                    <Button variant="outline" size="sm" className="rounded-xl">Post item</Button>
+                  </Link>
+                </div>
+                {shopItems.length === 0 ? (
+                  <p className="rounded-xl bg-muted/40 px-4 py-5 text-sm text-muted-foreground">
+                    This shop has not listed items yet.
+                  </p>
+                ) : (
+                  <div className="grid gap-3 sm:grid-cols-2">
+                    {shopItems.map((item) => (
+                      <Link key={item.id} href={`/marketplace/${item.id}`} className="rounded-xl border border-border bg-background/70 p-3 transition-colors hover:bg-muted/50">
+                        <p className="line-clamp-1 text-sm font-bold text-foreground">{item.title}</p>
+                        <p className="mt-1 line-clamp-2 text-xs text-muted-foreground">{item.description}</p>
+                        <p className="mt-2 text-sm font-bold text-primary">{formatPrice(item.pricePkr)}</p>
+                      </Link>
+                    ))}
+                  </div>
+                )}
+              </section>
+            )}
           </div>
         </main>
       </div>

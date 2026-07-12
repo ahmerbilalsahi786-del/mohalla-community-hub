@@ -7,7 +7,7 @@ import { TopNavbar } from '@/components/dashboard/top-navbar'
 import {
   Plus, X, Search, Loader2, ChevronDown, ChevronUp,
   Armchair, Tv2, Shirt, Car, Wrench, Gift, Package,
-  Tag, Image as ImageIcon, Store, MapPin, Trash2
+  Tag, Image as ImageIcon, Store, MapPin, Trash2, Clock
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { useToast } from '@/hooks/use-toast'
@@ -61,7 +61,7 @@ function timeAgo(dateStr: string) {
 }
 
 interface Listing {
-  id: number
+  id: string | number
   userId: string
   userName: string
   unitNumber: string
@@ -94,6 +94,7 @@ function ListingCard({
   const cond = CONDITION_BADGE[listing.condition] || CONDITION_BADGE.good
   const status = STATUS_BADGE[listing.status] || STATUS_BADGE.available
   const isSold = listing.status !== 'available'
+  const isShop = listing.listingKind === 'shop' || listing.category === 'shop'
   const { data: user } = useCurrentUser()
   const canDelete = canManage || user?.userId === listing.userId
 
@@ -138,7 +139,7 @@ function ListingCard({
             />
           ) : (
             <div className="w-full h-full flex items-center justify-center">
-              <Package size={40} className="delight-swing-soft text-muted-foreground/30" />
+              {isShop ? <Store size={40} className="delight-swing-soft text-muted-foreground/30" /> : <Package size={40} className="delight-swing-soft text-muted-foreground/30" />}
             </div>
           )}
           {isSold && (
@@ -164,19 +165,32 @@ function ListingCard({
           </div>
 
           <div className="flex items-center gap-1.5 flex-wrap">
-            {(listing.listingKind === 'shop' || listing.category === 'shop') && (
+            {isShop && (
               <span className="rounded-full bg-primary/10 px-2 py-0.5 text-xs font-semibold text-primary">
                 Shop
               </span>
             )}
-            <span className={cn('rounded-full px-2 py-0.5 text-xs font-semibold', cond.bg, cond.text)}>
-              {cond.label}
-            </span>
+            {isShop ? (
+              <span className="inline-flex items-center gap-1 rounded-full bg-amber-500/10 px-2 py-0.5 text-xs font-semibold text-amber-700">
+                <Clock size={11} />
+                Local business
+              </span>
+            ) : (
+              <span className={cn('rounded-full px-2 py-0.5 text-xs font-semibold', cond.bg, cond.text)}>
+                {cond.label}
+              </span>
+            )}
           </div>
 
-          <p className="text-base font-bold text-primary mt-auto">
-            {formatPrice(listing.pricePkr)}
-          </p>
+          {isShop ? (
+            <p className="mt-auto line-clamp-2 text-sm font-semibold text-muted-foreground">
+              {listing.description || 'View shop details and listed items'}
+            </p>
+          ) : (
+            <p className="text-base font-bold text-primary mt-auto">
+              {formatPrice(listing.pricePkr)}
+            </p>
+          )}
 
           <div className="flex items-center justify-between text-xs text-muted-foreground">
             <span className="truncate">{listing.location || listing.unitNumber}</span>
@@ -515,7 +529,7 @@ export default function Marketplace() {
   const [showCreate, setShowCreate] = useState(false)
   const [createMode, setCreateMode] = useState<'listing' | 'shop'>('listing')
   const [page, setPage] = useState(1)
-  const [deletingId, setDeletingId] = useState<number | null>(null)
+  const [deletingId, setDeletingId] = useState<string | number | null>(null)
   const searchTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const queryClient = useQueryClient()
   const query = useSearch()
@@ -721,14 +735,16 @@ export default function Marketplace() {
             ) : listings.length === 0 ? (
               <CommunityEmptyState
                 kind="marketplace"
-                title={debouncedSearch || activeCategory !== 'all' || minPrice || maxPrice ? 'No listings found' : undefined}
-                description={debouncedSearch || activeCategory !== 'all' || minPrice || maxPrice ? 'Try different filters, or add the first helpful listing for your neighbours.' : undefined}
-                action="Add Listing"
-                onAction={() => openCreate('listing')}
+                title={activeCategory === 'shop' ? 'No shops found' : debouncedSearch || activeCategory !== 'all' || minPrice || maxPrice ? 'No listings found' : undefined}
+                description={activeCategory === 'shop' ? 'Register the first nearby shop so residents can find local services.' : debouncedSearch || activeCategory !== 'all' || minPrice || maxPrice ? 'Try different filters, or add the first helpful listing for your neighbours.' : undefined}
+                action={activeCategory === 'shop' ? 'Register Shop' : 'Add Listing'}
+                onAction={() => openCreate(activeCategory === 'shop' ? 'shop' : 'listing')}
               />
             ) : (
               <>
-                <p className="text-sm text-muted-foreground mb-4">{data?.total ?? 0} listings</p>
+                <p className="text-sm text-muted-foreground mb-4">
+                  {data?.total ?? 0} {activeCategory === 'shop' ? 'shops' : 'listings'}
+                </p>
                 <div className="grid grid-cols-1 gap-3 min-[380px]:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 sm:gap-4">
                   {listings.map((l) => (
                     <ListingCard

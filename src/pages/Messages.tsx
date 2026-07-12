@@ -188,6 +188,7 @@ function MemberPicker({
 export default function Messages() {
   const [, params] = useRoute("/messages/:id");
   const conversationId = params?.id ?? null;
+  const hasOpenConversation = Boolean(conversationId);
   const [, navigate] = useLocation();
   const [search, setSearch] = useState("");
   const [showNew, setShowNew] = useState(false);
@@ -298,9 +299,12 @@ export default function Messages() {
       <Sidebar />
       <div className="flex min-w-0 flex-1 flex-col overflow-hidden">
         <TopNavbar />
-        <main className="flex-1 overflow-y-auto p-3 pb-24 sm:p-6">
-          <div className="mx-auto grid h-[calc(100dvh-8.5rem)] max-w-6xl gap-4 lg:grid-cols-[22rem_minmax(0,1fr)]">
-            <section className="flex min-h-0 flex-col overflow-hidden rounded-3xl border portal-soft-rule bg-card/62 shadow-sm backdrop-blur-xl">
+        <main className="flex-1 overflow-hidden p-0 pb-20 sm:p-6 sm:pb-6">
+          <div className="mx-auto grid h-[calc(100dvh-8.25rem)] max-w-6xl gap-4 sm:h-[calc(100dvh-8.5rem)] lg:grid-cols-[22rem_minmax(0,1fr)]">
+            <section className={cn(
+              "portal-soft-rule min-h-0 flex-col overflow-hidden rounded-none border-0 bg-card/62 shadow-sm backdrop-blur-xl sm:rounded-3xl sm:border lg:flex",
+              hasOpenConversation ? "hidden" : "flex",
+            )}>
               <div className="border-b portal-soft-rule p-4">
                 <div className="flex items-center justify-between gap-3">
                   <div>
@@ -363,7 +367,10 @@ export default function Messages() {
               </div>
             </section>
 
-            <section className="flex min-h-0 flex-col overflow-hidden rounded-3xl border portal-soft-rule bg-card/62 shadow-sm backdrop-blur-xl">
+            <section className={cn(
+              "portal-soft-rule min-h-0 flex-col overflow-hidden rounded-none border-0 bg-card/62 shadow-sm backdrop-blur-xl sm:rounded-3xl sm:border lg:flex",
+              hasOpenConversation ? "flex" : "hidden",
+            )}>
               {!conversationId ? (
                 <div className="flex min-h-0 flex-1 flex-col items-center justify-center px-6 text-center">
                   <span className="flex h-16 w-16 items-center justify-center rounded-3xl bg-primary/10 text-primary ring-1 ring-primary/15">

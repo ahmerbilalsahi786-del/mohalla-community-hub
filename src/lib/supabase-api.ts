@@ -975,11 +975,15 @@ async function listListings(params: URLSearchParams) {
   const limit = Number(params.get("limit") ?? 20);
   const search = params.get("search");
   const category = params.get("category");
+  const sellerId = params.get("sellerId");
   const minPrice = Number(params.get("minPrice") ?? 0);
   const maxPrice = Number(params.get("maxPrice") ?? 0);
   if (isDemoMode()) {
     let rows = applySearch(readDemoRows(DEMO_LISTINGS_KEY), search, ["title", "description", "category", "location"]);
-    if (category && category !== "all") rows = rows.filter((row: any) => row.category === category);
+    if (category === "shop") rows = rows.filter((row: any) => row.category === "shop" || row.listing_kind === "shop");
+    else rows = rows.filter((row: any) => row.category !== "shop" && row.listing_kind !== "shop");
+    if (category && category !== "all" && category !== "shop") rows = rows.filter((row: any) => row.category === category);
+    if (sellerId) rows = rows.filter((row: any) => String(row.user_id) === sellerId);
     if (minPrice) rows = rows.filter((row: any) => Number(row.price_pkr ?? 0) >= minPrice);
     if (maxPrice) rows = rows.filter((row: any) => Number(row.price_pkr ?? 0) <= maxPrice);
     const listings = pageRows(rows, page, limit).map((row: any) => toListing(row, DEMO_PROFILE));
@@ -990,7 +994,10 @@ async function listListings(params: URLSearchParams) {
   if (error) throw error;
 
   let rows = applySearch(data ?? [], search, ["title", "description", "category", "location"]);
-  if (category && category !== "all") rows = rows.filter((row: any) => row.category === category);
+  if (category === "shop") rows = rows.filter((row: any) => row.category === "shop" || row.listing_kind === "shop");
+  else rows = rows.filter((row: any) => row.category !== "shop" && row.listing_kind !== "shop");
+  if (category && category !== "all" && category !== "shop") rows = rows.filter((row: any) => row.category === category);
+  if (sellerId) rows = rows.filter((row: any) => String(row.user_id) === sellerId);
   if (minPrice) rows = rows.filter((row: any) => Number(row.price_pkr ?? 0) >= minPrice);
   if (maxPrice) rows = rows.filter((row: any) => Number(row.price_pkr ?? 0) <= maxPrice);
   const profiles = await profilesById(rows.map((row: any) => row.user_id));
