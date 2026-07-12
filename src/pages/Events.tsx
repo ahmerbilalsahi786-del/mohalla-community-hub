@@ -187,8 +187,8 @@ function CreateEventModal({ onClose }: { onClose: () => void }) {
   }
 
   return (
-    <div className="fixed inset-0 z-[80] flex items-stretch justify-center overflow-hidden bg-black/40 p-0 backdrop-blur-sm sm:items-center sm:p-4">
-      <div className="flex h-dvh w-full max-w-lg flex-col overflow-hidden border-0 border-border bg-card shadow-2xl sm:h-auto sm:max-h-[calc(100dvh-2rem)] sm:rounded-2xl sm:border">
+    <div data-mobile-composer className="fixed inset-0 z-[80] flex items-stretch justify-center overflow-hidden bg-black/40 p-0 backdrop-blur-sm sm:items-center sm:p-4">
+      <div className="flex h-dvh min-h-0 w-full max-w-lg flex-col overflow-hidden border-0 border-border bg-card shadow-2xl sm:h-auto sm:max-h-[calc(100dvh-2rem)] sm:rounded-2xl sm:border">
         <div className="flex items-center justify-between px-5 py-4 border-b border-border shrink-0">
           <h2 className="text-lg font-bold text-foreground">Create Event</h2>
           <button onClick={onClose} className="flex h-8 w-8 items-center justify-center rounded-lg hover:bg-muted text-muted-foreground">
@@ -196,7 +196,7 @@ function CreateEventModal({ onClose }: { onClose: () => void }) {
           </button>
         </div>
 
-        <div className="flex-1 space-y-4 overflow-y-auto p-4 sm:p-5">
+        <div className="min-h-0 flex-1 space-y-4 overflow-y-auto p-4 sm:p-5">
           {/* Image */}
           <div>
             <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-1.5 block">Event Photo (optional)</label>

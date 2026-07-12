@@ -557,7 +557,7 @@ function CreatePostModal({ onClose, initialType = 'general' }: { onClose: () => 
   const isComplaint = type === 'complaint'
 
   return (
-    <div className="fixed inset-0 z-[80] flex items-stretch justify-center overflow-hidden bg-black/40 p-0 backdrop-blur-sm sm:items-center sm:p-4">
+    <div data-mobile-composer className="fixed inset-0 z-[80] flex items-stretch justify-center overflow-hidden bg-black/40 p-0 backdrop-blur-sm sm:items-center sm:p-4">
       <div className="flex h-[100dvh] max-h-[100dvh] w-full max-w-xl flex-col overflow-hidden border-0 bg-card shadow-2xl sm:h-auto sm:max-h-[calc(100dvh-2rem)] sm:rounded-xl sm:border sm:border-border">
         <div className="flex shrink-0 items-center justify-between border-b border-border px-5 py-4">
           <div>

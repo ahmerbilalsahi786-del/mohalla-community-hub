@@ -39,7 +39,7 @@ export function MobileNav() {
     .filter((item) => item.href !== '/admin' || canManageCommunity(user?.role))
 
   return (
-    <nav className="fixed inset-x-0 bottom-0 z-50 flex h-[calc(4rem+env(safe-area-inset-bottom))] items-start border-t border-border bg-background/95 pb-[env(safe-area-inset-bottom)] shadow-[0_-10px_28px_rgba(15,23,42,0.06)] backdrop-blur-md md:hidden">
+    <nav className="mobile-bottom-nav fixed inset-x-0 bottom-0 z-50 flex h-[calc(4rem+env(safe-area-inset-bottom))] items-start border-t border-border bg-background/95 pb-[env(safe-area-inset-bottom)] shadow-[0_-10px_28px_rgba(15,23,42,0.06)] backdrop-blur-md md:hidden">
       {NAV.map((item) => {
         const active = location === item.href || (item.href !== '/' && location.startsWith(item.href))
         const Icon = item.icon

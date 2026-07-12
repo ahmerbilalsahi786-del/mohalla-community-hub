@@ -148,13 +148,13 @@ function PlaceModal({
   const update = (patch: Partial<PlaceForm>) => onChange({ ...form, ...patch })
 
   return (
-    <div className="fixed inset-0 z-[80] flex items-stretch justify-center overflow-hidden bg-black/40 p-0 backdrop-blur-sm sm:items-center sm:p-4">
+    <div data-mobile-composer className="fixed inset-0 z-[80] flex items-stretch justify-center overflow-hidden bg-black/40 p-0 backdrop-blur-sm sm:items-center sm:p-4">
       <form
         onSubmit={(event) => {
           event.preventDefault()
           onSubmit()
         }}
-        className="flex h-dvh w-full max-w-lg flex-col overflow-hidden border-0 border-border bg-card shadow-xl sm:h-auto sm:max-h-[calc(100dvh-2rem)] sm:rounded-2xl sm:border"
+        className="flex h-dvh min-h-0 w-full max-w-lg flex-col overflow-hidden border-0 border-border bg-card shadow-xl sm:h-auto sm:max-h-[calc(100dvh-2rem)] sm:rounded-2xl sm:border"
       >
         <div className="flex items-center justify-between border-b border-border px-5 py-4">
           <div>
@@ -166,7 +166,7 @@ function PlaceModal({
           </button>
         </div>
 
-        <div className="flex-1 space-y-4 overflow-y-auto p-4 sm:p-5">
+        <div className="min-h-0 flex-1 space-y-4 overflow-y-auto p-4 sm:p-5">
           <div>
             <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-muted-foreground">Name</label>
             <input
