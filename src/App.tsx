@@ -11,8 +11,8 @@ import { MohallaLoadingScreen } from "@/components/brand/mohalla-brand";
 import { AppDelightLayer } from "@/components/community/community-delight";
 import { ProtectedRoute, AdminRoute, AuthenticatedRoute, SuperAdminRoute } from "@/components/ProtectedRoute";
 import { InstallAppButton, InstallAppPrompt } from "@/components/pwa/install-app";
-import { clearToken, isLoggedIn } from "@/lib/auth";
-import { useCurrentUser } from "@/hooks/use-current-user";
+import { clearToken } from "@/lib/auth";
+import { isSuperAdmin, useCurrentUser } from "@/hooks/use-current-user";
 import { useCommunityTheme } from "@/lib/theme";
 import { syncMobilePushSubscription } from "@/lib/mobile-push";
 
@@ -105,7 +105,14 @@ const SAdminCommunities   = SuperAdminRoute(SuperAdminCommunities);
 const SAdminCommunityDetail = SuperAdminRoute(SuperAdminCommunityDetail);
 
 function LandingEntry() {
-  if (isLoggedIn()) return <Redirect to="/dashboard" />;
+  const { data: user, isLoading } = useCurrentUser();
+  if (isLoading) return <MohallaLoadingScreen />;
+  if (user) {
+    if (isSuperAdmin(user.role)) return <Redirect to="/super-admin/dashboard" />;
+    if (user.communityStatus !== "approved") return <Redirect to="/pending-approval" />;
+    if (user.membershipStatus !== "approved") return <Redirect to="/pending" />;
+    return <Redirect to="/dashboard" />;
+  }
   return <Landing />;
 }
 

@@ -1,6 +1,6 @@
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useLocation } from "wouter";
-import { clearToken, getToken, getUser as getStoredUser } from "@/lib/auth";
+import { clearToken, getToken, getUser as getStoredUser, setToken } from "@/lib/auth";
 import { supabase } from "@/integrations/supabase/client";
 
 export interface CurrentUser {
@@ -83,12 +83,16 @@ async function loadCurrentUser(): Promise<CurrentUser | null> {
   }
 
   const {
-    data: { user },
-  } = await supabase.auth.getUser();
+    data: { session },
+  } = await supabase.auth.getSession();
+  const user = session?.user ?? (await supabase.auth.getUser()).data.user;
 
   if (!user) {
     clearToken();
     return null;
+  }
+  if (session?.access_token) {
+    setToken(session.access_token);
   }
 
   const [{ data: profile }, { data: roles }, { data: memberStatus }] = await Promise.all([
