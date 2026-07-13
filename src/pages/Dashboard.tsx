@@ -19,6 +19,7 @@ import {
   useAdminGetStats,
   useListAlerts,
   useListEvents,
+  useListListings,
   useListPosts,
 } from '@/lib/generated/api'
 
@@ -111,26 +112,31 @@ function TrendingTopicsSlideshow({ topics }: { topics: TrendingTopic[] }) {
 
 export default function Dashboard() {
   const { data: user } = useCurrentUser()
-  const { data: statsData } = useAdminGetStats({ communityId: 'default' })
+  const isManager = canManageCommunity(user?.role)
+  const { data: statsData } = useAdminGetStats(
+    { communityId: 'default' },
+    { query: { queryKey: ['/api/admin/stats', { communityId: 'default' }], enabled: isManager } },
+  )
   const { data: eventData, isLoading: eventsLoading } = useListEvents({ communityId: 'default' })
   const { data: postData, isLoading: postsLoading } = useListPosts({ communityId: 'default', page: 1, limit: 5 })
+  const { data: listingData, isLoading: listingsLoading } = useListListings({ communityId: 'default', page: 1, limit: 1 })
   const { data: alertData = [], isLoading: alertsLoading } = useListAlerts({ communityId: 'default' })
   const { data: memberData = [], isLoading: membersLoading } = useQuery({
     queryKey: ['dashboard-community-members'],
     queryFn: async () => {
-      const response = await fetch('/api/community/members?status=approved&limit=8')
+      const response = await fetch('/api/community/members?status=approved&limit=200')
       if (!response.ok) throw new Error('Could not load community members.')
       return response.json()
     },
     refetchInterval: 30000,
   })
-  const statsLoading = eventsLoading || postsLoading || alertsLoading || membersLoading
+  const statsLoading = eventsLoading || postsLoading || alertsLoading || membersLoading || listingsLoading
 
-  const stats = statsData ?? {
-    totalMembers: 0,
-    postsThisMonth: 0,
-    activeListings: 0,
-    pendingMembers: 0,
+  const stats = {
+    totalMembers: statsData?.totalMembers ?? (memberData as any[]).length,
+    postsThisMonth: statsData?.postsThisMonth ?? postData?.total ?? 0,
+    activeListings: statsData?.activeListings ?? listingData?.total ?? 0,
+    pendingMembers: statsData?.pendingMembers ?? 0,
   }
   const upcomingEvents = ((eventData?.upcoming ?? []) as any[]).slice(0, 5)
   const featuredEvents = upcomingEvents.slice(0, 2)
@@ -139,20 +145,19 @@ export default function Dashboard() {
   const members = (memberData as any[]).slice(0, 4)
   const activeSafetyAlerts = (alertData as any[]).filter((alert) => !alert.isResolved).length
   const resolvedComplaints = recentPosts.filter((post) => post.type === 'complaint' && post.status === 'resolved').length
-  const isManager = canManageCommunity(user?.role)
   const firstName = user?.name?.split(/\s+/)[0] || 'Neighbor'
   const communityName = user?.community?.name ?? 'your mohalla'
   const approvalLabel = stats.pendingMembers === 1 ? 'approval' : 'approvals'
   const eventLabel = upcomingEvents.length === 1 ? 'event' : 'events'
   const summaryLine = isManager
-    ? `${stats.pendingMembers} ${approvalLabel} waiting, ${stats.postsThisMonth} community updates this month, and ${upcomingEvents.length} ${eventLabel} on the calendar.`
-    : `${upcomingEvents.length} ${eventLabel} on the calendar, ${stats.activeListings} active listings, and ${stats.postsThisMonth} community updates this month.`
+    ? `${stats.pendingMembers} ${approvalLabel} waiting, ${stats.postsThisMonth} community updates, and ${upcomingEvents.length} ${eventLabel} on the calendar.`
+    : `${upcomingEvents.length} ${eventLabel} on the calendar, ${stats.activeListings} active listings, and ${stats.postsThisMonth} community updates.`
 
   const statCards = [
     {
       title: 'Community Pulse',
       value: stats.postsThisMonth,
-      description: stats.postsThisMonth === 1 ? 'update this month' : 'community updates this month',
+      description: stats.postsThisMonth === 1 ? 'community update' : 'community updates',
       icon: TrendingUp,
       iconColor: 'bg-primary/10 text-primary',
       href: '/feed',
@@ -304,31 +309,8 @@ export default function Dashboard() {
               <TrendingTopicsSlideshow topics={trendingTopics} />
             </div>
 
-            <div className="grid gap-3 sm:grid-cols-3 xl:grid-cols-1">
-              <div className="delight-hover-lift rounded-xl border portal-soft-rule bg-background/70 p-4 shadow-xs">
-                <div className="delight-swing-on-hover mb-3 flex h-11 w-11 items-center justify-center rounded-lg bg-primary/10 text-primary">
-                  <TrendingUp className="h-5 w-5" />
-                </div>
-                <p className="text-xs font-black uppercase text-muted-foreground">Community Pulse</p>
-                <p className="mt-2 text-2xl font-black text-foreground">{stats.postsThisMonth}</p>
-                <p className="mt-1 text-sm text-muted-foreground">community updates this month</p>
-              </div>
-              <div className="delight-hover-lift rounded-xl border portal-soft-rule bg-background/70 p-4 shadow-xs">
-                <div className="delight-swing-on-hover mb-3 flex h-11 w-11 items-center justify-center rounded-lg bg-accent/10 text-accent">
-                  <Calendar className="h-5 w-5" />
-                </div>
-                <p className="text-xs font-black uppercase text-muted-foreground">Upcoming Events</p>
-                <p className="mt-2 text-2xl font-black text-foreground">{upcomingEvents.length}</p>
-                <p className="mt-1 text-sm text-muted-foreground">{upcomingEvents.length > 0 ? `${upcomingEvents.length} ${eventLabel} scheduled` : 'No upcoming events'}</p>
-              </div>
-              <div className="delight-hover-lift rounded-xl border portal-soft-rule bg-background/70 p-4 shadow-xs">
-                <div className="delight-swing-on-hover mb-3 flex h-11 w-11 items-center justify-center rounded-lg bg-amber-500/10 text-amber-600">
-                  <Users className="h-5 w-5" />
-                </div>
-                <p className="text-xs font-black uppercase text-muted-foreground">Verified Residents</p>
-                <p className="mt-2 text-2xl font-black text-foreground">{stats.totalMembers}</p>
-                <p className="mt-1 text-sm text-muted-foreground">verified residents connected</p>
-              </div>
+            <div className="xl:self-start">
+              <QuickActions />
             </div>
           </div>
         </section>
@@ -399,7 +381,6 @@ export default function Dashboard() {
               verifiedResidents={stats.totalMembers}
             />
             <SafetyWidget />
-            <QuickActions />
             <ActivityCard activities={activities} />
             <MemberCard members={activeMembers} />
           </aside>
