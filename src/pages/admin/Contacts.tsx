@@ -147,25 +147,25 @@ function ContactModal({
   const update = (patch: Partial<ContactForm>) => onChange({ ...form, ...patch })
 
   return (
-    <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/40 p-3 sm:items-center">
+    <div data-mobile-composer role="dialog" aria-modal="true" aria-label={title} className="fixed inset-0 z-[80] flex items-stretch justify-center overflow-hidden bg-black/40 p-0 backdrop-blur-sm sm:items-center sm:p-4">
       <form
         onSubmit={(event) => {
           event.preventDefault()
           onSubmit()
         }}
-        className="w-full max-w-lg overflow-hidden rounded-2xl border border-border bg-card shadow-xl"
+        className="flex h-dvh min-h-0 w-full max-w-lg flex-col overflow-hidden border-0 border-border bg-card shadow-xl sm:h-auto sm:max-h-[calc(100dvh-2rem)] sm:rounded-2xl sm:border"
       >
         <div className="flex items-center justify-between border-b border-border px-5 py-4">
           <div>
             <h3 className="font-semibold text-foreground">{title}</h3>
             <p className="text-xs text-muted-foreground">Only admins and moderators can edit these contacts.</p>
           </div>
-          <button type="button" onClick={onClose} className="rounded-lg p-1 text-muted-foreground hover:bg-muted hover:text-foreground">
+          <button type="button" onClick={onClose} aria-label="Close contact form" className="rounded-lg p-1 text-muted-foreground hover:bg-muted hover:text-foreground">
             <X size={18} />
           </button>
         </div>
 
-        <div className="space-y-4 p-5">
+        <div className="min-h-0 flex-1 space-y-4 overflow-y-auto p-4 sm:p-5">
           <div className="grid gap-3 sm:grid-cols-2">
             <div>
               <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-muted-foreground">Category</label>
@@ -255,7 +255,7 @@ function ContactModal({
           )}
         </div>
 
-        <div className="flex justify-end gap-2 border-t border-border bg-muted/20 px-5 py-4">
+        <div className="flex shrink-0 justify-end gap-2 border-t border-border bg-muted/20 px-4 pb-[calc(0.75rem+env(safe-area-inset-bottom))] pt-3 sm:px-5 sm:py-4">
           <Button type="button" variant="ghost" onClick={onClose} className="rounded-xl">Cancel</Button>
           <Button
             type="submit"

@@ -195,7 +195,7 @@ function ImageGrid({ urls }: { urls: string[] }) {
           count === 1 ? 'aspect-video' : 'aspect-square',
           count === 3 && i === 0 ? 'row-span-2' : ''
         )}>
-          <img src={url} alt="" className="w-full h-full object-cover" />
+          <img src={url} alt="" loading="lazy" decoding="async" className="h-full w-full object-cover" />
           {i === 3 && count > 4 && (
             <div className="absolute inset-0 bg-black/50 flex items-center justify-center text-white font-bold text-lg">
               +{count - 4}
@@ -557,7 +557,7 @@ function CreatePostModal({ onClose, initialType = 'general' }: { onClose: () => 
   const isComplaint = type === 'complaint'
 
   return (
-    <div data-mobile-composer className="fixed inset-0 z-[80] flex items-stretch justify-center overflow-hidden bg-black/40 p-0 backdrop-blur-sm sm:items-center sm:p-4">
+    <div data-mobile-composer role="dialog" aria-modal="true" aria-label={isComplaint ? 'File a community report' : 'Create a community post'} className="fixed inset-0 z-[80] flex items-stretch justify-center overflow-hidden bg-black/40 p-0 backdrop-blur-sm sm:items-center sm:p-4">
       <div className="flex h-[100dvh] max-h-[100dvh] w-full max-w-xl flex-col overflow-hidden border-0 bg-card shadow-2xl sm:h-auto sm:max-h-[calc(100dvh-2rem)] sm:rounded-xl sm:border sm:border-border">
         <div className="flex shrink-0 items-center justify-between border-b border-border px-5 py-4">
           <div>
@@ -662,7 +662,7 @@ function CreatePostModal({ onClose, initialType = 'general' }: { onClose: () => 
                     <button
                       onClick={() => setImageUrls(imageUrls.filter((_, j) => j !== i))}
                       aria-label="Remove photo"
-                      className="absolute -right-1.5 -top-1.5 hidden h-5 w-5 items-center justify-center rounded-full bg-destructive text-white group-hover:flex"
+                      className="absolute -right-1.5 -top-1.5 flex h-7 w-7 items-center justify-center rounded-full bg-destructive text-white sm:hidden sm:group-hover:flex"
                     >
                       <X size={10} />
                     </button>

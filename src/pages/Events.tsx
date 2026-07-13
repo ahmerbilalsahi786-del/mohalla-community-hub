@@ -65,7 +65,7 @@ function EventCard({ event, isPast }: { event: EventItem; isPast?: boolean }) {
       isPast ? 'border-border opacity-70' : soon ? 'border-primary/30' : 'border-border'
     )}>
       {event.imageUrl && (
-        <img src={event.imageUrl} alt={event.title} className="h-40 w-full object-cover" />
+        <img src={event.imageUrl} alt={event.title} loading="lazy" decoding="async" className="h-40 w-full object-cover" />
       )}
       {!event.imageUrl && !isPast && (
         <div className={cn('h-2 w-full', soon ? 'bg-primary' : 'bg-accent/60')} />
@@ -187,11 +187,11 @@ function CreateEventModal({ onClose }: { onClose: () => void }) {
   }
 
   return (
-    <div data-mobile-composer className="fixed inset-0 z-[80] flex items-stretch justify-center overflow-hidden bg-black/40 p-0 backdrop-blur-sm sm:items-center sm:p-4">
+    <div data-mobile-composer role="dialog" aria-modal="true" aria-label="Create a community event" className="fixed inset-0 z-[80] flex items-stretch justify-center overflow-hidden bg-black/40 p-0 backdrop-blur-sm sm:items-center sm:p-4">
       <div className="flex h-dvh min-h-0 w-full max-w-lg flex-col overflow-hidden border-0 border-border bg-card shadow-2xl sm:h-auto sm:max-h-[calc(100dvh-2rem)] sm:rounded-2xl sm:border">
         <div className="flex items-center justify-between px-5 py-4 border-b border-border shrink-0">
           <h2 className="text-lg font-bold text-foreground">Create Event</h2>
-          <button onClick={onClose} className="flex h-8 w-8 items-center justify-center rounded-lg hover:bg-muted text-muted-foreground">
+          <button onClick={onClose} aria-label="Close event form" className="flex h-8 w-8 items-center justify-center rounded-lg hover:bg-muted text-muted-foreground">
             <X size={18} />
           </button>
         </div>

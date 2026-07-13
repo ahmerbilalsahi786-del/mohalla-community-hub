@@ -145,11 +145,11 @@ function CreatePollModal({ onClose }: { onClose: () => void }) {
   const updateOption = (i: number, v: string) => setOptions(p => p.map((o, j) => j === i ? v : o))
 
   return (
-    <div data-mobile-composer className="fixed inset-0 z-[80] flex items-stretch justify-center overflow-hidden bg-black/40 p-0 backdrop-blur-sm sm:items-center sm:p-4">
+    <div data-mobile-composer role="dialog" aria-modal="true" aria-label="Create a community poll" className="fixed inset-0 z-[80] flex items-stretch justify-center overflow-hidden bg-black/40 p-0 backdrop-blur-sm sm:items-center sm:p-4">
       <div className="flex h-dvh min-h-0 w-full max-w-lg flex-col overflow-hidden border-0 border-border bg-card shadow-2xl sm:h-auto sm:max-h-[calc(100dvh-2rem)] sm:rounded-2xl sm:border">
         <div className="flex items-center justify-between px-5 py-4 border-b border-border shrink-0">
           <h2 className="text-lg font-bold text-foreground">Create Poll</h2>
-          <button onClick={onClose} className="flex h-8 w-8 items-center justify-center rounded-lg hover:bg-muted text-muted-foreground">
+          <button onClick={onClose} aria-label="Close poll form" className="flex h-8 w-8 items-center justify-center rounded-lg hover:bg-muted text-muted-foreground">
             <X size={18} />
           </button>
         </div>

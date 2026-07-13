@@ -106,10 +106,11 @@ export function TopNavbar() {
 
         <Button
           onClick={openComposer}
-          className="hidden h-11 gap-2 rounded-lg bg-primary px-5 text-primary-foreground hover:bg-primary-hover sm:flex"
+          aria-label="Create a new post"
+          className="h-11 w-11 gap-2 rounded-lg bg-primary px-0 text-primary-foreground hover:bg-primary-hover sm:w-auto sm:px-5"
         >
           <Plus size={16} />
-          <span>New Post</span>
+          <span className="hidden sm:inline">New Post</span>
         </Button>
 
         <NotificationBell />

@@ -199,6 +199,8 @@ function AlertCard({ alert, onResolve }: { alert: AlertData; onResolve: (id: num
               <img
                 src={alert.imageUrl}
                 alt=""
+                loading="lazy"
+                decoding="async"
                 className="mt-3 h-48 w-full rounded-xl object-cover border border-border"
               />
             )}
@@ -290,11 +292,11 @@ function ReportAlertModal({ onClose }: { onClose: () => void }) {
   ]
 
   return (
-    <div data-mobile-composer className="fixed inset-0 z-[80] flex items-stretch justify-center overflow-hidden bg-black/40 p-0 backdrop-blur-sm sm:items-center sm:p-4">
+    <div data-mobile-composer role="dialog" aria-modal="true" aria-label="Report a safety alert" className="fixed inset-0 z-[80] flex items-stretch justify-center overflow-hidden bg-black/40 p-0 backdrop-blur-sm sm:items-center sm:p-4">
       <div className="flex h-dvh min-h-0 w-full max-w-lg flex-col overflow-hidden border-0 border-border bg-card shadow-2xl sm:h-auto sm:max-h-[calc(100dvh-2rem)] sm:rounded-2xl sm:border">
         <div className="flex items-center justify-between px-5 py-4 border-b border-border shrink-0">
           <h2 className="text-lg font-bold text-foreground">Report Safety Alert</h2>
-          <button onClick={onClose} className="flex h-8 w-8 items-center justify-center rounded-lg hover:bg-muted text-muted-foreground">
+          <button onClick={onClose} aria-label="Close alert form" className="flex h-8 w-8 items-center justify-center rounded-lg hover:bg-muted text-muted-foreground">
             <X size={18} />
           </button>
         </div>

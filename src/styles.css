@@ -251,6 +251,90 @@
 }
 
 @media (max-width: 767px) {
+  html,
+  body,
+  #root {
+    min-height: 100dvh;
+    max-width: 100%;
+  }
+
+  body {
+    overflow-x: clip;
+    -webkit-text-size-adjust: 100%;
+  }
+
+  body:has([data-mobile-composer]),
+  body:has([data-slot="dialog-content"]),
+  body:has([data-slot="alert-dialog-content"]),
+  body:has([data-slot="sheet-content"]) {
+    overflow: hidden;
+  }
+
+  .portal-shell {
+    min-height: 100dvh;
+    max-width: 100vw;
+    overflow-x: clip;
+  }
+
+  .portal-shell > .relative > header {
+    padding-top: calc(0.75rem + env(safe-area-inset-top));
+  }
+
+  :where(.portal-shell, [data-mobile-composer], [data-slot="dialog-content"], [data-slot="alert-dialog-content"], [data-slot="sheet-content"])
+    :where(button, a[href], [role="button"], [role="tab"], [role="menuitem"]):not([aria-hidden="true"]) {
+    min-height: 44px;
+    min-width: 44px;
+  }
+
+  :where(.portal-shell, [data-mobile-composer], [data-slot="dialog-content"], [data-slot="alert-dialog-content"], [data-slot="sheet-content"])
+    :where(button, [role="button"]):has(> svg:only-child) {
+    min-width: 44px;
+  }
+
+  :where(input, textarea, select, [role="combobox"]):not([type="hidden"]):not([type="file"]):not([type="checkbox"]):not([type="radio"]) {
+    min-height: 44px;
+    font-size: 16px;
+    line-height: 1.5;
+  }
+
+  :where(.portal-shell, [data-mobile-composer], [data-slot="dialog-content"], [data-slot="alert-dialog-content"], [data-slot="sheet-content"])
+    :where(.text-xs, [class~="text-[9px]"], [class~="text-[10px]"], [class~="text-[11px]"], [class~="text-[0.8rem]"]) {
+    font-size: 0.875rem;
+    line-height: 1.25rem;
+  }
+
+  [data-mobile-composer] > :first-child {
+    padding-top: env(safe-area-inset-top);
+  }
+
+  [data-mobile-composer] > :first-child > :last-child button {
+    min-width: 0;
+    flex: 1 1 0%;
+  }
+
+  [data-slot="dialog-content"],
+  [data-slot="alert-dialog-content"] {
+    max-height: calc(100dvh - 1rem);
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    padding-bottom: calc(1.5rem + env(safe-area-inset-bottom));
+  }
+
+  [data-slot="dialog-close"],
+  [data-slot="sheet-content"] > button:last-child {
+    display: flex;
+    min-height: 44px;
+    min-width: 44px;
+    align-items: center;
+    justify-content: center;
+  }
+
+  [data-slot="sheet-content"] {
+    max-height: calc(100dvh - env(safe-area-inset-top));
+    overflow-y: auto;
+    overscroll-behavior: contain;
+  }
+
   body:has([data-mobile-composer]) .mobile-bottom-nav {
     display: none;
   }

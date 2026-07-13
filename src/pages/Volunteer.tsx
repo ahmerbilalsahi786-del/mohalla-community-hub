@@ -138,7 +138,7 @@ function OpportunityModal({
   const update = (patch: Partial<OpportunityForm>) => onChange({ ...form, ...patch })
 
   return (
-    <div data-mobile-composer className="fixed inset-0 z-[80] flex items-stretch justify-center overflow-hidden bg-black/40 p-0 backdrop-blur-sm sm:items-center sm:p-4">
+    <div data-mobile-composer role="dialog" aria-modal="true" aria-label="Add a volunteer opportunity" className="fixed inset-0 z-[80] flex items-stretch justify-center overflow-hidden bg-black/40 p-0 backdrop-blur-sm sm:items-center sm:p-4">
       <form
         onSubmit={(event) => {
           event.preventDefault()
@@ -151,7 +151,7 @@ function OpportunityModal({
             <h3 className="font-semibold text-foreground">{title}</h3>
             <p className="text-xs text-muted-foreground">Visible to approved residents in this community.</p>
           </div>
-          <button type="button" onClick={onClose} className="rounded-lg p-1 text-muted-foreground hover:bg-muted hover:text-foreground">
+          <button type="button" onClick={onClose} aria-label="Close opportunity form" className="rounded-lg p-1 text-muted-foreground hover:bg-muted hover:text-foreground">
             <X size={18} />
           </button>
         </div>

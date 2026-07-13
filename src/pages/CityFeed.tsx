@@ -291,7 +291,7 @@ function PublicationCard({ publication }: { publication: CityPublication }) {
   return (
     <article className="overflow-hidden rounded-2xl border portal-soft-rule bg-card/88 shadow-sm backdrop-blur transition-shadow hover:shadow-md">
       {publication.imageUrl && (
-        <img src={publication.imageUrl} alt="" className="h-52 w-full object-cover" />
+        <img src={publication.imageUrl} alt="" loading="lazy" decoding="async" className="h-52 w-full object-cover" />
       )}
       <div className="p-4 sm:p-5">
         <div className="flex items-start gap-3">

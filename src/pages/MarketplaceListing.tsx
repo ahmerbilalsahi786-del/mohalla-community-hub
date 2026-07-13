@@ -280,7 +280,7 @@ export default function MarketplaceListing({ params }: Props) {
                           i === activeImg ? 'border-primary' : 'border-border hover:border-primary/50'
                         )}
                       >
-                        <img src={url} alt="" className="h-full w-full object-cover" />
+                        <img src={url} alt="" loading="lazy" decoding="async" className="h-full w-full object-cover" />
                       </button>
                     ))}
                   </div>

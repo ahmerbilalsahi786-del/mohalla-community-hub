@@ -34,7 +34,7 @@ export function CommunityRulesModal() {
   if (!show) return null
 
   return (
-    <div className="fixed inset-0 z-[100] flex items-end justify-center bg-black/50 p-3 backdrop-blur-sm sm:items-center sm:p-4">
+    <div role="dialog" aria-modal="true" aria-label="Community guidelines" className="fixed inset-0 z-[100] flex items-end justify-center bg-black/50 p-3 backdrop-blur-sm sm:items-center sm:p-4">
       <div className="flex max-h-[calc(100dvh-1.5rem)] w-full max-w-md flex-col overflow-hidden rounded-2xl border border-border bg-card shadow-2xl">
         {/* Header */}
         <div className="shrink-0 border-b border-border bg-gradient-to-r from-primary/20 to-accent/10 px-5 py-4 text-center sm:px-6 sm:py-5">
