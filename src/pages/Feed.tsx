@@ -22,6 +22,7 @@ import { CommunityEmptyState } from '@/components/community/community-empty-stat
 import { FeedPostSkeleton } from '@/components/community/skeleton-states'
 import { PostTypeSelector } from '@/components/feed/post-type-selector'
 import { UserAvatar } from '@/components/community/user-avatar'
+import { PostImageGallery } from '@/components/feed/post-image-gallery'
 
 type PostType = 'general' | 'announcement' | 'safety' | 'lost_found' | 'buy_sell' | 'event' | 'complaint'
 
@@ -172,32 +173,6 @@ function timeAgo(dateStr: string) {
 
 function ResidentAvatar({ name, avatarUrl, size = 'md' }: { name: string; avatarUrl?: string | null; size?: 'sm' | 'md' }) {
   return <UserAvatar name={name} src={avatarUrl} className={size === 'sm' ? 'h-8 w-8' : 'h-10 w-10'} fallbackClassName={size === 'sm' ? 'text-xs' : 'text-sm'} />
-}
-
-function ImageGrid({ urls }: { urls: string[] }) {
-  if (!urls || urls.length === 0) return null
-  const count = urls.length
-  return (
-    <div className={cn(
-      'mt-3 grid gap-1.5 overflow-hidden rounded-lg',
-      count === 1 ? 'grid-cols-1' : count === 2 ? 'grid-cols-2' : 'grid-cols-2'
-    )}>
-      {urls.slice(0, 4).map((url, i) => (
-        <div key={i} className={cn(
-          'relative overflow-hidden bg-muted',
-          count === 1 ? 'aspect-video' : 'aspect-square',
-          count === 3 && i === 0 ? 'row-span-2' : ''
-        )}>
-          <img src={url} alt="" loading="lazy" decoding="async" className="h-full w-full object-cover" />
-          {i === 3 && count > 4 && (
-            <div className="absolute inset-0 bg-black/50 flex items-center justify-center text-white font-bold text-lg">
-              +{count - 4}
-            </div>
-          )}
-        </div>
-      ))}
-    </div>
-  )
 }
 
 function CommentSection({ postId }: { postId: number }) {
@@ -424,7 +399,7 @@ function PostCard({ post, onLike }: { post: Post; onLike: (id: number) => void }
           <p className="break-words text-sm leading-relaxed text-foreground/80">{post.body}</p>
         </div>
 
-        <ImageGrid urls={post.imageUrls} />
+        <PostImageGallery urls={post.imageUrls} title={post.title || 'Post photo'} />
 
         <div className="mt-4 flex flex-wrap items-center gap-2 border-t border-border pt-3">
           <button
@@ -649,16 +624,17 @@ function CreatePostModal({ onClose, initialType = 'general' }: { onClose: () => 
             )}
 
             {imageUrls.length > 0 && (
-              <div className="mt-2 flex flex-wrap gap-2">
+              <div className="mt-2 grid grid-cols-2 gap-2 sm:grid-cols-4">
                 {imageUrls.map((url, i) => (
-                  <div key={i} className="relative group">
-                    <img src={url} alt="" className="h-16 w-16 rounded-lg object-cover border border-border" />
+                  <div key={`${url}-${i}`} className="group relative flex aspect-square min-w-0 items-center justify-center overflow-hidden rounded-lg border border-border bg-muted/45">
+                    <img src={url} alt={`Selected photo ${i + 1}`} className="h-full w-full object-contain" />
                     <button
+                      type="button"
                       onClick={() => setImageUrls(imageUrls.filter((_, j) => j !== i))}
-                      aria-label="Remove photo"
-                      className="absolute -right-1.5 -top-1.5 flex h-7 w-7 items-center justify-center rounded-full bg-destructive text-white sm:hidden sm:group-hover:flex"
+                      aria-label={`Remove selected photo ${i + 1}`}
+                      className="absolute right-1 top-1 flex h-8 w-8 items-center justify-center rounded-full bg-destructive text-white shadow-sm sm:opacity-0 sm:transition-opacity sm:group-hover:opacity-100 sm:focus-visible:opacity-100"
                     >
-                      <X size={10} />
+                      <X size={14} />
                     </button>
                   </div>
                 ))}
