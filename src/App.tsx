@@ -37,6 +37,7 @@ const AdminBranding = lazy(() => import("@/pages/admin/Branding"));
 const AdminContacts = lazy(() => import("@/pages/admin/Contacts"));
 const AdminAnnouncements = lazy(() => import("@/pages/admin/Announcements"));
 const AdminModeration = lazy(() => import("@/pages/admin/Moderation"));
+const Reviewers = lazy(() => import("@/pages/Reviewers"));
 const SuperAdminDashboard = lazy(() => import("@/pages/super-admin/Dashboard"));
 const SuperAdminCommunities = lazy(() => import("@/pages/super-admin/Communities"));
 const SuperAdminCommunityDetail = lazy(() => import("@/pages/super-admin/CommunityDetail"));
@@ -100,6 +101,7 @@ const AAdminBranding      = AdminRoute(AdminBranding);
 const AAdminContacts      = AdminRoute(AdminContacts);
 const AAdminAnnouncements = AdminRoute(AdminAnnouncements);
 const AAdminModeration    = AdminRoute(AdminModeration);
+const AReviewers          = AdminRoute(Reviewers);
 const SAdminDashboard     = SuperAdminRoute(SuperAdminDashboard);
 const SAdminCommunities   = SuperAdminRoute(SuperAdminCommunities);
 const SAdminCommunityDetail = SuperAdminRoute(SuperAdminCommunityDetail);
@@ -159,6 +161,7 @@ function Router() {
       <Route path="/admin/contacts" component={AAdminContacts} />
       <Route path="/admin/announcements" component={AAdminAnnouncements} />
       <Route path="/admin/moderation" component={AAdminModeration} />
+      <Route path="/reviewers" component={AReviewers} />
 
       {/* Super-admin routes */}
       <Route path="/super-admin" component={SAdminDashboard} />

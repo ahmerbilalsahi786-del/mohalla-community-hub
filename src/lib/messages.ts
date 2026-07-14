@@ -46,13 +46,27 @@ export interface SendMessageInput {
 }
 
 export interface CommunityMember {
-  id: number;
+  id: number | string;
   userId: string;
   name: string;
   unitNumber: string;
   status: string;
   role: string;
   isVerified: boolean;
+  communityId?: string;
+  communityName?: string;
+  communityLogoUrl?: string | null;
+}
+
+export interface SocietyReviewer {
+  userId: string;
+  name: string;
+  unitNumber: string;
+  avatarUrl?: string | null;
+  role: "admin" | "moderator";
+  communityId: string;
+  communityName: string;
+  communityLogoUrl?: string | null;
 }
 
 export const messageConversationsQueryKey = ["/api/messages"] as const;
@@ -67,6 +81,10 @@ export function communityMembersQueryKey() {
 
 export function communityMembersSearchQueryKey(search = "") {
   return ["/api/community/members", "approved", search.trim()] as const;
+}
+
+export function societyReviewersQueryKey(search = "") {
+  return ["/api/reviewers", search.trim()] as const;
 }
 
 export async function listMessageConversations() {
@@ -107,6 +125,14 @@ export async function listCommunityMembers(search = "") {
   return customFetch<CommunityMember[]>(`/api/community/members?${params.toString()}`, { method: "GET" });
 }
 
+export async function listSocietyReviewers(search = "") {
+  const params = new URLSearchParams();
+  const trimmedSearch = search.trim();
+  if (trimmedSearch) params.set("search", trimmedSearch);
+  const suffix = params.size ? `?${params.toString()}` : "";
+  return customFetch<SocietyReviewer[]>(`/api/reviewers${suffix}`, { method: "GET" });
+}
+
 export function useListMessageConversations() {
   return useQuery({
     queryKey: messageConversationsQueryKey,
@@ -128,6 +154,14 @@ export function useCommunityMembers(enabled = true, search = "") {
   return useQuery({
     queryKey: communityMembersSearchQueryKey(search),
     queryFn: () => listCommunityMembers(search),
+    enabled,
+  });
+}
+
+export function useSocietyReviewers(enabled = true, search = "") {
+  return useQuery({
+    queryKey: societyReviewersQueryKey(search),
+    queryFn: () => listSocietyReviewers(search),
     enabled,
   });
 }

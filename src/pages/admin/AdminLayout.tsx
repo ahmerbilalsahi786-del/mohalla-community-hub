@@ -1,7 +1,7 @@
 import { Link, useLocation } from 'wouter'
 import { Sidebar } from '@/components/dashboard/sidebar'
 import { TopNavbar } from '@/components/dashboard/top-navbar'
-import { Users, FileText, Building2, Megaphone, ShieldCheck, Flag, Palette, Phone } from 'lucide-react'
+import { Users, FileText, Building2, Megaphone, ShieldCheck, Flag, Palette, Phone, UserRoundCheck } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { useQuery } from '@tanstack/react-query'
 import { supabase } from '@/integrations/supabase/client'
@@ -15,6 +15,7 @@ const TABS = [
   { label: 'Contacts',      href: '/admin/contacts',      icon: Phone },
   { label: 'Announcements', href: '/admin/announcements', icon: Megaphone },
   { label: 'Moderation',    href: '/admin/moderation',    icon: Flag },
+  { label: 'Reviewers',     href: '/reviewers',           icon: UserRoundCheck },
 ]
 
 export function AdminLayout({ children }: { children: React.ReactNode }) {

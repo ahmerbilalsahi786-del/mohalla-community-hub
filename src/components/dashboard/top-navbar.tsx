@@ -26,6 +26,7 @@ const PAGE_META: Record<string, { title: string; subtitle: string }> = {
   '/admin/community': { title: 'Admin Panel', subtitle: 'Manage your community' },
   '/admin/announcements': { title: 'Admin Panel', subtitle: 'Manage your community' },
   '/admin/contacts': { title: 'Admin Panel', subtitle: 'Manage emergency contacts and services' },
+  '/reviewers': { title: 'Reviewers Panel', subtitle: 'Administrators and moderators across Mohalla societies' },
   '/places': { title: 'Places', subtitle: 'Nearby places of interest' },
   '/volunteer': { title: 'Volunteer', subtitle: 'Give back to the community' },
 }

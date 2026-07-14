@@ -35,9 +35,26 @@ function base64UrlToUint8Array(value: string) {
   return Uint8Array.from(raw, (char) => char.charCodeAt(0));
 }
 
+function getVapidPublicKeyBytes() {
+  const value = getVapidPublicKey();
+  if (!value) return null;
+  try {
+    const bytes = base64UrlToUint8Array(value);
+    return bytes.length === 65 && bytes[0] === 4 ? bytes : null;
+  } catch {
+    return null;
+  }
+}
+
+function keysMatch(existing: ArrayBuffer | null, expected: Uint8Array) {
+  if (!existing || existing.byteLength !== expected.byteLength) return false;
+  const current = new Uint8Array(existing);
+  return current.every((byte, index) => byte === expected[index]);
+}
+
 function pushState(permission: MobilePushState["permission"], subscribed: boolean): MobilePushState {
   if (!isPushSupported()) return { status: "unsupported", permission: "unsupported", subscribed: false };
-  if (!getVapidPublicKey()) return { status: "missing-key", permission, subscribed: false };
+  if (!getVapidPublicKeyBytes()) return { status: "missing-key", permission, subscribed: false };
   if (permission === "denied") return { status: "blocked", permission, subscribed: false };
   if (permission === "default") return { status: "prompt", permission, subscribed: false };
   return { status: subscribed ? "enabled" : "disabled", permission, subscribed };
@@ -62,16 +79,20 @@ async function subscribeCurrentDevice(registration?: ServiceWorkerRegistration):
   const user = currentPushUser();
   if (!user) return getMobilePushState(registration);
 
-  const vapidPublicKey = getVapidPublicKey();
+  const vapidPublicKey = getVapidPublicKeyBytes();
   if (!vapidPublicKey) return pushState(Notification.permission, false);
 
   const activeRegistration = await getRegistration(registration);
-  const existing = await activeRegistration.pushManager.getSubscription();
+  let existing = await activeRegistration.pushManager.getSubscription();
+  if (existing && !keysMatch(existing.options.applicationServerKey, vapidPublicKey)) {
+    await existing.unsubscribe();
+    existing = null;
+  }
   const subscription =
     existing ??
     (await activeRegistration.pushManager.subscribe({
       userVisibleOnly: true,
-      applicationServerKey: base64UrlToUint8Array(vapidPublicKey),
+      applicationServerKey: vapidPublicKey,
     }));
 
   const serialized = subscription.toJSON();
@@ -107,7 +128,7 @@ export async function syncMobilePushSubscription(registration?: ServiceWorkerReg
 
 export async function enableMobilePushNotifications(): Promise<MobilePushState> {
   if (!isPushSupported()) return { status: "unsupported", permission: "unsupported", subscribed: false };
-  if (!getVapidPublicKey()) return pushState(Notification.permission, false);
+  if (!getVapidPublicKeyBytes()) return pushState(Notification.permission, false);
   if (Notification.permission === "denied") return pushState(Notification.permission, false);
 
   const permission = Notification.permission === "granted" ? "granted" : await Notification.requestPermission();

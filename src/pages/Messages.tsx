@@ -5,7 +5,7 @@ import { Sidebar } from "@/components/dashboard/sidebar";
 import { TopNavbar } from "@/components/dashboard/top-navbar";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
-import { useCurrentUser } from "@/hooks/use-current-user";
+import { canManageCommunity, useCurrentUser } from "@/hooks/use-current-user";
 import {
   CommunityMember,
   MessageConversation,
@@ -14,6 +14,7 @@ import {
   useMarkConversationRead,
   useMessageConversation,
   useSendConversationMessage,
+  useSocietyReviewers,
   useStartConversation,
 } from "@/lib/messages";
 import { cn } from "@/lib/utils";
@@ -94,10 +95,12 @@ function ConversationRow({
 
 function MemberPicker({
   currentUserId,
+  canSearchReviewers,
   onStart,
   busy,
 }: {
   currentUserId?: string;
+  canSearchReviewers: boolean;
   onStart: (member: CommunityMember, openingMessage: string) => void;
   busy: boolean;
 }) {
@@ -106,10 +109,33 @@ function MemberPicker({
   const [openingMessage, setOpeningMessage] = useState("");
   const memberSearch = query.trim();
   const { data: members = [], isLoading, isError } = useCommunityMembers(true, memberSearch);
+  const {
+    data: reviewers = [],
+    isLoading: reviewersLoading,
+    isError: reviewersError,
+  } = useSocietyReviewers(canSearchReviewers, memberSearch);
 
   const filteredMembers = useMemo(() => {
     const needle = memberSearch.toLowerCase();
-    return members
+    const reviewerMembers: CommunityMember[] = reviewers.map((reviewer) => ({
+      id: reviewer.userId,
+      userId: reviewer.userId,
+      name: reviewer.name,
+      unitNumber: reviewer.unitNumber,
+      status: "approved",
+      role: reviewer.role,
+      isVerified: true,
+      communityId: reviewer.communityId,
+      communityName: reviewer.communityName,
+      communityLogoUrl: reviewer.communityLogoUrl,
+    }));
+    const uniqueMembers = new Map<string, CommunityMember>();
+    [...members, ...reviewerMembers].forEach((member) => {
+      const existing = uniqueMembers.get(member.userId);
+      uniqueMembers.set(member.userId, existing?.communityName ? existing : member);
+    });
+
+    return [...uniqueMembers.values()]
       .filter((member) => member.userId !== currentUserId)
       .filter((member) => {
         if (!needle) return true;
@@ -118,7 +144,7 @@ function MemberPicker({
           (member.unitNumber ?? "").toLowerCase().includes(needle)
         );
       });
-  }, [currentUserId, memberSearch, members]);
+  }, [currentUserId, memberSearch, members, reviewers]);
 
   const selectedMember = filteredMembers.find((member) => member.userId === selectedId) ?? null;
 
@@ -129,18 +155,18 @@ function MemberPicker({
         <input
           value={query}
           onChange={(event) => setQuery(event.target.value)}
-          placeholder="Search members"
+          placeholder={canSearchReviewers ? "Search members or society reviewers" : "Search members"}
           className="h-10 w-full rounded-xl border portal-soft-rule bg-background/70 pl-9 pr-3 text-sm outline-none transition-colors focus:border-primary"
         />
       </div>
 
       <div className="mt-3 max-h-48 space-y-1 overflow-y-auto">
-        {isLoading ? (
+        {isLoading || reviewersLoading ? (
           <div className="flex items-center gap-2 px-2 py-3 text-sm text-muted-foreground">
             <Loader2 className="h-4 w-4 animate-spin" />
             Loading members...
           </div>
-        ) : isError ? (
+        ) : isError || reviewersError ? (
           <p className="px-2 py-4 text-sm text-destructive">Could not load community members.</p>
         ) : filteredMembers.length === 0 ? (
           <p className="px-2 py-4 text-sm text-muted-foreground">No members found.</p>
@@ -158,7 +184,11 @@ function MemberPicker({
               <Avatar name={member.name} />
               <span className="min-w-0">
                 <span className="block truncate text-sm font-bold">{member.name}</span>
-                <span className="block truncate text-xs text-muted-foreground">{member.unitNumber || "Community member"}</span>
+                <span className="block truncate text-xs text-muted-foreground">
+                  {member.communityName
+                    ? `${member.role === "admin" ? "Admin" : "Moderator"} · ${member.communityName}`
+                    : member.unitNumber || "Community member"}
+                </span>
               </span>
             </button>
           ))
@@ -331,6 +361,7 @@ export default function Messages() {
                   <div className="mb-3">
                     <MemberPicker
                       currentUserId={currentUser?.userId}
+                      canSearchReviewers={canManageCommunity(currentUser?.role)}
                       busy={startConversation.isPending}
                       onStart={handleStart}
                     />

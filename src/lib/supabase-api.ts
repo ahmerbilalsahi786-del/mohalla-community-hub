@@ -1966,6 +1966,25 @@ async function listCommunityMembers(params: URLSearchParams) {
   return status && status !== "all" ? members.filter((member: any) => member.status === status) : members;
 }
 
+async function listSocietyReviewers(params: URLSearchParams) {
+  if (isDemoMode()) return [];
+
+  const search = compactText(params.get("search"), 80) || null;
+  const { data, error } = await extendedDb.rpc("list_society_reviewers", { search_text: search });
+  if (error) throw error;
+
+  return (data ?? []).map((reviewer: any) => ({
+    userId: reviewer.user_id,
+    name: reviewer.display_name || reviewer.full_name || "Community reviewer",
+    unitNumber: reviewer.unit_number ?? "",
+    avatarUrl: reviewer.avatar_url ?? null,
+    role: reviewer.role,
+    communityId: reviewer.community_id,
+    communityName: reviewer.community_name || "Mohalla society",
+    communityLogoUrl: reviewer.community_logo_url ?? null,
+  }));
+}
+
 function demoMemberProfile(userId: string) {
   if (userId === DEMO_USER_ID) return { ...DEMO_PROFILE, community_id: "default", membership_status: "approved" };
   const member = readDemoMembers().find((row: any) => String(row.userId) === userId || String(row.id) === userId);
@@ -2070,11 +2089,9 @@ async function listMessageConversations() {
   }
 
   const userId = await requiredUserId();
-  const communityId = await currentCommunityId();
   const { data, error } = await extendedDb
     .from("message_conversations")
     .select("*")
-    .eq("community_id", communityId)
     .or(`participant_one.eq.${userId},participant_two.eq.${userId}`)
     .order("updated_at", { ascending: false });
   if (error) throw error;
@@ -2205,15 +2222,12 @@ async function startConversation(payload: JsonBody) {
     if (recipientId === DEMO_USER_ID) throw new Error("You cannot message yourself.");
     const recipient = demoMemberProfile(recipientId);
     if (!recipient) throw new Error("Member not found.");
-    const postId = payload.postId ? String(payload.postId) : null;
-    const post = postId ? readDemoPosts().find((row: any) => String(row.id) === postId) : null;
     const [participantOne, participantTwo] = conversationPair(DEMO_USER_ID, recipientId);
     const rows = readDemoRows(DEMO_MESSAGE_CONVERSATIONS_KEY);
     let conversation = rows.find(
       (row: any) =>
         row.participant_one === participantOne &&
-        row.participant_two === participantTwo &&
-        String(row.post_id ?? "") === String(postId ?? ""),
+        row.participant_two === participantTwo,
     );
     if (!conversation) {
       const now = new Date().toISOString();
@@ -2223,8 +2237,8 @@ async function startConversation(payload: JsonBody) {
         created_by: DEMO_USER_ID,
         participant_one: participantOne,
         participant_two: participantTwo,
-        post_id: postId,
-        post_title: post?.title ?? payload.postTitle ?? null,
+        post_id: null,
+        post_title: null,
         created_at: now,
         updated_at: now,
       };
@@ -2237,33 +2251,33 @@ async function startConversation(payload: JsonBody) {
   const userId = await requiredUserId();
   if (recipientId === userId) throw new Error("You cannot message yourself.");
   const communityId = await currentCommunityId();
+  const { data: canStart, error: permissionError } = await extendedDb
+    .rpc("can_start_message_with", { target_user: recipientId });
+  if (permissionError) throw permissionError;
+  if (!canStart) throw new Error("This member is not available for private messages.");
+
   const { data: recipient, error: recipientError } = await supabase
     .from("profiles")
     .select("*")
     .eq("id", recipientId)
-    .eq("community_id", communityId)
     .eq("membership_status", "approved")
     .maybeSingle();
   if (recipientError) throw recipientError;
   if (!recipient) throw new Error("This member is not available for private messages.");
 
   const postId = payload.postId ? String(payload.postId) : null;
-  let postTitle: string | null = null;
   if (postId) {
     const { data: post, error: postError } = await extendedDb.from("posts").select("id, title, community_id").eq("id", postId).maybeSingle();
     if (postError) throw postError;
     if (!post || post.community_id !== communityId) throw new Error("Post not found in your community.");
-    postTitle = post.title;
   }
 
   const [participantOne, participantTwo] = conversationPair(userId, recipientId);
-  let query = extendedDb
+  const query = extendedDb
     .from("message_conversations")
     .select("*")
-    .eq("community_id", communityId)
     .eq("participant_one", participantOne)
     .eq("participant_two", participantTwo);
-  query = postId ? query.eq("post_id", postId) : query.is("post_id", null);
   const { data: existing, error: existingError } = await query.maybeSingle();
   if (existingError) throw existingError;
 
@@ -2276,8 +2290,8 @@ async function startConversation(payload: JsonBody) {
         created_by: userId,
         participant_one: participantOne,
         participant_two: participantTwo,
-        post_id: postId,
-        post_title: postTitle,
+        post_id: null,
+        post_title: null,
       })
       .select("*")
       .single();
@@ -2801,6 +2815,7 @@ export async function handleSupabaseApi<T = unknown>(url: string, method = "GET"
   if (path === "/api/reports" && method === "POST") return createModerationReport(payload) as T;
   if (path === "/api/blocks" && method === "POST") return toggleUserBlock(payload) as T;
   if (path === "/api/community/members" && method === "GET") return listCommunityMembers(requestUrl.searchParams) as T;
+  if (path === "/api/reviewers" && method === "GET") return listSocietyReviewers(requestUrl.searchParams) as T;
   if (path.startsWith("/api/profile/") && method === "GET") return getProfile(path.split("/").pop() ?? "") as T;
   if (path.startsWith("/api/profile/") && method === "PUT") return saveProfile(path.split("/").pop() ?? "", payload) as T;
 
