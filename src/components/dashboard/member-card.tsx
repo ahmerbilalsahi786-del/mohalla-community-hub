@@ -3,12 +3,13 @@ import { cn } from '@/lib/utils'
 import { titleCaseWords } from '@/lib/format-label'
 import { CommunityEmptyState } from '@/components/community/community-empty-state'
 import { ResidentBadgeGroup } from '@/components/community/resident-badge'
+import { UserAvatar } from '@/components/community/user-avatar'
 
 interface Member {
   id: string
   name: string
   role: string
-  avatar?: string
+  avatar?: string | null
   isVerified: boolean
   href: string
   mutualConnections?: number
@@ -44,7 +45,7 @@ export function MemberCard({ members }: MemberCardProps) {
           >
             {/* Avatar */}
             <div className="relative">
-              <div className="h-12 w-12 rounded-full bg-gradient-to-br from-primary/50 to-accent/50" />
+              <UserAvatar name={member.name} src={member.avatar} className="h-12 w-12" />
               <div
                 className={cn(
                   'absolute -bottom-0.5 -right-0.5 h-3.5 w-3.5 rounded-full border-2 border-card',

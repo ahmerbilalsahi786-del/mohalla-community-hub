@@ -6,10 +6,7 @@ import { Link } from 'wouter'
 import { CommunityEmptyState } from '@/components/community/community-empty-state'
 import { ResidentBadgeGroup } from '@/components/community/resident-badge'
 import { ResidentListSkeleton } from '@/components/community/skeleton-states'
-
-function getInitials(name: string) {
-  return name.split(' ').map((n) => n[0]).join('').slice(0, 2).toUpperCase()
-}
+import { UserAvatar } from '@/components/community/user-avatar'
 
 export default function Community() {
   const { data, isLoading } = useQuery({
@@ -60,9 +57,7 @@ export default function Community() {
                       <div className="group cursor-pointer rounded-2xl border border-border bg-card p-4 hover:border-primary/30 hover:shadow-sm transition-all">
                         <div className="flex items-center gap-3 mb-3">
                           <div className="relative">
-                            <div className="flex h-12 w-12 items-center justify-center rounded-full bg-gradient-to-br from-primary/60 to-accent/60 font-bold text-white text-sm shrink-0">
-                              {getInitials(m.name)}
-                            </div>
+                            <UserAvatar name={m.name} src={m.avatarUrl} className="h-12 w-12" />
                             {m.isActive && (
                               <div className="absolute -bottom-0.5 -right-0.5 h-3.5 w-3.5 rounded-full border-2 border-card bg-green-500" />
                             )}

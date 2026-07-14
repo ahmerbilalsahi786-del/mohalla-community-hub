@@ -912,6 +912,9 @@ components:
           type: string
         unitNumber:
           type: string
+        avatarUrl:
+          type: string
+          nullable: true
         type:
           type: string
         title:
@@ -1007,6 +1010,9 @@ components:
           type: string
         unitNumber:
           type: string
+        avatarUrl:
+          type: string
+          nullable: true
         body:
           type: string
         createdAt:
@@ -1055,6 +1061,9 @@ components:
           type: string
         unitNumber:
           type: string
+        avatarUrl:
+          type: string
+          nullable: true
         type:
           type: string
         title:
@@ -1129,6 +1138,9 @@ components:
           type: string
         unitNumber:
           type: string
+        avatarUrl:
+          type: string
+          nullable: true
         body:
           type: string
         createdAt:
@@ -1178,6 +1190,9 @@ components:
           type: string
         unitNumber:
           type: string
+        avatarUrl:
+          type: string
+          nullable: true
         title:
           type: string
         description:
@@ -1278,6 +1293,7 @@ components:
         userId: { type: string }
         userName: { type: string }
         unitNumber: { type: string }
+        avatarUrl: { type: string, nullable: true }
         title: { type: string }
         description: { type: string }
         date: { type: string }
@@ -1341,6 +1357,7 @@ components:
         userId: { type: string }
         userName: { type: string }
         unitNumber: { type: string }
+        avatarUrl: { type: string, nullable: true }
         question: { type: string }
         options:
           type: array
@@ -1357,6 +1374,7 @@ components:
         userId: { type: string }
         userName: { type: string }
         unitNumber: { type: string }
+        avatarUrl: { type: string, nullable: true }
         question: { type: string }
         options:
           type: array
@@ -1417,6 +1435,9 @@ components:
           type: string
         unitNumber:
           type: string
+        avatarUrl:
+          type: string
+          nullable: true
         phone:
           type: string
         status:

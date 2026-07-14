@@ -21,6 +21,7 @@ import { useStartConversation } from '@/lib/messages'
 import { CommunityEmptyState } from '@/components/community/community-empty-state'
 import { FeedPostSkeleton } from '@/components/community/skeleton-states'
 import { PostTypeSelector } from '@/components/feed/post-type-selector'
+import { UserAvatar } from '@/components/community/user-avatar'
 
 type PostType = 'general' | 'announcement' | 'safety' | 'lost_found' | 'buy_sell' | 'event' | 'complaint'
 
@@ -169,16 +170,8 @@ function timeAgo(dateStr: string) {
   return `${Math.floor(diff / 86400)}d ago`
 }
 
-function AvatarInitials({ name, size = 'md' }: { name: string; size?: 'sm' | 'md' }) {
-  const initials = name.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase()
-  return (
-    <div className={cn(
-      'flex shrink-0 items-center justify-center rounded-full bg-primary/10 font-bold text-primary ring-1 ring-primary/15',
-      size === 'sm' ? 'h-8 w-8 text-xs' : 'h-10 w-10 text-sm'
-    )}>
-      {initials}
-    </div>
-  )
+function ResidentAvatar({ name, avatarUrl, size = 'md' }: { name: string; avatarUrl?: string | null; size?: 'sm' | 'md' }) {
+  return <UserAvatar name={name} src={avatarUrl} className={size === 'sm' ? 'h-8 w-8' : 'h-10 w-10'} fallbackClassName={size === 'sm' ? 'text-xs' : 'text-sm'} />
 }
 
 function ImageGrid({ urls }: { urls: string[] }) {
@@ -247,7 +240,7 @@ function CommentSection({ postId }: { postId: number }) {
         <div className="space-y-3">
           {comments.map((c) => (
             <div key={c.id} className="flex gap-2.5">
-              <AvatarInitials name={c.userName} size="sm" />
+              <ResidentAvatar name={c.userName} avatarUrl={c.avatarUrl} size="sm" />
               <div className="min-w-0 flex-1">
                 <div className="rounded-lg bg-secondary/60 px-3 py-2">
                   <div className="flex items-baseline gap-2">
@@ -264,7 +257,7 @@ function CommentSection({ postId }: { postId: number }) {
       )}
 
       <div className="mt-3 flex gap-2">
-        <AvatarInitials name={currentUser?.name ?? 'Resident'} size="sm" />
+        <ResidentAvatar name={currentUser?.name ?? 'Resident'} avatarUrl={currentUser?.avatarUrl} size="sm" />
         <div className="flex flex-1 items-center gap-2">
           <input
             type="text"
@@ -294,6 +287,7 @@ interface Post {
   userId: string
   userName: string
   unitNumber: string
+  avatarUrl?: string | null
   type: string
   title: string
   body: string
@@ -393,7 +387,7 @@ function PostCard({ post, onLike }: { post: Post; onLike: (id: number) => void }
       <div className="p-4 sm:p-5">
         <div className="flex items-start justify-between gap-3">
           <div className="flex min-w-0 flex-1 items-start gap-3">
-            <AvatarInitials name={post.userName} />
+            <ResidentAvatar name={post.userName} avatarUrl={post.avatarUrl} />
             <div className="min-w-0 flex-1">
               <div className="flex flex-wrap items-baseline gap-x-2 gap-y-0.5">
                 <span className="text-sm font-bold text-foreground">{post.userName}</span>
@@ -571,7 +565,7 @@ function CreatePostModal({ onClose, initialType = 'general' }: { onClose: () => 
 
         <div className="min-h-0 flex-1 space-y-4 overflow-y-auto p-4 pb-6 sm:p-5">
           <div className="flex items-center gap-3">
-            <AvatarInitials name={currentUser?.name ?? 'Resident'} />
+            <ResidentAvatar name={currentUser?.name ?? 'Resident'} avatarUrl={currentUser?.avatarUrl} />
             <div>
               <p className="font-semibold text-sm text-foreground">{currentUser?.name ?? 'Resident'}</p>
               <p className="text-xs text-muted-foreground">{currentUser?.unitNumber || 'No unit set'} - Mohalla Community</p>

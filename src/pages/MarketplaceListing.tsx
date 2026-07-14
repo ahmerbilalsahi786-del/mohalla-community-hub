@@ -13,6 +13,7 @@ import { cn } from '@/lib/utils'
 import { canManageCommunity, useCurrentUser } from '@/hooks/use-current-user'
 import { useToast } from '@/hooks/use-toast'
 import { customFetch } from '@/lib/custom-fetch'
+import { UserAvatar } from '@/components/community/user-avatar'
 
 const CONDITION_BADGE: Record<string, { label: string; bg: string; text: string }> = {
   new: { label: 'New', bg: 'bg-emerald-500/10', text: 'text-emerald-700' },
@@ -37,6 +38,7 @@ type Listing = {
   userId: string
   userName: string
   unitNumber: string
+  avatarUrl?: string | null
   title: string
   description: string
   pricePkr?: number | null
@@ -323,9 +325,7 @@ export default function MarketplaceListing({ params }: Props) {
                 <div className="rounded-2xl border border-border bg-muted/30 p-4 space-y-2">
                   <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">{isShop ? 'Shop contact' : 'Seller'}</h3>
                   <div className="flex items-center gap-3">
-                    <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-br from-primary/60 to-accent/60 font-bold text-white text-sm shrink-0">
-                      {listing.userName.split(' ').map((n) => n[0]).join('').slice(0, 2).toUpperCase()}
-                    </div>
+                    <UserAvatar name={listing.userName} src={listing.avatarUrl} className="h-10 w-10" />
                     <div>
                       <p className="font-semibold text-sm text-foreground">{listing.userName}</p>
                       <div className="flex items-center gap-1 text-xs text-muted-foreground">

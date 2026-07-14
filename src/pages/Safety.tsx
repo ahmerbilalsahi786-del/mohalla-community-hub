@@ -17,6 +17,8 @@ import { cn } from '@/lib/utils'
 import { PublicationToggle } from '@/components/city-feed/publication-toggle'
 import LocationPicker, { type PickedLocation } from '@/components/location-picker'
 import { useToast } from '@/hooks/use-toast'
+import { useCurrentUser } from '@/hooks/use-current-user'
+import { UserAvatar } from '@/components/community/user-avatar'
 
 type AlertType = 'theft' | 'suspicious' | 'emergency' | 'power_outage' | 'water_shortage' | 'other'
 type Severity = 'low' | 'medium' | 'high'
@@ -56,6 +58,7 @@ interface AlertData {
   userId: string
   userName: string
   unitNumber: string
+  avatarUrl?: string | null
   type: string
   title: string
   description: string
@@ -71,6 +74,7 @@ interface AlertData {
 function AlertComments({ alertId }: { alertId: number }) {
   const [body, setBody] = useState('')
   const { data: comments = [], isLoading } = useListAlertComments(alertId)
+  const { data: currentUser } = useCurrentUser()
   const queryClient = useQueryClient()
   const createComment = useCreateAlertComment({
     mutation: {
@@ -91,9 +95,7 @@ function AlertComments({ alertId }: { alertId: number }) {
         <div className="space-y-3">
           {comments.map((c) => (
             <div key={c.id} className="flex gap-2.5">
-              <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-primary/60 to-accent/60 text-xs font-bold text-white">
-                {c.userName.split(' ').map((n: string) => n[0]).join('').slice(0, 2).toUpperCase()}
-              </div>
+              <UserAvatar name={c.userName} src={c.avatarUrl} className="h-7 w-7" fallbackClassName="text-xs" />
               <div className="flex-1 min-w-0">
                 <div className="rounded-xl bg-muted/50 px-3 py-2">
                   <div className="flex items-baseline gap-2">
@@ -109,7 +111,7 @@ function AlertComments({ alertId }: { alertId: number }) {
         </div>
       )}
       <div className="flex gap-2">
-        <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-primary/60 to-accent/60 text-xs font-bold text-white">AK</div>
+        <UserAvatar name={currentUser?.name} src={currentUser?.avatarUrl} className="h-7 w-7" fallbackClassName="text-xs" />
         <div className="flex flex-1 gap-2">
           <input
             type="text"
@@ -137,7 +139,8 @@ function AlertCard({ alert, onResolve }: { alert: AlertData; onResolve: (id: num
   const typeCfg = TYPE_CONFIG[alert.type] || TYPE_CONFIG.other
   const sevCfg = SEVERITY_CONFIG[alert.severity] || SEVERITY_CONFIG.medium
   const TypeIcon = typeCfg.icon
-  const isCurrentUser = alert.userId === 'ahmed'
+  const { data: currentUser } = useCurrentUser()
+  const isCurrentUser = alert.userId === currentUser?.userId
 
   return (
     <div className={cn(
@@ -206,9 +209,12 @@ function AlertCard({ alert, onResolve }: { alert: AlertData; onResolve: (id: num
             )}
 
             <div className="mt-3 flex items-center justify-between">
-              <div className="text-xs text-muted-foreground">
-                <span className="font-medium">{alert.userName}</span>
-                <span> · {alert.unitNumber} · {timeAgo(alert.createdAt)}</span>
+              <div className="flex min-w-0 items-center gap-2 text-xs text-muted-foreground">
+                <UserAvatar name={alert.userName} src={alert.avatarUrl} className="h-7 w-7" fallbackClassName="text-[10px]" />
+                <span className="min-w-0 truncate">
+                  <span className="font-medium">{alert.userName}</span>
+                  <span> · {alert.unitNumber} · {timeAgo(alert.createdAt)}</span>
+                </span>
               </div>
 
               <div className="flex items-center gap-2">
@@ -281,7 +287,6 @@ function ReportAlertModal({ onClose }: { onClose: () => void }) {
       },
     },
   })
-
   const typeOptions: { value: AlertType; label: string }[] = [
     { value: 'theft', label: 'Theft' },
     { value: 'suspicious', label: 'Suspicious Activity' },

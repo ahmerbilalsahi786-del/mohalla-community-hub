@@ -14,9 +14,11 @@ import { sendMemberApprovedEmail } from '@/lib/approval-email'
 import { CommunityEmptyState } from '@/components/community/community-empty-state'
 import { ResidentBadgeGroup } from '@/components/community/resident-badge'
 import { ResidentListSkeleton } from '@/components/community/skeleton-states'
+import { UserAvatar } from '@/components/community/user-avatar'
 
 type Member = {
   id: number; userId: string; name: string; unitNumber: string; phone: string;
+  avatarUrl?: string | null;
   status: string; role: string; isVerified: boolean; joinDate: string; communityId: string;
 }
 
@@ -48,6 +50,7 @@ function toMember(profile: any): Member {
     userId: profile.id,
     name: memberName(profile),
     unitNumber: profile.unit_number ?? '',
+    avatarUrl: profile.avatar_url ?? null,
     phone: profile.phone ?? profile.whatsapp_number ?? '',
     status: profile.membership_status ?? (profile.is_verified ? 'approved' : 'pending'),
     role: profile.role ?? 'user',
@@ -62,7 +65,16 @@ async function loadAdminMembers(communityId?: string | null) {
   const { data, error } = await (supabase as any).rpc('admin_list_members', { requested_status: null })
 
   if (error) throw error
-  return (data ?? []).map(toMember)
+  const rows = data ?? []
+  const userIds = rows.map((row: any) => row.id).filter(Boolean)
+  if (userIds.length === 0) return []
+  const { data: profiles, error: profileError } = await supabase
+    .from('profiles')
+    .select('id, avatar_url')
+    .in('id', userIds)
+  if (profileError) throw profileError
+  const avatarsByUserId = new Map((profiles ?? []).map((profile) => [profile.id, profile.avatar_url]))
+  return rows.map((row: any) => toMember({ ...row, avatar_url: avatarsByUserId.get(row.id) ?? null }))
 }
 
 function timeAgo(d: string) {
@@ -162,9 +174,7 @@ function MemberRow({ member, refetch }: { member: Member; refetch: () => void })
     <tr className="border-b border-border hover:bg-muted/30 transition-colors">
       <td className="px-4 py-3">
         <div className="flex items-center gap-2.5">
-          <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-primary/60 to-accent/60 text-xs font-bold text-white">
-            {member.name.split(' ').map(n => n[0]).join('').slice(0,2).toUpperCase()}
-          </div>
+          <UserAvatar name={member.name} src={member.avatarUrl} className="h-8 w-8" fallbackClassName="text-xs" />
           <div>
             <div className="flex items-center gap-1.5">
               <span className="text-sm font-medium text-foreground">{member.name}</span>

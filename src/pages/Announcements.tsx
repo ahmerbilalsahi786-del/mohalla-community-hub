@@ -6,6 +6,7 @@ import { useListPosts } from '@/lib/generated/api'
 import { CommunityEmptyState } from '@/components/community/community-empty-state'
 import { FeedPostSkeleton } from '@/components/community/skeleton-states'
 import { canManageCommunity, useCurrentUser } from '@/hooks/use-current-user'
+import { UserAvatar } from '@/components/community/user-avatar'
 
 function timeAgo(dateStr: string) {
   const diff = Math.floor((Date.now() - new Date(dateStr).getTime()) / 1000)
@@ -123,6 +124,7 @@ function AnnouncementCard({
     body: string
     userName: string
     unitNumber: string
+    avatarUrl?: string | null
     createdAt: string
     isPinned: boolean
   }
@@ -139,7 +141,10 @@ function AnnouncementCard({
           </span>
           <div className="min-w-0">
             <p className="text-xs font-black uppercase text-muted-foreground">{featured ? 'Pinned announcement' : 'Announcement'}</p>
-            <p className="text-xs text-muted-foreground">{post.userName || 'Community admin'} · {timeAgo(post.createdAt)}</p>
+            <div className="mt-1 flex items-center gap-2 text-xs text-muted-foreground">
+              <UserAvatar name={post.userName || 'Community admin'} src={post.avatarUrl} className="h-6 w-6" fallbackClassName="text-[9px]" />
+              <span>{post.userName || 'Community admin'} · {timeAgo(post.createdAt)}</span>
+            </div>
           </div>
         </div>
         {post.isPinned && (

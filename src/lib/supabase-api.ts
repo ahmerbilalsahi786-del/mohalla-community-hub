@@ -473,6 +473,7 @@ function toComment(row: any, profile?: any) {
     userId: row.user_id,
     userName: profileName(profile),
     unitNumber: unit(profile),
+    avatarUrl: profile?.avatar_url ?? null,
     body: row.body,
     createdAt: row.created_at ?? new Date().toISOString(),
   };
@@ -485,6 +486,7 @@ function toAlertComment(row: any, profile?: any) {
     userId: row.user_id,
     userName: profileName(profile),
     unitNumber: unit(profile),
+    avatarUrl: profile?.avatar_url ?? null,
     body: row.body,
     createdAt: row.created_at ?? new Date().toISOString(),
   };
@@ -516,6 +518,7 @@ function toPost(row: any, profile?: any) {
     userId: row.user_id,
     userName: profileName(profile),
     unitNumber: unit(profile),
+    avatarUrl: profile?.avatar_url ?? null,
     type: row.type ?? "general",
     title: row.title,
     body: row.body,
@@ -645,6 +648,7 @@ function toListing(row: any, profile?: any) {
     userId: row.user_id,
     userName: profileName(profile),
     unitNumber: unit(profile),
+    avatarUrl: profile?.avatar_url ?? null,
     title: row.title,
     description: row.description,
     pricePkr: row.price_pkr,
@@ -668,6 +672,7 @@ function toEvent(row: any, profile?: any, myStatus: string | null = null) {
     userId: row.user_id,
     userName: profileName(profile),
     unitNumber: unit(profile),
+    avatarUrl: profile?.avatar_url ?? null,
     title: row.title,
     description: row.description ?? "",
     date: row.event_date,
@@ -689,6 +694,7 @@ function toAlert(row: any, profile?: any) {
     userId: row.user_id,
     userName: profileName(profile),
     unitNumber: unit(profile),
+    avatarUrl: profile?.avatar_url ?? null,
     type: row.alert_type ?? "general",
     title: row.title,
     description: row.description,
@@ -1081,6 +1087,7 @@ async function listPolls() {
       userId: row.user_id,
       userName: profileName(profiles.get(row.user_id)),
       unitNumber: unit(profiles.get(row.user_id)),
+      avatarUrl: profiles.get(row.user_id)?.avatar_url ?? null,
       question: row.question,
       options: options.map((option: any) => option.option_text),
       endsAt,
@@ -1863,6 +1870,7 @@ function toMember(profile: any, manager: boolean) {
     userId: profile.id,
     name: profileName(profile),
     unitNumber: unit(profile),
+    avatarUrl: profile.avatar_url ?? null,
     phone: manager ? profile.private_profiles?.phone ?? profile.private_profiles?.whatsapp_number ?? "" : "",
     whatsappNumber: manager ? profile.private_profiles?.whatsapp_number ?? "" : "",
     status: profile.membership_status ?? (profile.is_verified ? "approved" : "pending"),
@@ -1947,7 +1955,7 @@ async function listCommunityMembers(params: URLSearchParams) {
   const search = compactText(params.get("search"), 80);
   let query = extendedDb
     .from("profiles")
-    .select("id, display_name, full_name, unit_number, membership_status, is_verified, created_at, community_id")
+    .select("id, display_name, full_name, unit_number, avatar_url, membership_status, is_verified, created_at, community_id")
     .eq("community_id", communityId)
     .limit(limit);
 

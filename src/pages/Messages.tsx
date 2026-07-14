@@ -18,15 +18,7 @@ import {
   useStartConversation,
 } from "@/lib/messages";
 import { cn } from "@/lib/utils";
-
-function initials(name: string) {
-  return name
-    .split(" ")
-    .map((part) => part[0])
-    .join("")
-    .slice(0, 2)
-    .toUpperCase();
-}
+import { UserAvatar } from "@/components/community/user-avatar";
 
 function timeAgo(value?: string | null) {
   if (!value) return "";
@@ -37,12 +29,8 @@ function timeAgo(value?: string | null) {
   return `${Math.floor(diff / 86400)}d`;
 }
 
-function Avatar({ name }: { name: string }) {
-  return (
-    <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-sm font-bold text-primary ring-1 ring-primary/15">
-      {initials(name || "Resident")}
-    </span>
-  );
+function Avatar({ name, avatarUrl }: { name: string; avatarUrl?: string | null }) {
+  return <UserAvatar name={name} src={avatarUrl} className="h-10 w-10 rounded-xl" />;
 }
 
 function ConversationRow({
@@ -63,7 +51,7 @@ function ConversationRow({
       )}
     >
       <div className="flex items-start gap-3">
-        <Avatar name={conversation.participant.name} />
+        <Avatar name={conversation.participant.name} avatarUrl={conversation.participant.avatarUrl} />
         <div className="min-w-0 flex-1">
           <div className="flex items-start justify-between gap-2">
             <div className="min-w-0">
@@ -122,6 +110,7 @@ function MemberPicker({
       userId: reviewer.userId,
       name: reviewer.name,
       unitNumber: reviewer.unitNumber,
+      avatarUrl: reviewer.avatarUrl,
       status: "approved",
       role: reviewer.role,
       isVerified: true,
@@ -181,7 +170,7 @@ function MemberPicker({
                 selectedId === member.userId ? "bg-primary/10 text-primary" : "hover:bg-muted/60",
               )}
             >
-              <Avatar name={member.name} />
+              <Avatar name={member.name} avatarUrl={member.avatarUrl} />
               <span className="min-w-0">
                 <span className="block truncate text-sm font-bold">{member.name}</span>
                 <span className="block truncate text-xs text-muted-foreground">
@@ -429,7 +418,7 @@ export default function Messages() {
                     <Link href="/messages" className="flex h-9 w-9 items-center justify-center rounded-xl border portal-soft-rule bg-background/70 text-muted-foreground lg:hidden">
                       <ArrowLeft size={17} />
                     </Link>
-                    <Avatar name={detail.conversation.participant.name} />
+                    <Avatar name={detail.conversation.participant.name} avatarUrl={detail.conversation.participant.avatarUrl} />
                     <div className="min-w-0 flex-1">
                       <p className="truncate text-sm font-black text-foreground">{detail.conversation.participant.name}</p>
                       <p className="truncate text-xs text-muted-foreground">

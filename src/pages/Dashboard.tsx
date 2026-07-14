@@ -255,6 +255,7 @@ export default function Dashboard() {
     user: post.userName || 'Resident',
     action: 'posted',
     target: post.title || 'a community update',
+    avatar: post.avatarUrl ?? null,
     time: formatDistanceToNow(new Date(post.createdAt), { addSuffix: true }),
     type: 'post' as const,
   }))
@@ -274,6 +275,7 @@ export default function Dashboard() {
     id: String(member.id),
     name: member.name || 'Resident',
     role: member.role === 'admin' ? 'Community Admin' : member.role === 'moderator' ? 'Moderator' : 'Member',
+    avatar: member.avatarUrl ?? null,
     isVerified: Boolean(member.isVerified),
     href: `/profile/${member.userId ?? member.id}`,
   }))

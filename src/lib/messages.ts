@@ -50,6 +50,7 @@ export interface CommunityMember {
   userId: string;
   name: string;
   unitNumber: string;
+  avatarUrl?: string | null;
   status: string;
   role: string;
   isVerified: boolean;

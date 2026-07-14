@@ -1,6 +1,7 @@
 import { cn } from '@/lib/utils'
 import { Calendar, Heart, MessageSquare, PencilLine, UserPlus } from 'lucide-react'
 import { Link } from 'wouter'
+import { UserAvatar } from '@/components/community/user-avatar'
 
 interface Activity {
   id: string
@@ -8,7 +9,7 @@ interface Activity {
   action: string
   target: string
   time: string
-  avatar?: string
+  avatar?: string | null
   type: 'event' | 'post' | 'join' | 'comment' | 'like'
 }
 
@@ -52,9 +53,13 @@ export function ActivityCard({ activities }: ActivityCardProps) {
               key={activity.id}
               className="flex items-start gap-3 p-4 transition-colors hover:bg-secondary/45"
             >
-              <div className={cn('delight-swing-on-hover flex h-10 w-10 shrink-0 items-center justify-center rounded-lg', meta.className)}>
-                <Icon size={18} />
-              </div>
+              {activity.avatar ? (
+                <UserAvatar name={activity.user} src={activity.avatar} className="h-10 w-10 rounded-lg" />
+              ) : (
+                <div className={cn('delight-swing-on-hover flex h-10 w-10 shrink-0 items-center justify-center rounded-lg', meta.className)}>
+                  <Icon size={18} />
+                </div>
+              )}
 
               <div className="min-w-0 flex-1">
                 <p className="break-words text-sm leading-relaxed text-card-foreground">

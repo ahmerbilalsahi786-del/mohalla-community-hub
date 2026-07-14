@@ -18,11 +18,13 @@ import LocationPicker, { type PickedLocation } from '@/components/location-picke
 import { PublicationToggle } from '@/components/city-feed/publication-toggle'
 import { CommunityEmptyState } from '@/components/community/community-empty-state'
 import { EventSkeleton } from '@/components/community/skeleton-states'
+import { UserAvatar } from '@/components/community/user-avatar'
 
 type EventItem = {
   id: number; title: string; description: string; date: string; time: string;
   location: string; imageUrl?: string | null; rsvpCount: number; createdAt: string;
   userName: string; unitNumber: string; userId: string;
+  avatarUrl?: string | null;
   myStatus?: string | null;
   latitude?: number | null; longitude?: number | null;
 }
@@ -112,7 +114,10 @@ function EventCard({ event, isPast }: { event: EventItem; isPast?: boolean }) {
         </div>
 
         <div className="mt-3 flex items-center justify-between">
-          <span className="text-xs text-muted-foreground">By {event.userName} · {event.unitNumber}</span>
+          <span className="flex min-w-0 items-center gap-2 text-xs text-muted-foreground">
+            <UserAvatar name={event.userName} src={event.avatarUrl} className="h-7 w-7" fallbackClassName="text-[10px]" />
+            <span className="truncate">By {event.userName} · {event.unitNumber}</span>
+          </span>
           <PublicationToggle sourceType="event" sourceId={event.id} variant="chip" className="ml-auto mr-2" />
           {!isPast && (
             <div className="flex items-center gap-1">

@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { Link, useLocation } from 'wouter'
 import { Home, MessageSquare, ShoppingBag, ShieldAlert, Calendar, Menu, Users, Megaphone, MapPin, Heart, BarChart2, Settings, HelpCircle, ShieldCheck, LogOut, Globe2, UserCircle, ChevronDown, UserRoundCheck } from 'lucide-react'
 import { cn } from '@/lib/utils'
+import { UserAvatar } from '@/components/community/user-avatar'
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet'
 import { InstallAppButton } from '@/components/pwa/install-app'
 import { canManageCommunity, useCurrentUser, useLogout } from '@/hooks/use-current-user'
@@ -89,9 +90,7 @@ export function MobileNav() {
               onClick={() => setProfileTrayOpen((open) => !open)}
               className="flex w-full items-center gap-3 rounded-xl border border-border bg-card px-4 py-3 text-left shadow-xs transition-colors hover:bg-secondary/60"
             >
-              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary/10 text-primary">
-                <UserCircle size={19} />
-              </div>
+              <UserAvatar name={user?.name} src={user?.avatarUrl} className="h-10 w-10 rounded-xl" />
               <div className="min-w-0 flex-1">
                 <span className="block truncate text-sm font-black text-foreground">Profile</span>
                 <span className="block truncate text-xs text-muted-foreground">Account and access</span>

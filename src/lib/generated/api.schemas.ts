@@ -15,6 +15,7 @@ export interface Post {
   userId: string;
   userName: string;
   unitNumber: string;
+  avatarUrl?: string | null;
   type: string;
   title: string;
   body: string;
@@ -51,6 +52,7 @@ export interface Comment {
   userId: string;
   userName: string;
   unitNumber: string;
+  avatarUrl?: string | null;
   body: string;
   createdAt: string;
 }
@@ -68,6 +70,7 @@ export interface Alert {
   userId: string;
   userName: string;
   unitNumber: string;
+  avatarUrl?: string | null;
   type: string;
   title: string;
   description: string;
@@ -97,6 +100,7 @@ export interface AlertComment {
   userId: string;
   userName: string;
   unitNumber: string;
+  avatarUrl?: string | null;
   body: string;
   createdAt: string;
 }
@@ -114,6 +118,7 @@ export interface Listing {
   userId: string;
   userName: string;
   unitNumber: string;
+  avatarUrl?: string | null;
   title: string;
   description: string;
   pricePkr?: number | null;
@@ -165,6 +170,7 @@ export interface Event {
   userId: string;
   userName: string;
   unitNumber: string;
+  avatarUrl?: string | null;
   title: string;
   description: string;
   date: string;
@@ -218,6 +224,7 @@ export interface Poll {
   userId: string;
   userName: string;
   unitNumber: string;
+  avatarUrl?: string | null;
   question: string;
   options: string[];
   endsAt: string;
@@ -230,6 +237,7 @@ export interface PollResult {
   userId: string;
   userName: string;
   unitNumber: string;
+  avatarUrl?: string | null;
   question: string;
   options: string[];
   endsAt: string;
@@ -267,6 +275,7 @@ export interface Member {
   userId: string;
   name: string;
   unitNumber: string;
+  avatarUrl?: string | null;
   phone: string;
   status: string;
   role: string;

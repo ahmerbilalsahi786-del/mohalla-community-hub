@@ -4,6 +4,7 @@ import { Sidebar } from '@/components/dashboard/sidebar'
 import { TopNavbar } from '@/components/dashboard/top-navbar'
 import { Button } from '@/components/ui/button'
 import { InviteTools } from '@/components/community/invite-tools'
+import { UserAvatar } from '@/components/community/user-avatar'
 import { cn } from '@/lib/utils'
 import { useCurrentUser, useLogout } from '@/hooks/use-current-user'
 import { useToast } from '@/hooks/use-toast'
@@ -402,9 +403,7 @@ export default function Settings() {
             <Section title="Your Profile">
               <Link href={`/profile/${user?.userId ?? "me"}`} className="w-full flex items-center justify-between px-5 py-4 hover:bg-muted/30 transition-colors">
                 <div className="flex items-center gap-3">
-                  <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-br from-primary/60 to-accent/60 text-white font-bold text-sm">
-                    {(user?.name ?? "R").slice(0, 1).toUpperCase()}
-                  </div>
+                  <UserAvatar name={user?.name} src={user?.avatarUrl} className="h-10 w-10" />
                   <div>
                     <p className="text-sm font-semibold text-foreground">{user?.name ?? "Resident"}</p>
                     <p className="text-xs text-muted-foreground">{user?.unitNumber || "No unit set"} · View and edit your profile</p>

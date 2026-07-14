@@ -10,11 +10,13 @@ import { BarChart2, Plus, X, Clock, Users, CheckCircle2, Loader2 } from 'lucide-
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
 import { PublicationToggle } from '@/components/city-feed/publication-toggle'
+import { UserAvatar } from '@/components/community/user-avatar'
 
 type PollResult = {
   id: number; question: string; options: string[]; totalVotes: number;
   voteCounts: number[]; myVoteIndex: number | null; isEnded: boolean;
   endsAt: string; createdAt: string; userName: string; unitNumber: string;
+  avatarUrl?: string | null;
 }
 
 function timeLeft(endsAt: string) {
@@ -47,9 +49,10 @@ function PollCard({ poll }: { poll: PollResult }) {
       <div className="flex items-start justify-between gap-3 mb-4">
         <div>
           <p className="font-semibold text-foreground leading-snug">{poll.question}</p>
-          <p className="text-xs text-muted-foreground mt-1">
-            By {poll.userName} · {poll.unitNumber}
-          </p>
+          <div className="mt-2 flex items-center gap-2 text-xs text-muted-foreground">
+            <UserAvatar name={poll.userName} src={poll.avatarUrl} className="h-7 w-7" fallbackClassName="text-[10px]" />
+            <span>By {poll.userName} · {poll.unitNumber}</span>
+          </div>
         </div>
         <span className={cn(
           'shrink-0 rounded-full px-2.5 py-1 text-xs font-semibold',

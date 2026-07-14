@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { useCurrentUser } from "@/hooks/use-current-user";
 import { SocietyReviewer, useSocietyReviewers, useStartConversation } from "@/lib/messages";
+import { UserAvatar } from "@/components/community/user-avatar";
 
 function reviewerName(reviewer: SocietyReviewer) {
   return reviewer.name || "Community reviewer";
@@ -115,13 +116,7 @@ export default function Reviewers() {
                     <div className="space-y-2">
                       {society.reviewers.map((reviewer) => (
                         <div key={reviewer.userId} className="flex items-center gap-3 rounded-xl border portal-soft-rule bg-card/82 p-3">
-                          <span className="flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-xl bg-secondary text-sm font-black text-secondary-foreground">
-                            {reviewer.avatarUrl ? (
-                              <img src={reviewer.avatarUrl} alt="" className="h-full w-full object-cover" />
-                            ) : (
-                              reviewerName(reviewer).slice(0, 1).toUpperCase()
-                            )}
-                          </span>
+                          <UserAvatar name={reviewerName(reviewer)} src={reviewer.avatarUrl} className="h-10 w-10 rounded-xl" />
                           <div className="min-w-0 flex-1">
                             <p className="truncate text-sm font-black text-foreground">{reviewerName(reviewer)}</p>
                             <p className="truncate text-xs text-muted-foreground">
