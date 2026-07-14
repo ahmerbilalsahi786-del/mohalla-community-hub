@@ -5,7 +5,7 @@ import { useQueryClient } from '@tanstack/react-query'
 import { Sidebar } from '@/components/dashboard/sidebar'
 import { TopNavbar } from '@/components/dashboard/top-navbar'
 import {
-  Plus, X, Search, Loader2, ChevronDown, ChevronUp,
+  Plus, X, Search, Loader2, ChevronDown, ChevronUp, ArrowDownUp,
   Armchair, Tv2, Shirt, Car, Wrench, Gift, Package,
   Tag, Image as ImageIcon, Store, MapPin, Trash2, Clock
 } from 'lucide-react'
@@ -527,6 +527,7 @@ export default function Marketplace() {
   const [debouncedSearch, setDebouncedSearch] = useState('')
   const [minPrice, setMinPrice] = useState('')
   const [maxPrice, setMaxPrice] = useState('')
+  const [sortOrder, setSortOrder] = useState<'newest' | 'oldest'>('newest')
   const [showFilters, setShowFilters] = useState(false)
   const [showCreate, setShowCreate] = useState(false)
   const [createMode, setCreateMode] = useState<'listing' | 'shop'>('listing')
@@ -568,7 +569,10 @@ export default function Marketplace() {
     limit: 24,
   })
 
-  const listings = data?.listings ?? []
+  const listings = [...(data?.listings ?? [])].sort((a, b) => {
+    const difference = new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
+    return sortOrder === 'oldest' ? difference : -difference
+  })
   const hasMore = data?.hasMore ?? false
 
   const handleCategoryChange = (cat: Category) => {
@@ -628,45 +632,32 @@ export default function Marketplace() {
                   className="w-full rounded-xl border border-border bg-muted/50 pl-9 pr-4 py-2 text-sm focus:outline-none focus:border-primary focus:bg-background transition-colors"
                 />
               </div>
-              <button
-                onClick={() => setShowFilters(!showFilters)}
-                className={cn(
-                  'flex items-center gap-1.5 rounded-xl border px-3 py-2 text-sm font-medium transition-colors shrink-0',
-                  showFilters || minPrice || maxPrice
-                    ? 'border-primary bg-primary/10 text-primary'
-                    : 'border-border bg-muted/50 text-muted-foreground hover:bg-muted'
-                )}
-              >
-                <Tag size={14} />
-                Price
-                {showFilters ? <ChevronUp size={13} /> : <ChevronDown size={13} />}
-              </button>
-              <button
-                onClick={() => handleCategoryChange(activeCategory === 'shop' ? 'all' : 'shop')}
-                className={cn(
-                  'flex items-center gap-1.5 rounded-xl border px-3 py-2 text-sm font-semibold transition-colors shrink-0',
-                  activeCategory === 'shop'
-                    ? 'border-primary bg-primary/10 text-primary'
-                    : 'border-border bg-muted/50 text-muted-foreground hover:bg-muted'
-                )}
-              >
-                <Store size={14} />
-                Shops
-              </button>
-              <button
-                onClick={() => openCreate('shop')}
-                className="flex shrink-0 items-center gap-1.5 rounded-xl border border-primary/30 bg-primary/10 px-3 py-2 text-sm font-semibold text-primary transition-colors hover:bg-primary/15"
-              >
-                <Store size={14} />
-                Register Shop
-              </button>
-              <button
-                onClick={() => openCreate('listing')}
-                className="flex shrink-0 items-center gap-1.5 rounded-xl bg-primary px-3 py-2 text-sm font-semibold text-primary-foreground shadow-sm transition-colors hover:bg-primary-hover"
-              >
-                <Plus size={14} />
-                Post Item
-              </button>
+              <div className="flex shrink-0 items-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => setSortOrder((current) => current === 'newest' ? 'oldest' : 'newest')}
+                  aria-label={`Sort by post date, ${sortOrder === 'newest' ? 'newest first' : 'oldest first'}`}
+                  className="flex flex-1 items-center justify-center gap-1.5 rounded-xl border border-border bg-muted/50 px-3 py-2 text-sm font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-foreground sm:flex-none"
+                >
+                  <ArrowDownUp size={14} />
+                  {sortOrder === 'newest' ? 'Newest first' : 'Oldest first'}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setShowFilters(!showFilters)}
+                  aria-expanded={showFilters}
+                  className={cn(
+                    'flex flex-1 items-center justify-center gap-1.5 rounded-xl border px-3 py-2 text-sm font-medium transition-colors sm:flex-none',
+                    showFilters || minPrice || maxPrice
+                      ? 'border-primary bg-primary/10 text-primary'
+                      : 'border-border bg-muted/50 text-muted-foreground hover:bg-muted'
+                  )}
+                >
+                  <Tag size={14} />
+                  Price
+                  {showFilters ? <ChevronUp size={13} /> : <ChevronDown size={13} />}
+                </button>
+              </div>
             </div>
 
             {/* Price filter */}
