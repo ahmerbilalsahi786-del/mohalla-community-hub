@@ -95,18 +95,29 @@ async function loadCurrentUser(): Promise<CurrentUser | null> {
     setToken(session.access_token);
   }
 
-  const [{ data: profile }, { data: roles }, { data: memberStatus }] = await Promise.all([
+  const [profileResult, rolesResult, memberStatusResult] = await Promise.all([
     supabase.from("profiles").select("*").eq("id", user.id).maybeSingle(),
     supabase.from("user_roles").select("role").eq("user_id", user.id),
     (supabase as any).rpc("my_member_status").maybeSingle(),
   ]);
 
+  if (profileResult.error) throw new Error(`Could not load your profile: ${profileResult.error.message}`);
+  if (rolesResult.error) throw new Error(`Could not load your role: ${rolesResult.error.message}`);
+  if (memberStatusResult.error) throw new Error(`Could not load your membership status: ${memberStatusResult.error.message}`);
+
+  const profile = profileResult.data;
+  const roles = rolesResult.data;
+  const memberStatus = memberStatusResult.data;
   const typedProfile = profile as any;
   const typedStatus = memberStatus as any;
   const profileCommunityId = typedStatus?.community_id ?? typedProfile?.community_id;
-  const { data: community } = profileCommunityId
+  const communityResult = profileCommunityId
     ? await (supabase as any).from("community_settings").select("*").eq("id", profileCommunityId).maybeSingle()
     : { data: null };
+  if ("error" in communityResult && communityResult.error) {
+    throw new Error(`Could not load your community: ${communityResult.error.message}`);
+  }
+  const { data: community } = communityResult;
   const resolvedCommunity = community ?? (
     typedStatus?.community_id
       ? {

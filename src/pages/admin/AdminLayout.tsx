@@ -47,37 +47,57 @@ export function AdminLayout({ children }: { children: React.ReactNode }) {
         <TopNavbar />
 
         {/* Admin sub-nav */}
-        <div className="border-b border-border bg-background/80 backdrop-blur-sm">
-          <div className="flex items-center gap-1 px-6 overflow-x-auto">
-            <div className="flex items-center gap-1.5 mr-4 shrink-0">
-              <div className="flex h-6 w-6 items-center justify-center rounded-md bg-primary/10">
-                <ShieldCheck size={14} className="text-primary" />
+        <div className="shrink-0 border-b border-border bg-background/90 backdrop-blur-sm">
+          <div className="px-3 py-2 sm:px-6 sm:py-0">
+            <div className="mb-2 flex items-center justify-between sm:hidden">
+              <div className="flex items-center gap-2">
+                <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary/10">
+                  <ShieldCheck size={16} className="text-primary" />
+                </div>
+                <div>
+                  <p className="text-sm font-semibold text-foreground">Admin tools</p>
+                  <p className="text-[11px] text-muted-foreground">Swipe to view all sections</p>
+                </div>
               </div>
-              <span className="text-sm font-semibold text-foreground">Admin</span>
             </div>
-            {TABS.map((tab) => {
-              const Icon = tab.icon
-              const active = location === tab.href
-              const isPending = tab.href === '/admin/members' && pendingCount > 0
-              return (
-                <Link key={tab.href} href={tab.href}>
-                  <div className={cn(
-                    'relative flex items-center gap-1.5 border-b-2 px-3 py-3 text-sm font-medium transition-colors cursor-pointer shrink-0',
-                    active
-                      ? 'border-primary text-primary'
-                      : 'border-transparent text-muted-foreground hover:text-foreground'
-                  )}>
-                    <Icon size={15} />
+
+            <nav
+              aria-label="Admin sections"
+              className="no-scrollbar flex snap-x snap-mandatory items-center gap-2 overflow-x-auto pb-1 sm:gap-1 sm:pb-0"
+            >
+              <div className="mr-4 hidden shrink-0 items-center gap-1.5 sm:flex">
+                <div className="flex h-6 w-6 items-center justify-center rounded-md bg-primary/10">
+                  <ShieldCheck size={14} className="text-primary" />
+                </div>
+                <span className="text-sm font-semibold text-foreground">Admin</span>
+              </div>
+              {TABS.map((tab) => {
+                const Icon = tab.icon
+                const active = location === tab.href
+                const isPending = tab.href === '/admin/members' && pendingCount > 0
+                return (
+                  <Link
+                    key={tab.href}
+                    href={tab.href}
+                    aria-current={active ? 'page' : undefined}
+                    className={cn(
+                      'relative flex min-h-11 shrink-0 snap-start items-center gap-2 whitespace-nowrap rounded-xl border px-3.5 py-2.5 text-sm font-semibold transition-colors sm:min-h-0 sm:rounded-none sm:border-x-0 sm:border-t-0 sm:border-b-2 sm:px-3 sm:py-3 sm:font-medium',
+                      active
+                        ? 'border-primary/30 bg-primary/10 text-primary shadow-sm sm:border-primary sm:bg-transparent sm:shadow-none'
+                        : 'border-border bg-card text-muted-foreground hover:border-primary/30 hover:bg-muted/60 hover:text-foreground sm:border-transparent sm:bg-transparent'
+                    )}
+                  >
+                    <Icon size={16} aria-hidden="true" />
                     {tab.label}
                     {isPending && (
-                      <span className="flex h-4 w-4 items-center justify-center rounded-full bg-red-500 text-[10px] font-bold text-white">
+                      <span className="flex h-5 min-w-5 items-center justify-center rounded-full bg-red-500 px-1 text-[10px] font-bold text-white">
                         {pendingCount}
                       </span>
                     )}
-                  </div>
-                </Link>
-              )
-            })}
+                  </Link>
+                )
+              })}
+            </nav>
           </div>
         </div>
 

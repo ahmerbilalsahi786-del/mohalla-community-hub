@@ -67,7 +67,13 @@ function EventCard({ event, isPast }: { event: EventItem; isPast?: boolean }) {
       isPast ? 'border-border opacity-70' : soon ? 'border-primary/30' : 'border-border'
     )}>
       {event.imageUrl && (
-        <img src={event.imageUrl} alt={event.title} loading="lazy" decoding="async" className="h-40 w-full object-cover" />
+        <img
+          src={event.imageUrl}
+          alt={event.title}
+          loading="lazy"
+          decoding="async"
+          className="h-40 w-full bg-muted/40 object-contain"
+        />
       )}
       {!event.imageUrl && !isPast && (
         <div className={cn('h-2 w-full', soon ? 'bg-primary' : 'bg-accent/60')} />
@@ -207,7 +213,11 @@ function CreateEventModal({ onClose }: { onClose: () => void }) {
             <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-1.5 block">Event Photo (optional)</label>
             {imageUrl ? (
               <div className="relative">
-                <img src={imageUrl} className="h-32 w-full rounded-xl object-cover" alt="" />
+                <img
+                  src={imageUrl}
+                  className="h-32 w-full rounded-xl bg-muted/40 object-contain"
+                  alt="Event photo preview"
+                />
                 <button onClick={() => setImageUrl(undefined)} className="absolute top-2 right-2 flex h-6 w-6 items-center justify-center rounded-full bg-black/50 text-white hover:bg-black/70">
                   <X size={12} />
                 </button>

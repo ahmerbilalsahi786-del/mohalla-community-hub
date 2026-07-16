@@ -1,4 +1,5 @@
-import { lazy, Suspense, useEffect } from "react";
+import { lazy, Suspense, useEffect, useState } from "react";
+import { AlertTriangle, X } from "lucide-react";
 import { Redirect, Route, Router as WouterRouter, Switch, useLocation } from "wouter";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
@@ -15,6 +16,7 @@ import { clearToken } from "@/lib/auth";
 import { isSuperAdmin, useCurrentUser } from "@/hooks/use-current-user";
 import { useCommunityTheme } from "@/lib/theme";
 import { syncMobilePushSubscription } from "@/lib/mobile-push";
+import { checkHealth } from "@/lib/health";
 
 const NotFound = lazy(() => import("@/pages/not-found"));
 const Landing = lazy(() => import("@/pages/Landing"));
@@ -53,6 +55,7 @@ const MembershipPending = lazy(() => import("@/pages/MembershipPending"));
 const Notifications = lazy(() => import("@/pages/Notifications"));
 const Privacy = lazy(() => import("@/pages/Privacy"));
 const Terms = lazy(() => import("@/pages/Terms"));
+const Health = lazy(() => import("@/pages/Health"));
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -118,6 +121,45 @@ function LandingEntry() {
   return <Landing />;
 }
 
+function ConnectionHealthBanner() {
+  const [message, setMessage] = useState<string | null>(null);
+
+  useEffect(() => {
+    let cancelled = false;
+    checkHealth()
+      .then((health) => {
+        if (!cancelled && !health.ok) {
+          setMessage("Connection issue detected. Some live community data may not load until Supabase is reachable.");
+        }
+      })
+      .catch(() => {
+        if (!cancelled) {
+          setMessage("Connection issue detected. Some live community data may not load until Supabase is reachable.");
+        }
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  if (!message) return null;
+
+  return (
+    <div className="fixed inset-x-3 top-3 z-[120] mx-auto flex max-w-2xl items-start gap-3 rounded-2xl border border-amber-500/25 bg-amber-50 px-4 py-3 text-amber-950 shadow-lg dark:bg-amber-950 dark:text-amber-50">
+      <AlertTriangle className="mt-0.5 h-5 w-5 shrink-0" aria-hidden="true" />
+      <p className="min-w-0 flex-1 text-sm font-semibold">{message}</p>
+      <button
+        type="button"
+        onClick={() => setMessage(null)}
+        className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg hover:bg-black/10"
+        aria-label="Dismiss connection issue"
+      >
+        <X className="h-4 w-4" aria-hidden="true" />
+      </button>
+    </div>
+  );
+}
+
 function Router() {
   return (
     <Switch>
@@ -130,6 +172,7 @@ function Router() {
       <Route path="/pending-approval" component={PMembershipPending} />
       <Route path="/privacy" component={Privacy} />
       <Route path="/terms" component={Terms} />
+      <Route path="/health" component={Health} />
       <Route path="/" component={LandingEntry} />
 
       {/* Protected routes */}
@@ -192,6 +235,7 @@ function AppChrome() {
       <Suspense fallback={<MohallaLoadingScreen />}>
         <Router />
       </Suspense>
+      <ConnectionHealthBanner />
       {isPublicAuth && <InstallAppButton variant="floating" />}
       {!isPublicAuth && !isLanding && !isPlatformArea && (
         <>

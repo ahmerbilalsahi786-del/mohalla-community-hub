@@ -458,7 +458,15 @@ export default function ProfilePage() {
                   </div>
                 ) : listings.map(l => (
                   <div key={l.id} className="rounded-2xl border border-border bg-card overflow-hidden hover:shadow-sm transition-shadow">
-                    {l.imageUrl && <img src={l.imageUrl} alt={l.title} loading="lazy" decoding="async" className="h-32 w-full object-cover" />}
+                    {l.imageUrl && (
+                      <img
+                        src={l.imageUrl}
+                        alt={l.title}
+                        loading="lazy"
+                        decoding="async"
+                        className="h-32 w-full bg-muted/40 object-contain"
+                      />
+                    )}
                     <div className="p-3">
                       <div className="flex items-start justify-between gap-1">
                         <h4 className="font-semibold text-foreground text-sm line-clamp-1">{l.title}</h4>

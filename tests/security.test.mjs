@@ -20,10 +20,14 @@ test("Vercel sends baseline security headers", async () => {
 });
 
 test("browser Supabase config rejects secret keys and has no hardcoded project fallback", async () => {
-  for (const path of ["vite.config.ts", "src/integrations/supabase/client.ts", "src/lib/supabase.ts"]) {
+  for (const path of ["vite.config.ts", "src/lib/supabase-config.ts"]) {
     const source = await read(path);
     assert.match(source, /sb_secret_/);
     assert.doesNotMatch(source, /DEFAULT_SUPABASE_(URL|PUBLISHABLE_KEY)/);
+  }
+  for (const path of ["src/integrations/supabase/client.ts", "src/lib/supabase.ts"]) {
+    const source = await read(path);
+    assert.match(source, /resolveSupabaseBrowserConfig/);
   }
   const productionEnv = await read(".env.production");
   assert.match(productionEnv, /VITE_SUPABASE_URL=https:\/\/ytlzepxlwpzeirccwsov\.supabase\.co/);

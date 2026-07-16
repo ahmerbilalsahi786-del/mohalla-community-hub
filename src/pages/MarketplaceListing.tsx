@@ -226,7 +226,7 @@ export default function MarketplaceListing({ params }: Props) {
                       <img
                         src={images[activeImg]}
                         alt={listing.title}
-                        className="w-full h-full object-cover"
+                        className="h-full w-full bg-muted/40 object-contain"
                       />
                       {images.length > 1 && (
                         <>
@@ -282,7 +282,13 @@ export default function MarketplaceListing({ params }: Props) {
                           i === activeImg ? 'border-primary' : 'border-border hover:border-primary/50'
                         )}
                       >
-                        <img src={url} alt="" loading="lazy" decoding="async" className="h-full w-full object-cover" />
+                        <img
+                          src={url}
+                          alt={`${listing.title} photo ${i + 1}`}
+                          loading="lazy"
+                          decoding="async"
+                          className="h-full w-full bg-muted/40 object-contain"
+                        />
                       </button>
                     ))}
                   </div>

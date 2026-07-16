@@ -201,10 +201,10 @@ function AlertCard({ alert, onResolve }: { alert: AlertData; onResolve: (id: num
             {alert.imageUrl && (
               <img
                 src={alert.imageUrl}
-                alt=""
+                alt={alert.title}
                 loading="lazy"
                 decoding="async"
-                className="mt-3 h-48 w-full rounded-xl object-cover border border-border"
+                className="mt-3 h-48 w-full rounded-xl border border-border bg-muted/40 object-contain"
               />
             )}
 

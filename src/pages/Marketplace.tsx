@@ -137,7 +137,7 @@ function ListingCard({
               alt={listing.title}
               loading="lazy"
               decoding="async"
-              className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+              className="h-full w-full bg-muted/40 object-contain"
             />
           ) : (
             <div className="w-full h-full flex items-center justify-center">
@@ -492,7 +492,11 @@ function CreateListingModal({ onClose, initialMode = 'listing' }: { onClose: () 
               <div className="mt-2 flex flex-wrap gap-2">
                 {imageUrls.map((url, i) => (
                   <div key={i} className="relative group">
-                    <img src={url} alt="" className="h-16 w-16 rounded-lg object-cover border border-border" />
+                    <img
+                      src={url}
+                      alt={`Selected listing photo ${i + 1}`}
+                      className="h-20 w-20 rounded-lg border border-border bg-muted/40 object-contain"
+                    />
                     <button
                       onClick={() => setImageUrls(imageUrls.filter((_, j) => j !== i))}
                       className="absolute -right-1.5 -top-1.5 flex h-7 w-7 items-center justify-center rounded-full bg-destructive text-white sm:hidden sm:group-hover:flex"
