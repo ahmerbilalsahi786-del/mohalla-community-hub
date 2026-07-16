@@ -13,7 +13,6 @@ import { MemberCard } from '@/components/dashboard/member-card'
 import { SafetyWidget } from '@/components/dashboard/safety-widget'
 import { EmergencyServicesWidget } from '@/components/dashboard/emergency-services-widget'
 import { HealthScoreCard } from '@/components/dashboard/health-score-card'
-import { DashboardCardSkeleton } from '@/components/community/skeleton-states'
 import { canManageCommunity, useCurrentUser } from '@/hooks/use-current-user'
 import {
   useAdminGetStats,
@@ -282,9 +281,9 @@ export default function Dashboard() {
 
   return (
     <DashboardShell>
-      <div className="space-y-5">
-        <section className="relative overflow-hidden rounded-xl border portal-soft-rule bg-card p-5 shadow-sm sm:p-6">
-          <div className="grid gap-6 xl:grid-cols-[minmax(0,1.2fr)_minmax(320px,0.8fr)] xl:items-stretch">
+      <div className="grid items-start gap-5 xl:grid-cols-[minmax(0,1fr)_360px] 2xl:grid-cols-[minmax(0,1fr)_390px]">
+        <div className="contents xl:block xl:space-y-5">
+          <section className="order-1 relative overflow-hidden rounded-xl border portal-soft-rule bg-card p-5 shadow-sm sm:p-6">
             <div className="space-y-5">
               <div className="portal-chip w-fit border-primary/20 bg-primary/10 text-primary">
                 <Sparkles className="h-3.5 w-3.5" />
@@ -310,23 +309,9 @@ export default function Dashboard() {
 
               <TrendingTopicsSlideshow topics={trendingTopics} />
             </div>
+          </section>
 
-            <div className="xl:self-start">
-              <QuickActions />
-            </div>
-          </div>
-        </section>
-
-        <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-          {statsLoading
-            ? [1, 2, 3, 4].map((item) => <DashboardCardSkeleton key={item} />)
-            : statCards.map((stat) => (
-                <StatCard key={stat.title} {...stat} />
-              ))}
-        </div>
-
-        <div className="grid items-start gap-5 xl:grid-cols-[minmax(0,1fr)_360px] 2xl:grid-cols-[minmax(0,1fr)_390px]">
-          <div className="min-w-0 space-y-5">
+          <div className="order-3 min-w-0 space-y-5">
             <CommunityChart />
 
             <section className="rounded-xl border portal-soft-rule bg-card p-5 shadow-sm sm:p-6">
@@ -372,9 +357,31 @@ export default function Dashboard() {
               </section>
             )}
           </div>
+        </div>
 
-          <aside className="min-w-0 space-y-5 xl:sticky xl:top-24">
+        <aside className="contents min-w-0 xl:sticky xl:top-24 xl:block">
+          <div className="order-2 space-y-5">
+            <QuickActions />
             <EmergencyServicesWidget />
+            <div>
+              <SafetyWidget />
+            </div>
+
+            <section aria-labelledby="community-overview-title">
+              <h3 id="community-overview-title" className="sr-only">Community overview</h3>
+              <div className="grid grid-cols-2 gap-3">
+                {statsLoading
+                  ? [1, 2, 3, 4].map((item) => (
+                      <div key={item} className="h-[118px] animate-pulse rounded-xl border portal-soft-rule bg-muted/60" />
+                    ))
+                  : statCards.map((stat) => (
+                      <StatCard key={stat.title} {...stat} compact />
+                    ))}
+              </div>
+            </section>
+          </div>
+
+          <div className="order-4 space-y-5 xl:mt-5">
             <HealthScoreCard
               postsThisMonth={stats.postsThisMonth}
               activeSafetyAlerts={activeSafetyAlerts}
@@ -382,11 +389,10 @@ export default function Dashboard() {
               upcomingEvents={upcomingEvents.length}
               verifiedResidents={stats.totalMembers}
             />
-            <SafetyWidget />
             <ActivityCard activities={activities} />
             <MemberCard members={activeMembers} />
-          </aside>
-        </div>
+          </div>
+        </aside>
       </div>
     </DashboardShell>
   )
