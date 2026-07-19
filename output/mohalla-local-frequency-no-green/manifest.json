@@ -1,0 +1,51 @@
+{
+  "campaign": "Mohalla Local Frequency",
+  "asset": "Your Neighborhood Has a Frequency",
+  "platform": "Instagram Reel / Story",
+  "canvas": {
+    "width": 1080,
+    "height": 1920,
+    "unit": "px"
+  },
+  "single_minded_proposition": "Mohalla turns local signals into what matters.",
+  "palette": {
+    "midnight_indigo": "#121126",
+    "deep_plum": "#24203D",
+    "electric_coral": "#FF5D73",
+    "saffron": "#FFB84D",
+    "electric_blue": "#44C7F4",
+    "lavender": "#A78BFA",
+    "warm_peach": "#FFD6B3"
+  },
+  "excluded_palette": [
+    "green",
+    "white"
+  ],
+  "files": {
+    "editable_source": "index.html",
+    "preview": "mohalla-local-frequency.png"
+  },
+  "canva": {
+    "design_id": "DAHPloILj40",
+    "page_count": 1,
+    "edit_url": "https://www.canva.com/d/FINGDNlXMwk2knA",
+    "view_url": "https://www.canva.com/d/PlnUjxmXwXMROWr"
+  },
+  "creative_principles": [
+    "original radio-frequency visual metaphor",
+    "early brand identification",
+    "high-energy editorial typography",
+    "four color-coded product signals",
+    "protected Reel safe zones",
+    "single decisive call to action"
+  ],
+  "design_constraints": [
+    "flat vector design",
+    "no gradients",
+    "no shadows",
+    "no 3D effects",
+    "no green",
+    "no white",
+    "mobile-readable copy"
+  ]
+}

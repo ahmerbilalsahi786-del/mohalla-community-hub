@@ -1,0 +1,598 @@
+{"kind":"deck","id":"pr/jaq89g","name":"Deck"}
+{"kind":"layout","layoutId":"6df3239a-cd2f-4530-a8de-ec1422c0022f","name":"Master","type":"master"}
+{"kind":"layout","layoutId":"d0feb382-0ba0-4c8c-8894-f1761ed4a8d6","name":"Title Slide","type":"title"}
+{"kind":"slide","id":"sl/cf3xyn","slide":1,"title":"mohalla","textShapes":5}
+{"kind":"shape","id":"sh/ux43ulsn","slide":1,"bbox":[0,0,520,720]}
+{"kind":"shape","id":"sh/vyx4nq98","slide":1,"bbox":[78.3,70.6,15.75,15.75]}
+{"kind":"shape","id":"sh/8vmlsvax","slide":1,"bbox":[94.05,70.6,15.75,15.75]}
+{"kind":"shape","id":"sh/9wvml0r2","slide":1,"bbox":[78.3,70.6,31.5,0]}
+{"kind":"shape","id":"sh/m943qlsr","slide":1,"bbox":[72,58,12.6,12.6]}
+{"kind":"shape","id":"sh/7ud4jq9c","slide":1,"bbox":[87.75,73.75,12.6,12.6]}
+{"kind":"shape","id":"sh/k7mlobal","slide":1,"bbox":[103.5,58,12.6,12.6]}
+{"kind":"textbox","id":"sh/l8vmhgr6","slide":1,"text":"mohalla","textPreview":"mohalla","textChars":7,"textLines":1,"bbox":[126,53,240,38]}
+{"kind":"shape","id":"sh/xcrutk76","slide":1,"bbox":[72,126,338,34]}
+{"kind":"textbox","id":"sh/cbydkf6l","slide":1,"text":"INVESTOR + CUSTOMER DECK  •  JULY 2026","textPreview":"INVESTOR + CUSTOMER DECK  •  JULY 2026","textChars":38,"textLines":1,"bbox":[84,130,314,26]}
+{"kind":"textbox","id":"sh/bapcrup0","slide":1,"text":"Pakistan’s verified\nneighborhood\noperating system.","textPreview":"Pakistan’s verified | neighborhood | operating system.","textChars":50,"textLines":3,"bbox":[72,205,400,255]}
+{"kind":"shape","id":"sh/a9gvipof","slide":1,"bbox":[72,493,94,7]}
+{"kind":"textbox","id":"sh/p87upk7u","slide":1,"text":"Private communities. Public value.","textPreview":"Private communities. Public value.","textChars":34,"textLines":1,"bbox":[72,526,370,42]}
+{"kind":"textbox","id":"sh/o7ydgfq9","slide":1,"text":"Illustrative planning scenario • no current traction or financial claims","textPreview":"Illustrative planning scenario • no current traction or financial claims","textChars":72,"textLines":1,"bbox":[72,656,430,30]}
+{"kind":"image","id":"im/0naxgv69","slide":1,"name":"","alt":"A Pakistani neighborhood at blue hour","bbox":[0,0,1280,720]}
+{"kind":"notes","id":"nt/cf3xyn","slide":1,"text":"Open with the category claim: Mohalla is not another chat group or a back-office society tool. It is a verified digital layer for everyday neighborhood life. The presentation intentionally separates implemented product capabilities from planning assumptions.\n\nSources:\n• Mohalla product audit, July 2026; supplied City Feed and Events screenshots."}
+{"kind":"slide","id":"sl/su368l","slide":2,"title":"THE THESIS","textShapes":14}
+{"kind":"textbox","id":"sh/9wfe1cfa","slide":2,"text":"THE THESIS","textPreview":"THE THESIS","textChars":10,"textLines":1,"bbox":[72,42,360,24]}
+{"kind":"textbox","id":"sh/mtovqxgj","slide":2,"text":"Pakistan is digitally connected.\nNeighborhoods are not.","textPreview":"Pakistan is digitally connected. | Neighborhoods are not.","textChars":55,"textLines":2,"bbox":[72,106,1136,150]}
+{"kind":"textbox","id":"sh/nuxwz2x4","slide":2,"text":"The infrastructure exists. The trusted local operating layer does not.","textPreview":"The infrastructure exists. The trusted local operating layer does not.","textChars":70,"textLines":1,"bbox":[74,282,960,44]}
+{"kind":"textbox","id":"sh/wz6xw7yl","slide":2,"text":"147.2m","textPreview":"147.2m","textChars":6,"textLines":1,"bbox":[72,380,330,82]}
+{"kind":"textbox","id":"sh/x0fe5cf6","slide":2,"text":"broadband subscribers","textPreview":"broadband subscribers","textChars":21,"textLines":1,"bbox":[72,475,320,40]}
+{"kind":"textbox","id":"sh/axofuhgv","slide":2,"text":"March 2025","textPreview":"March 2025","textChars":10,"textLines":1,"bbox":[72,526,280,26]}
+{"kind":"shape","id":"sh/vyxw32xg","slide":2,"bbox":[428,390,0,175]}
+{"kind":"textbox","id":"sh/k3qx0ryx","slide":2,"text":"93.8m","textPreview":"93.8m","textChars":5,"textLines":1,"bbox":[454,380,330,82]}
+{"kind":"textbox","id":"sh/54ze9wfi","slide":2,"text":"urban residents","textPreview":"urban residents","textChars":15,"textLines":1,"bbox":[454,475,320,40]}
+{"kind":"textbox","id":"sh/90redkzu","slide":2,"text":"2023 census","textPreview":"2023 census","textChars":11,"textLines":1,"bbox":[454,526,280,26]}
+{"kind":"shape","id":"sh/ozidkfy9","slide":2,"bbox":[810,390,0,175]}
+{"kind":"textbox","id":"sh/ny9wbah4","slide":2,"text":"15.0m","textPreview":"15.0m","textChars":5,"textLines":1,"bbox":[836,380,330,82]}
+{"kind":"textbox","id":"sh/mx0vi5gj","slide":2,"text":"urban households","textPreview":"urban households","textChars":16,"textLines":1,"bbox":[836,475,320,40]}
+{"kind":"textbox","id":"sh/xobehkz6","slide":2,"text":"2023 census","textPreview":"2023 census","textChars":11,"textLines":1,"bbox":[836,526,280,26]}
+{"kind":"textbox","id":"sh/wn2xofyl","slide":2,"text":"Sources: Pakistan Economic Survey 2024–25; Pakistan Bureau of Statistics, Census 2023.","textPreview":"Sources: Pakistan Economic Survey 2024–25; Pakistan Bureau of Statistics, Census 2023.","textChars":86,"textLines":1,"bbox":[72,683,1030,18]}
+{"kind":"textbox","id":"sh/bmtwfah0","slide":2,"text":"02","textPreview":"02","textChars":2,"textLines":1,"bbox":[1166,681,42,20]}
+{"kind":"notes","id":"nt/su368l","slide":2,"text":"The timing thesis is simple: smartphones and connectivity are already mainstream, but neighborhood coordination still lives across unverified chat groups, paper notices, personal contacts, and disconnected tools.\n\nSources:\n• https://finance.gov.pk/survey/chapter_25/15_Information_Technology.pdf\n• https://www.pbs.gov.pk/sites/default/files/population/2023/Pakistan.pdf"}
+{"kind":"slide","id":"sl/95t9pm","slide":3,"title":"THE DAILY REALITY","textShapes":11}
+{"kind":"shape","id":"sh/nudcfids","slide":3,"bbox":[0,0,528,720]}
+{"kind":"textbox","id":"sh/mt4v6dw7","slide":3,"text":"THE DAILY REALITY","textPreview":"THE DAILY REALITY","textChars":17,"textLines":1,"bbox":[72,44,360,24]}
+{"kind":"textbox","id":"sh/1svud8vm","slide":3,"text":"A gated society is\nphysically organized—\nand digitally chaotic.","textPreview":"A gated society is | physically organized— | and digitally chaotic.","textChars":63,"textLines":3,"bbox":[72,93,392,178]}
+{"kind":"textbox","id":"sh/0rmd43eh","slide":3,"text":"URGENT","textPreview":"URGENT","textChars":6,"textLines":1,"bbox":[72,308,390,22]}
+{"kind":"textbox","id":"sh/zqdcbydw","slide":3,"text":"Safety alerts vanish inside chat threads.","textPreview":"Safety alerts vanish inside chat threads.","textChars":41,"textLines":1,"bbox":[72,336,390,62]}
+{"kind":"textbox","id":"sh/ep4v2twb","slide":3,"text":"TRUST","textPreview":"TRUST","textChars":5,"textLines":1,"bbox":[72,386,390,22]}
+{"kind":"textbox","id":"sh/5ozepcv6","slide":3,"text":"Outsiders, tenants and stale contacts blur access.","textPreview":"Outsiders, tenants and stale contacts blur access.","textChars":50,"textLines":1,"bbox":[72,414,390,62]}
+{"kind":"textbox","id":"sh/knqdg7ul","slide":3,"text":"COMMERCE","textPreview":"COMMERCE","textChars":8,"textLines":1,"bbox":[72,464,390,22]}
+{"kind":"textbox","id":"sh/ehwvixsn","slide":3,"text":"Reliable local services depend on word of mouth.","textPreview":"Reliable local services depend on word of mouth.","textChars":48,"textLines":1,"bbox":[72,492,390,62]}
+{"kind":"textbox","id":"sh/fi5wb298","slide":3,"text":"GOVERNANCE","textPreview":"GOVERNANCE","textChars":10,"textLines":1,"bbox":[72,542,390,22]}
+{"kind":"textbox","id":"sh/gjedk7at","slide":3,"text":"Notices, polls and complaints live in separate places.","textPreview":"Notices, polls and complaints live in separate places.","textChars":54,"textLines":1,"bbox":[72,570,390,62]}
+{"kind":"shape","id":"sh/1knedcre","slide":3,"bbox":[72,628,405,34]}
+{"kind":"textbox","id":"sh/6tcvedsr","slide":3,"text":"ONE NEIGHBORHOOD  •  FIVE DISCONNECTED SYSTEMS","textPreview":"ONE NEIGHBORHOOD  •  FIVE DISCONNECTED SYSTEMS","textChars":46,"textLines":1,"bbox":[84,632,381,26]}
+{"kind":"image","id":"im/9gf2hkvi","slide":3,"name":"","alt":"Resident checking a phone beside a society noticeboard and gate","bbox":[0,0,1280,720]}
+{"kind":"notes","id":"nt/95t9pm","slide":3,"text":"Frame the pain as coordination cost, not simply inconvenience. Fragmented communication slows response, weakens accountability, and reduces participation. Research on Lahore communities links social interaction and resident participation with stronger community cohesion.\n\nSources:\n• https://journals.umt.edu.pk/index.php/JAABE/article/view/4426"}
+{"kind":"slide","id":"sl/ubsn4j","slide":4,"title":"THE COMPARISON","textShapes":29}
+{"kind":"textbox","id":"sh/q547q5w3","slide":4,"text":"THE COMPARISON","textPreview":"THE COMPARISON","textChars":14,"textLines":1,"bbox":[72,42,360,24]}
+{"kind":"textbox","id":"sh/d8v6lkfu","slide":4,"text":"WhatsApp is a channel. Mohalla is infrastructure.","textPreview":"WhatsApp is a channel. Mohalla is infrastructure.","textChars":49,"textLines":1,"bbox":[72,78,1120,68]}
+{"kind":"shape","id":"sh/s7mpsfe9","slide":4,"bbox":[72,181,520,397]}
+{"kind":"shape","id":"sh/32dofaxs","slide":4,"bbox":[620,181,588,397]}
+{"kind":"shape","id":"sh/i1k7m5w7","slide":4,"bbox":[100,207,142,34]}
+{"kind":"textbox","id":"sh/54v6h0fi","slide":4,"text":"STATUS QUO","textPreview":"STATUS QUO","textChars":10,"textLines":1,"bbox":[112,211,118,26]}
+{"kind":"textbox","id":"sh/43mpofed","slide":4,"text":"WhatsApp group","textPreview":"WhatsApp group","textChars":14,"textLines":1,"bbox":[100,255,420,44]}
+{"kind":"shape","id":"sh/vetobqxg","slide":4,"bbox":[104,327,22,22]}
+{"kind":"textbox","id":"sh/udk7ilwv","slide":4,"text":"×","textPreview":"×","textChars":1,"textLines":1,"bbox":[104,326,22,22]}
+{"kind":"textbox","id":"sh/8fupovq5","slide":4,"text":"Anyone can join","textPreview":"Anyone can join","textChars":15,"textLines":1,"bbox":[141,323,400,30]}
+{"kind":"shape","id":"sh/9g36h07q","slide":4,"bbox":[104,373,22,22]}
+{"kind":"textbox","id":"sh/mdc7m58z","slide":4,"text":"×","textPreview":"×","textChars":1,"textLines":1,"bbox":[104,372,22,22]}
+{"kind":"textbox","id":"sh/nelofqpk","slide":4,"text":"Messages get buried","textPreview":"Messages get buried","textChars":19,"textLines":1,"bbox":[141,369,400,30]}
+{"kind":"shape","id":"sh/0bupkvqt","slide":4,"bbox":[104,419,22,22]}
+{"kind":"textbox","id":"sh/lc36d07e","slide":4,"text":"×","textPreview":"×","textChars":1,"textLines":1,"bbox":[104,418,22,22]}
+{"kind":"textbox","id":"sh/y9snil83","slide":4,"text":"No emergency workflow","textPreview":"No emergency workflow","textChars":21,"textLines":1,"bbox":[141,415,400,30]}
+{"kind":"shape","id":"sh/za1obqp8","slide":4,"bbox":[104,465,22,22]}
+{"kind":"textbox","id":"sh/k7epwfqd","slide":4,"text":"×","textPreview":"×","textChars":1,"textLines":1,"bbox":[104,464,22,22]}
+{"kind":"textbox","id":"sh/58n6pk7i","slide":4,"text":"No structured marketplace","textPreview":"No structured marketplace","textChars":25,"textLines":1,"bbox":[141,461,400,30]}
+{"kind":"shape","id":"sh/toj69kz2","slide":4,"bbox":[104,511,22,22]}
+{"kind":"textbox","id":"sh/s3apgfyh","slide":4,"text":"×","textPreview":"×","textChars":1,"textLines":1,"bbox":[104,510,22,22]}
+{"kind":"textbox","id":"sh/r21o7ahw","slide":4,"text":"No community-wide safety alerts","textPreview":"No community-wide safety alerts","textChars":31,"textLines":1,"bbox":[141,507,400,30]}
+{"kind":"shape","id":"sh/61s7e5gb","slide":4,"bbox":[650,207,208,34]}
+{"kind":"textbox","id":"sh/50j65kzq","slide":4,"text":"COORDINATED OUTCOMES","textPreview":"COORDINATED OUTCOMES","textChars":20,"textLines":1,"bbox":[662,211,184,26]}
+{"kind":"textbox","id":"sh/4za5cfi5","slide":4,"text":"Mohalla","textPreview":"Mohalla","textChars":7,"textLines":1,"bbox":[650,255,420,44]}
+{"kind":"shape","id":"sh/jy1o3ahk","slide":4,"bbox":[654,327,22,22]}
+{"kind":"textbox","id":"sh/ix8na50f","slide":4,"text":"✓","textPreview":"✓","textChars":1,"textLines":1,"bbox":[654,326,22,22]}
+{"kind":"textbox","id":"sh/hwz610zu","slide":4,"text":"Verified residents only","textPreview":"Verified residents only","textChars":23,"textLines":1,"bbox":[691,323,455,30]}
+{"kind":"shape","id":"sh/wvq58vi9","slide":4,"bbox":[654,373,22,22]}
+{"kind":"textbox","id":"sh/m1o321g7","slide":4,"text":"✓","textPreview":"✓","textChars":1,"textLines":1,"bbox":[654,372,22,22]}
+{"kind":"textbox","id":"sh/72x4b6xc","slide":4,"text":"Organized by category","textPreview":"Organized by category","textChars":21,"textLines":1,"bbox":[691,369,455,30]}
+{"kind":"shape","id":"sh/836l4bex","slide":4,"bbox":[654,419,22,22]}
+{"kind":"textbox","id":"sh/94fmdgfi","slide":4,"text":"✓","textPreview":"✓","textChars":1,"textLines":1,"bbox":[654,418,22,22]}
+{"kind":"textbox","id":"sh/yd43yhgv","slide":4,"text":"One-tap emergency access","textPreview":"One-tap emergency access","textChars":24,"textLines":1,"bbox":[691,415,455,30]}
+{"kind":"shape","id":"sh/zex47mxg","slide":4,"bbox":[654,465,22,22]}
+{"kind":"textbox","id":"sh/kz6l0ry1","slide":4,"text":"✓","textPreview":"✓","textChars":1,"textLines":1,"bbox":[654,464,22,22]}
+{"kind":"textbox","id":"sh/l0fm9wfm","slide":4,"text":"Buy and sell locally","textPreview":"Buy and sell locally","textChars":20,"textLines":1,"bbox":[691,461,455,30]}
+{"kind":"shape","id":"sh/a943uhgz","slide":4,"bbox":[654,511,22,22]}
+{"kind":"textbox","id":"sh/badk3mxk","slide":4,"text":"✓","textPreview":"✓","textChars":1,"textLines":1,"bbox":[654,510,22,22]}
+{"kind":"textbox","id":"sh/3mx0fi10","slide":4,"text":"Safety alerts delivered to all","textPreview":"Safety alerts delivered to all","textChars":30,"textLines":1,"bbox":[691,507,455,30]}
+{"kind":"shape","id":"sh/21oz6d0f","slide":4,"bbox":[72,607,1136,46]}
+{"kind":"textbox","id":"sh/pofihsj6","slide":4,"text":"Chat optimizes for conversation. Mohalla optimizes for coordinated outcomes.","textPreview":"Chat optimizes for conversation. Mohalla optimizes for coordinated outcomes.","textChars":76,"textLines":1,"bbox":[96,617,1088,28]}
+{"kind":"textbox","id":"sh/on6h8nil","slide":4,"text":"Comparison reflects product architecture, not a claim about WhatsApp’s broader capabilities.","textPreview":"Comparison reflects product architecture, not a claim about WhatsApp’s broader capabilities.","textChars":92,"textLines":1,"bbox":[72,683,1030,18]}
+{"kind":"textbox","id":"sh/fyd0bi14","slide":4,"text":"04","textPreview":"04","textChars":2,"textLines":1,"bbox":[1166,681,42,20]}
+{"kind":"notes","id":"nt/ubsn4j","slide":4,"text":"Use this slide to clarify the category. WhatsApp remains useful, but it lacks verified community membership, role-based workflows, discoverable categories, local commerce structure, and purpose-built safety distribution."}
+{"kind":"slide","id":"sl/4qvx7a","slide":5,"title":"THE SOLUTION","textShapes":10}
+{"kind":"textbox","id":"sh/l8vehszq","slide":5,"text":"THE SOLUTION","textPreview":"THE SOLUTION","textChars":12,"textLines":1,"bbox":[72,42,360,24]}
+{"kind":"textbox","id":"sh/y5kfmdgf","slide":5,"text":"One verified layer\nfor the entire\nneighborhood.","textPreview":"One verified layer | for the entire | neighborhood.","textChars":47,"textLines":3,"bbox":[72,104,390,182]}
+{"kind":"shape","id":"sh/z6dwfihk","slide":5,"bbox":[72,337,10,10]}
+{"kind":"textbox","id":"sh/cj2xk3y9","slide":5,"text":"Relevant local updates—not message overload.","textPreview":"Relevant local updates—not message overload.","textChars":44,"textLines":1,"bbox":[94,330,348,58]}
+{"kind":"shape","id":"sh/d4bed8zu","slide":5,"bbox":[72,409,10,10]}
+{"kind":"textbox","id":"sh/qhkfitg3","slide":5,"text":"Safety, events, commerce and conversations in context.","textPreview":"Safety, events, commerce and conversations in context.","textChars":54,"textLines":1,"bbox":[94,402,348,68]}
+{"kind":"shape","id":"sh/bitwbyho","slide":5,"bbox":[72,493,10,10]}
+{"kind":"textbox","id":"sh/wz6xw7yd","slide":5,"text":"Admins keep control; residents gain everyday utility.","textPreview":"Admins keep control; residents gain everyday utility.","textChars":53,"textLines":1,"bbox":[94,486,348,58]}
+{"kind":"shape","id":"sh/x0fypczy","slide":5,"bbox":[72,596,170,34]}
+{"kind":"textbox","id":"sh/psfmlovi","slide":5,"text":"WORKING PRODUCT","textPreview":"WORKING PRODUCT","textChars":15,"textLines":1,"bbox":[84,600,146,26]}
+{"kind":"shape","id":"sh/or6lcjux","slide":5,"bbox":[486,54,330,610]}
+{"kind":"shape","id":"sh/3qx4jedc","slide":5,"bbox":[830,92,378,532]}
+{"kind":"shape","id":"sh/gn6l8ju1","slide":5,"bbox":[592,628,120,28]}
+{"kind":"textbox","id":"sh/fmxkfedg","slide":5,"text":"EVENTS","textPreview":"EVENTS","textChars":6,"textLines":1,"bbox":[604,632,96,20]}
+{"kind":"shape","id":"sh/e14369cv","slide":5,"bbox":[944,589,140,28]}
+{"kind":"textbox","id":"sh/lkzmt8bq","slide":5,"text":"CITY FEED","textPreview":"CITY FEED","textChars":9,"textLines":1,"bbox":[956,593,116,20]}
+{"kind":"textbox","id":"sh/0jqlk3u5","slide":5,"text":"Screens from the current Mohalla product: Events and City Feed.","textPreview":"Screens from the current Mohalla product: Events and City Feed.","textChars":63,"textLines":1,"bbox":[72,683,1030,18]}
+{"kind":"textbox","id":"sh/k3y5gr2h","slide":5,"text":"05","textPreview":"05","textChars":2,"textLines":1,"bbox":[1166,681,42,20]}
+{"kind":"image","id":"im/1wn658jq","slide":5,"name":"","alt":"Mohalla Events screen","bbox":[504,68,294,582]}
+{"kind":"image","id":"im/2xwnyd0b","slide":5,"name":"","alt":"Mohalla City Feed screen","bbox":[850,106,338,504]}
+{"kind":"notes","id":"nt/4qvx7a","slide":5,"text":"Demonstrate that Mohalla is already a tangible product, not only a concept. The two screens show structured local events and a city feed inside the same resident experience.\n\nSources:\n• Supplied Mohalla product screenshots; application audit, July 2026."}
+{"kind":"slide","id":"sl/5i6ype","slide":6,"title":"THE PRODUCT SYSTEM","textShapes":23}
+{"kind":"textbox","id":"sh/2pszih0n","slide":6,"text":"THE PRODUCT SYSTEM","textPreview":"THE PRODUCT SYSTEM","textChars":18,"textLines":1,"bbox":[72,42,360,24]}
+{"kind":"textbox","id":"sh/psjidwze","slide":6,"text":"Six everyday loops. One trusted identity.","textPreview":"Six everyday loops. One trusted identity.","textChars":41,"textLines":1,"bbox":[72,78,1136,96]}
+{"kind":"shape","id":"sh/4ra1krit","slide":6,"bbox":[72,184,348,166]}
+{"kind":"shape","id":"sh/ru10fmh4","slide":6,"bbox":[72,184,348,8]}
+{"kind":"textbox","id":"sh/qtsjm10z","slide":6,"text":"01","textPreview":"01","textChars":2,"textLines":1,"bbox":[96,211,44,32]}
+{"kind":"textbox","id":"sh/dw3ihwza","slide":6,"text":"Feed","textPreview":"Feed","textChars":4,"textLines":1,"bbox":[150,209,232,40]}
+{"kind":"textbox","id":"sh/cva1orip","slide":6,"text":"Relevant local updates and city-level discovery.","textPreview":"Relevant local updates and city-level discovery.","textChars":48,"textLines":1,"bbox":[96,266,300,58]}
+{"kind":"shape","id":"sh/7yh0j2h0","slide":6,"bbox":[448,184,348,166]}
+{"kind":"shape","id":"sh/6x8zax0f","slide":6,"bbox":[448,184,348,8]}
+{"kind":"textbox","id":"sh/4buhkje1","slide":6,"text":"02","textPreview":"02","textChars":2,"textLines":1,"bbox":[472,211,44,32]}
+{"kind":"textbox","id":"sh/5c3itovm","slide":6,"text":"Safety","textPreview":"Safety","textChars":6,"textLines":1,"bbox":[526,209,232,40]}
+{"kind":"textbox","id":"sh/i9czi9wv","slide":6,"text":"Alerts, emergency contacts and push delivery.","textPreview":"Alerts, emergency contacts and push delivery.","textChars":45,"textLines":1,"bbox":[472,266,300,58]}
+{"kind":"shape","id":"sh/jal0redg","slide":6,"bbox":[824,184,348,166]}
+{"kind":"shape","id":"sh/sfuho3ed","slide":6,"bbox":[824,184,348,8]}
+{"kind":"textbox","id":"sh/tg3ix8vy","slide":6,"text":"03","textPreview":"03","textChars":2,"textLines":1,"bbox":[848,211,44,32]}
+{"kind":"textbox","id":"sh/6dczmtw7","slide":6,"text":"Participate","textPreview":"Participate","textChars":11,"textLines":1,"bbox":[902,209,232,40]}
+{"kind":"textbox","id":"sh/rel0vyds","slide":6,"text":"Events, polls, announcements and volunteering.","textPreview":"Events, polls, announcements and volunteering.","textChars":46,"textLines":1,"bbox":[848,266,300,58]}
+{"kind":"shape","id":"sh/8jahczet","slide":6,"bbox":[72,378,348,166]}
+{"kind":"shape","id":"sh/9kjyl4ve","slide":6,"bbox":[72,378,348,8]}
+{"kind":"textbox","id":"sh/9gbep07i","slide":6,"text":"04","textPreview":"04","textChars":2,"textLines":1,"bbox":[96,405,44,32]}
+{"kind":"textbox","id":"sh/of2xgv6x","slide":6,"text":"Trade","textPreview":"Trade","textChars":5,"textLines":1,"bbox":[150,403,232,40]}
+{"kind":"textbox","id":"sh/netwnqpc","slide":6,"text":"Local marketplace, shops and service discovery.","textPreview":"Local marketplace, shops and service discovery.","textChars":47,"textLines":1,"bbox":[96,460,300,58]}
+{"kind":"shape","id":"sh/md0felor","slide":6,"bbox":[448,378,348,166]}
+{"kind":"shape","id":"sh/x4byt07e","slide":6,"bbox":[448,378,348,8]}
+{"kind":"textbox","id":"sh/w32xkv6t","slide":6,"text":"05","textPreview":"05","textChars":2,"textLines":1,"bbox":[472,405,44,32]}
+{"kind":"textbox","id":"sh/b2twrqp8","slide":6,"text":"Connect","textPreview":"Connect","textChars":7,"textLines":1,"bbox":[526,403,232,40]}
+{"kind":"textbox","id":"sh/ahkfi5on","slide":6,"text":"Private messages and contextual notifications.","textPreview":"Private messages and contextual notifications.","textChars":46,"textLines":1,"bbox":[472,460,300,58]}
+{"kind":"shape","id":"sh/l8vyxk7a","slide":6,"bbox":[824,378,348,166]}
+{"kind":"shape","id":"sh/k7mxof65","slide":6,"bbox":[824,378,348,8]}
+{"kind":"textbox","id":"sh/i1w32d0b","slide":6,"text":"06","textPreview":"06","textChars":2,"textLines":1,"bbox":[848,405,44,32]}
+{"kind":"textbox","id":"sh/j25kvi1w","slide":6,"text":"Operate","textPreview":"Operate","textChars":7,"textLines":1,"bbox":[902,403,232,40]}
+{"kind":"textbox","id":"sh/43el4ni1","slide":6,"text":"Approvals, roles, moderation and admin controls.","textPreview":"Approvals, roles, moderation and admin controls.","textChars":48,"textLines":1,"bbox":[848,460,300,58]}
+{"kind":"shape","id":"sh/54nmxsjm","slide":6,"bbox":[224,600,832,34]}
+{"kind":"textbox","id":"sh/65w36x07","slide":6,"text":"DAILY UTILITY FOR RESIDENTS  •  OPERATIONAL CONTROL FOR ADMINISTRATORS","textPreview":"DAILY UTILITY FOR RESIDENTS  •  OPERATIONAL CONTROL FOR ADMINISTRATORS","textChars":70,"textLines":1,"bbox":[236,604,808,26]}
+{"kind":"textbox","id":"sh/r654z21s","slide":6,"text":"Source: current Mohalla application routes and product audit, July 2026.","textPreview":"Source: current Mohalla application routes and product audit, July 2026.","textChars":72,"textLines":1,"bbox":[72,683,1030,18]}
+{"kind":"textbox","id":"sh/s7el8nid","slide":6,"text":"06","textPreview":"06","textChars":2,"textLines":1,"bbox":[1166,681,42,20]}
+{"kind":"notes","id":"nt/5i6ype","slide":6,"text":"Position the breadth as an integrated system of resident habits rather than a feature checklist. Every loop runs on the same verified identity and community context."}
+{"kind":"slide","id":"sl/yr36in","slide":7,"title":"TRUST ARCHITECTURE","textShapes":20}
+{"kind":"textbox","id":"sh/dcjedcna","slide":7,"text":"TRUST ARCHITECTURE","textPreview":"TRUST ARCHITECTURE","textChars":18,"textLines":1,"bbox":[72,42,360,24]}
+{"kind":"textbox","id":"sh/q98v2x4z","slide":7,"text":"Trust is not a badge.\nIt is the product\narchitecture.","textPreview":"Trust is not a badge. | It is the product | architecture.","textChars":53,"textLines":3,"bbox":[72,113,430,175]}
+{"kind":"textbox","id":"sh/ba1wb254","slide":7,"text":"The network becomes valuable because access, context and accountability are designed in.","textPreview":"The network becomes valuable because access, context and accountability are designed in.","textChars":88,"textLines":1,"bbox":[72,320,390,90]}
+{"kind":"shape","id":"sh/0zad87m1","slide":7,"bbox":[72,467,208,34]}
+{"kind":"textbox","id":"sh/l0je1cnm","slide":7,"text":"PRIVATE BY COMMUNITY","textPreview":"PRIVATE BY COMMUNITY","textChars":20,"textLines":1,"bbox":[84,471,184,26]}
+{"kind":"shape","id":"sh/ydsv6h4v","slide":7,"bbox":[292,467,150,34]}
+{"kind":"textbox","id":"sh/ze1wzm5g","slide":7,"text":"ROLE-BASED","textPreview":"ROLE-BASED","textChars":10,"textLines":1,"bbox":[304,471,126,26]}
+{"kind":"shape","id":"sh/83udcrmx","slide":7,"bbox":[72,514,132,34]}
+{"kind":"textbox","id":"sh/943e5wni","slide":7,"text":"AUDITABLE","textPreview":"AUDITABLE","textChars":9,"textLines":1,"bbox":[84,518,108,26]}
+{"kind":"shape","id":"sh/5wjehk3u","slide":7,"bbox":[565,92,54,54]}
+{"kind":"textbox","id":"sh/kvad8fmp","slide":7,"text":"1","textPreview":"1","textChars":1,"textLines":1,"bbox":[565,100,54,38]}
+{"kind":"shape","id":"sh/ju1wfal4","slide":7,"bbox":[592,146,0,83]}
+{"kind":"textbox","id":"sh/it8v654j","slide":7,"text":"Resident verification","textPreview":"Resident verification","textChars":21,"textLines":1,"bbox":[650,91,460,36]}
+{"kind":"textbox","id":"sh/t0jel436","slide":7,"text":"An admin validates who belongs.","textPreview":"An admin validates who belongs.","textChars":31,"textLines":1,"bbox":[650,134,500,47]}
+{"kind":"shape","id":"sh/szaxczml","slide":7,"bbox":[565,229,54,54]}
+{"kind":"textbox","id":"sh/7y1wjul0","slide":7,"text":"2","textPreview":"2","textChars":1,"textLines":1,"bbox":[565,237,54,38]}
+{"kind":"shape","id":"sh/6xsvap4f","slide":7,"bbox":[592,283,0,83]}
+{"kind":"textbox","id":"sh/94ze9032","slide":7,"text":"Permissioned access","textPreview":"Permissioned access","textChars":19,"textLines":1,"bbox":[650,228,460,36]}
+{"kind":"textbox","id":"sh/83qd0vmh","slide":7,"text":"Pending users cannot see community data.","textPreview":"Pending users cannot see community data.","textChars":40,"textLines":1,"bbox":[650,271,500,47]}
+{"kind":"shape","id":"sh/0nudwvud","slide":7,"bbox":[565,366,54,54]}
+{"kind":"textbox","id":"sh/183ep0bi","slide":7,"text":"3","textPreview":"3","textChars":1,"textLines":1,"bbox":[565,374,54,38]}
+{"kind":"shape","id":"sh/elsvu5c7","slide":7,"bbox":[592,420,0,83]}
+{"kind":"textbox","id":"sh/zm1wnats","slide":7,"text":"Moderated participation","textPreview":"Moderated participation","textChars":23,"textLines":1,"bbox":[650,365,460,36]}
+{"kind":"textbox","id":"sh/obux0fu9","slide":7,"text":"Roles and controls keep behavior accountable.","textPreview":"Roles and controls keep behavior accountable.","textChars":45,"textLines":1,"bbox":[650,408,500,47]}
+{"kind":"shape","id":"sh/9c3etkbu","slide":7,"bbox":[565,503,54,54]}
+{"kind":"textbox","id":"sh/m9cfy5c3","slide":7,"text":"4","textPreview":"4","textChars":1,"textLines":1,"bbox":[565,511,54,38]}
+{"kind":"textbox","id":"sh/nalwrato","slide":7,"text":"Targeted delivery","textPreview":"Targeted delivery","textChars":17,"textLines":1,"bbox":[650,502,460,36]}
+{"kind":"textbox","id":"sh/wfex4ful","slide":7,"text":"Safety and operational alerts reach the right people.","textPreview":"Safety and operational alerts reach the right people.","textChars":53,"textLines":1,"bbox":[650,545,500,47]}
+{"kind":"textbox","id":"sh/xgnexkbq","slide":7,"text":"Source: current Mohalla verification, role, moderation and notification flows.","textPreview":"Source: current Mohalla verification, role, moderation and notification flows.","textChars":78,"textLines":1,"bbox":[72,683,1030,18]}
+{"kind":"textbox","id":"sh/7apgned8","slide":7,"text":"07","textPreview":"07","textChars":2,"textLines":1,"bbox":[1166,681,42,20]}
+{"kind":"notes","id":"nt/yr36in","slide":7,"text":"Trust is the moat only if it is operational. Explain the verification gate, private community boundary, role-based administration, moderation, and targeted alerts."}
+{"kind":"slide","id":"sl/2sjd1k","slide":8,"title":"VISION","textShapes":5}
+{"kind":"shape","id":"sh/hkba5w7y","slide":8,"bbox":[0,0,530,720]}
+{"kind":"textbox","id":"sh/vits36ps","slide":8,"text":"VISION","textPreview":"VISION","textChars":6,"textLines":1,"bbox":[72,52,360,24]}
+{"kind":"textbox","id":"sh/8v2tsr6h","slide":8,"text":"A trusted digital layer for every neighborhood in Pakistan—where residents, administrators and local businesses coordinate daily life in real time.","textPreview":"A trusted digital layer for every neighborhood in Pakistan—where residents, administrators and local businesses coordinate daily life in ...","textChars":147,"textLines":1,"bbox":[72,112,390,248]}
+{"kind":"shape","id":"sh/tgba1w72","slide":8,"bbox":[72,397,390,2]}
+{"kind":"textbox","id":"sh/6t0bqh8b","slide":8,"text":"MISSION","textPreview":"MISSION","textChars":7,"textLines":1,"bbox":[72,431,200,24]}
+{"kind":"textbox","id":"sh/7u9szmpw","slide":8,"text":"Help verified neighbors communicate, respond, trade and participate through one private, locally relevant platform.","textPreview":"Help verified neighbors communicate, respond, trade and participate through one private, locally relevant platform.","textChars":115,"textLines":1,"bbox":[72,470,390,112]}
+{"kind":"shape","id":"sh/krito7q5","slide":8,"bbox":[72,627,332,34]}
+{"kind":"textbox","id":"sh/lsraxc7q","slide":8,"text":"PURPOSE  •  MAKE LOCAL LIFE WORK BETTER","textPreview":"PURPOSE  •  MAKE LOCAL LIFE WORK BETTER","textChars":39,"textLines":1,"bbox":[84,631,308,26]}
+{"kind":"image","id":"im/vmd4bud0","slide":8,"name":"","alt":"Pakistani residents at a neighborhood community market","bbox":[530,0,750,720]}
+{"kind":"notes","id":"nt/2sjd1k","slide":8,"text":"The vision is national infrastructure; the mission is concrete daily coordination. Keep the language human: people communicate, respond, trade and participate."}
+{"kind":"slide","id":"sl/tqw4o5","slide":9,"title":"WHY NOW","textShapes":15}
+{"kind":"textbox","id":"sh/u94nuhwb","slide":9,"text":"WHY NOW","textPreview":"WHY NOW","textChars":7,"textLines":1,"bbox":[72,42,360,24]}
+{"kind":"textbox","id":"sh/hwv6pwfm","slide":9,"text":"The habit is already digital. The neighborhood layer is missing.","textPreview":"The habit is already digital. The neighborhood layer is missing.","textChars":64,"textLines":1,"bbox":[72,78,1136,72]}
+{"kind":"shape","id":"sh/gbm5wre1","slide":9,"bbox":[72,202,348,244]}
+{"kind":"textbox","id":"sh/76doj2xk","slide":9,"text":"91%","textPreview":"91%","textChars":3,"textLines":1,"bbox":[96,234,300,78]}
+{"kind":"textbox","id":"sh/65knqxwz","slide":9,"text":"cellular coverage","textPreview":"cellular coverage","textChars":17,"textLines":1,"bbox":[96,324,300,38]}
+{"kind":"textbox","id":"sh/t8v6lcfq","slide":9,"text":"of Pakistan’s population","textPreview":"of Pakistan’s population","textChars":24,"textLines":1,"bbox":[96,375,300,28]}
+{"kind":"shape","id":"sh/s7m5s7e5","slide":9,"bbox":[448,202,348,244]}
+{"kind":"textbox","id":"sh/j2tof2xo","slide":9,"text":"81%","textPreview":"81%","textChars":3,"textLines":1,"bbox":[472,234,300,78]}
+{"kind":"textbox","id":"sh/i1knmxw3","slide":9,"text":"3G / 4G reach","textPreview":"3G / 4G reach","textChars":13,"textLines":1,"bbox":[472,324,300,38]}
+{"kind":"textbox","id":"sh/4vahkjmx","slide":9,"text":"of Pakistan’s population","textPreview":"of Pakistan’s population","textChars":24,"textLines":1,"bbox":[472,375,300,28]}
+{"kind":"shape","id":"sh/pwjiton2","slide":9,"bbox":[824,202,348,244]}
+{"kind":"textbox","id":"sh/298zi94r","slide":9,"text":"59.8%","textPreview":"59.8%","textChars":5,"textLines":1,"bbox":[848,234,300,78]}
+{"kind":"textbox","id":"sh/3uh0re5c","slide":9,"text":"broadband penetration","textPreview":"broadband penetration","textChars":21,"textLines":1,"bbox":[848,324,300,38]}
+{"kind":"textbox","id":"sh/g7qhgjml","slide":9,"text":"March 2025","textPreview":"March 2025","textChars":10,"textLines":1,"bbox":[848,375,300,28]}
+{"kind":"shape","id":"sh/h8zypon6","slide":9,"bbox":[72,489,1136,128]}
+{"kind":"textbox","id":"sh/u58ze94f","slide":9,"text":"The opportunity is not teaching people to use digital tools.","textPreview":"The opportunity is not teaching people to use digital tools.","textChars":60,"textLines":1,"bbox":[100,514,1040,38]}
+{"kind":"textbox","id":"sh/f6hgne50","slide":9,"text":"It is giving an existing digital habit trusted local context.","textPreview":"It is giving an existing digital habit trusted local context.","textChars":61,"textLines":1,"bbox":[100,562,1040,32]}
+{"kind":"textbox","id":"sh/03uhs3m5","slide":9,"text":"Source: Pakistan Economic Survey 2024–25, Information Technology & Telecommunication.","textPreview":"Source: Pakistan Economic Survey 2024–25, Information Technology & Telecommunication.","textChars":85,"textLines":1,"bbox":[72,683,1030,18]}
+{"kind":"textbox","id":"sh/143i18na","slide":9,"text":"09","textPreview":"09","textChars":2,"textLines":1,"bbox":[1166,681,42,20]}
+{"kind":"notes","id":"nt/tqw4o5","slide":9,"text":"Smartphone behavior and network access are already established. Mohalla can focus on trust, relevance and local utility instead of creating a new digital habit.\n\nSources:\n• https://finance.gov.pk/survey/chapter_25/15_Information_Technology.pdf"}
+{"kind":"slide","id":"sl/pl2w5b","slide":10,"title":"MARKET POTENTIAL","textShapes":16}
+{"kind":"textbox","id":"sh/qhcbmdwb","slide":10,"text":"MARKET POTENTIAL","textPreview":"MARKET POTENTIAL","textChars":16,"textLines":1,"bbox":[72,42,360,24]}
+{"kind":"textbox","id":"sh/d4naxsv2","slide":10,"text":"Start with 15.0m urban households.\nWin a dense, reachable wedge.","textPreview":"Start with 15.0m urban households. | Win a dense, reachable wedge.","textChars":64,"textLines":2,"bbox":[72,102,590,108]}
+{"kind":"shape","id":"sh/cjutoneh","slide":10,"bbox":[72,270,76,34]}
+{"kind":"textbox","id":"sh/3elsrydk","slide":10,"text":"TAM","textPreview":"TAM","textChars":3,"textLines":1,"bbox":[84,274,52,26]}
+{"kind":"textbox","id":"sh/2dcbidwf","slide":10,"text":"15.0m","textPreview":"15.0m","textChars":5,"textLines":1,"bbox":[168,266,128,48]}
+{"kind":"textbox","id":"sh/pg3at8vq","slide":10,"text":"All urban households","textPreview":"All urban households","textChars":20,"textLines":1,"bbox":[304,272,330,46]}
+{"kind":"shape","id":"sh/ofutk3e5","slide":10,"bbox":[72,376,76,34]}
+{"kind":"textbox","id":"sh/fa1snydo","slide":10,"text":"SAM","textPreview":"SAM","textChars":3,"textLines":1,"bbox":[84,380,52,26]}
+{"kind":"textbox","id":"sh/e9sretw3","slide":10,"text":"3.0m","textPreview":"3.0m","textChars":4,"textLines":1,"bbox":[168,372,128,48]}
+{"kind":"textbox","id":"sh/w7q9sb21","slide":10,"text":"Planning scenario: 20% initial reachable wedge","textPreview":"Planning scenario: 20% initial reachable wedge","textChars":46,"textLines":1,"bbox":[304,378,330,46]}
+{"kind":"shape","id":"sh/x8za1gjm","slide":10,"bbox":[72,482,76,34]}
+{"kind":"textbox","id":"sh/a58rq1kb","slide":10,"text":"SOM","textPreview":"SOM","textChars":3,"textLines":1,"bbox":[84,486,52,26]}
+{"kind":"textbox","id":"sh/b6hsz61g","slide":10,"text":"1.0m","textPreview":"1.0m","textChars":4,"textLines":1,"bbox":[168,478,128,48]}
+{"kind":"textbox","id":"sh/o369ob25","slide":10,"text":"Five-year household target","textPreview":"Five-year household target","textChars":26,"textLines":1,"bbox":[304,484,330,46]}
+{"kind":"shape","id":"sh/94zaxgjq","slide":10,"bbox":[700,154,508,448]}
+{"kind":"textbox","id":"sh/n2xsv61k","slide":10,"text":"URBAN HOUSEHOLDS • MILLIONS","textPreview":"URBAN HOUSEHOLDS • MILLIONS","textChars":27,"textLines":1,"bbox":[762,545,360,22]}
+{"kind":"shape","id":"sh/8zat0vi9","slide":10,"bbox":[72,612,168,34]}
+{"kind":"textbox","id":"sh/t0ja90ju","slide":10,"text":"ASSUMPTION LAYER","textPreview":"ASSUMPTION LAYER","textChars":16,"textLines":1,"bbox":[84,616,144,26]}
+{"kind":"textbox","id":"sh/hgfat0by","slide":10,"text":"SAM and SOM are planning assumptions—not current market share or forecasts.","textPreview":"SAM and SOM are planning assumptions—not current market share or forecasts.","textChars":75,"textLines":1,"bbox":[260,615,650,28]}
+{"kind":"textbox","id":"sh/gf69kvad","slide":10,"text":"TAM source: PBS Census 2023. SAM/SOM: illustrative Mohalla planning assumptions.","textPreview":"TAM source: PBS Census 2023. SAM/SOM: illustrative Mohalla planning assumptions.","textChars":80,"textLines":1,"bbox":[72,683,1030,18]}
+{"kind":"textbox","id":"sh/fuxsrqts","slide":10,"text":"10","textPreview":"10","textChars":2,"textLines":1,"bbox":[1166,681,42,20]}
+{"kind":"chart","id":"ch/254f6p8b","slide":10,"name":"","chartType":"bar","bbox":[735,201,435,330]}
+{"kind":"notes","id":"nt/pl2w5b","slide":10,"text":"Keep the sizing honest. TAM is the official urban household base. SAM is a 20% planning scenario for reachable gated and apartment communities; SOM is a five-year target. They are not current performance.\n\nSources:\n• https://www.pbs.gov.pk/sites/default/files/population/2023/Pakistan.pdf"}
+{"kind":"slide","id":"sl/6x5yec","slide":11,"title":"FOUR-SIDED VALUE","textShapes":17}
+{"kind":"textbox","id":"sh/q1wnexsn","slide":11,"text":"FOUR-SIDED VALUE","textPreview":"FOUR-SIDED VALUE","textChars":16,"textLines":1,"bbox":[72,42,360,24]}
+{"kind":"textbox","id":"sh/d47m9cry","slide":11,"text":"One network. Benefits across the neighborhood economy.","textPreview":"One network. Benefits across the neighborhood economy.","textChars":54,"textLines":1,"bbox":[72,78,1136,96]}
+{"kind":"shape","id":"sh/c3e5g7at","slide":11,"bbox":[72,182,540,188]}
+{"kind":"shape","id":"sh/3y543itw","slide":11,"bbox":[72,182,10,188]}
+{"kind":"textbox","id":"sh/2xwnadsb","slide":11,"text":"Residents","textPreview":"Residents","textChars":9,"textLines":1,"bbox":[104,204,230,38]}
+{"kind":"textbox","id":"sh/p0nm5sb2","slide":11,"text":"Less noise. Faster answers. Safer response.","textPreview":"Less noise. Faster answers. Safer response.","textChars":43,"textLines":1,"bbox":[104,249,466,44]}
+{"kind":"textbox","id":"sh/4ze5cnah","slide":11,"text":"Relevant updates  •  Trusted local help  •  Private participation","textPreview":"Relevant updates  •  Trusted local help  •  Private participation","textChars":65,"textLines":1,"bbox":[104,312,466,31]}
+{"kind":"shape","id":"sh/nupofm9g","slide":11,"bbox":[640,182,540,188]}
+{"kind":"shape","id":"sh/mtgnmhsv","slide":11,"bbox":[640,182,10,188]}
+{"kind":"textbox","id":"sh/szmhszmt","slide":11,"text":"Society managers","textPreview":"Society managers","textChars":16,"textLines":1,"bbox":[672,204,230,38]}
+{"kind":"textbox","id":"sh/t0vil43e","slide":11,"text":"A single operating view for community life.","textPreview":"A single operating view for community life.","textChars":43,"textLines":1,"bbox":[672,249,466,44]}
+{"kind":"textbox","id":"sh/6xkzqp4n","slide":11,"text":"Targeted notices  •  Resident approvals  •  Participation signals","textPreview":"Targeted notices  •  Resident approvals  •  Participation signals","textChars":65,"textLines":1,"bbox":[672,312,466,31]}
+{"kind":"shape","id":"sh/7yt0ju58","slide":11,"bbox":[72,398,540,188]}
+{"kind":"shape","id":"sh/kv2hofmx","slide":11,"bbox":[72,398,10,188]}
+{"kind":"textbox","id":"sh/5wbihkni","slide":11,"text":"Local businesses","textPreview":"Local businesses","textChars":16,"textLines":1,"bbox":[104,420,230,38]}
+{"kind":"textbox","id":"sh/itkzmp4r","slide":11,"text":"Discovery inside a trusted local market.","textPreview":"Discovery inside a trusted local market.","textChars":40,"textLines":1,"bbox":[104,465,466,44]}
+{"kind":"textbox","id":"sh/jut0fa5c","slide":11,"text":"Verified audience  •  Shorter response loops  •  Repeat neighborhood demand","textPreview":"Verified audience  •  Shorter response loops  •  Repeat neighborhood demand","textChars":75,"textLines":1,"bbox":[104,528,466,31]}
+{"kind":"shape","id":"sh/wrihkfml","slide":11,"bbox":[640,398,540,188]}
+{"kind":"shape","id":"sh/xsbidkn6","slide":11,"bbox":[640,398,10,188]}
+{"kind":"textbox","id":"sh/xo3yhwfu","slide":11,"text":"Strategic partners","textPreview":"Strategic partners","textChars":18,"textLines":1,"bbox":[672,420,230,38]}
+{"kind":"textbox","id":"sh/cnaxobep","slide":11,"text":"A consent-based path into local services.","textPreview":"A consent-based path into local services.","textChars":41,"textLines":1,"bbox":[672,465,466,44]}
+{"kind":"textbox","id":"sh/bm1gf6x4","slide":11,"text":"Safety integrations  •  Service partnerships  •  City-cluster reach","textPreview":"Safety integrations  •  Service partnerships  •  City-cluster reach","textChars":67,"textLines":1,"bbox":[672,528,466,31]}
+{"kind":"shape","id":"sh/alsfm1wj","slide":11,"bbox":[284,616,712,34]}
+{"kind":"textbox","id":"sh/pkjedwfy","slide":11,"text":"BETTER COORDINATION BECOMES BETTER COMMUNITY EXPERIENCE","textPreview":"BETTER COORDINATION BECOMES BETTER COMMUNITY EXPERIENCE","textChars":55,"textLines":1,"bbox":[296,620,688,26]}
+{"kind":"textbox","id":"sh/ojaxkred","slide":11,"text":"Benefit model based on current product capabilities and proposed ecosystem expansion.","textPreview":"Benefit model based on current product capabilities and proposed ecosystem expansion.","textChars":85,"textLines":1,"bbox":[72,683,1030,18]}
+{"kind":"textbox","id":"sh/ni1wbmxs","slide":11,"text":"11","textPreview":"11","textChars":2,"textLines":1,"bbox":[1166,681,42,20]}
+{"kind":"notes","id":"nt/6x5yec","slide":11,"text":"This is a B2B2C value proposition. Society leaders can buy or sponsor the operating layer, while resident engagement creates value for businesses and future partners."}
+{"kind":"slide","id":"sl/tvqf7d","slide":12,"title":"COMPETITIVE LANDSCAPE","textShapes":21}
+{"kind":"textbox","id":"sh/wfu18bq5","slide":12,"text":"COMPETITIVE LANDSCAPE","textPreview":"COMPETITIVE LANDSCAPE","textChars":21,"textLines":1,"bbox":[72,42,360,24]}
+{"kind":"textbox","id":"sh/velkf69k","slide":12,"text":"The wedge is verified resident utility—not generic admin software.","textPreview":"The wedge is verified resident utility—not generic admin software.","textChars":66,"textLines":1,"bbox":[72,78,1136,82]}
+{"kind":"shape","id":"sh/udcj618z","slide":12,"bbox":[104,565,680,0]}
+{"kind":"shape","id":"sh/9c32dwre","slide":12,"bbox":[104,211,0,354]}
+{"kind":"shape","id":"sh/8ru14rqt","slide":12,"bbox":[444,211,0,354]}
+{"kind":"shape","id":"sh/7qlkbm98","slide":12,"bbox":[104,388,680,0]}
+{"kind":"textbox","id":"sh/mpcj21sn","slide":12,"text":"LOW","textPreview":"LOW","textChars":3,"textLines":1,"bbox":[96,587,50,20]}
+{"kind":"textbox","id":"sh/t872p0ri","slide":12,"text":"HIGH RESIDENT UTILITY →","textPreview":"HIGH RESIDENT UTILITY →","textChars":23,"textLines":1,"bbox":[574,587,210,20]}
+{"kind":"textbox","id":"sh/snelgvqx","slide":12,"text":"VERIFIED LOCAL NETWORK →","textPreview":"VERIFIED LOCAL NETWORK →","textChars":24,"textLines":1,"bbox":[33,286,260,22]}
+{"kind":"shape","id":"sh/25g3qpsr","slide":12,"bbox":[219,427,82,82]}
+{"kind":"textbox","id":"sh/n6p4za9c","slide":12,"text":"Open social\nplatforms","textPreview":"Open social | platforms","textChars":21,"textLines":2,"bbox":[225,448,70,42]}
+{"kind":"shape","id":"sh/o7ylsfax","slide":12,"bbox":[517,402,82,82]}
+{"kind":"textbox","id":"sh/p87m1kri","slide":12,"text":"Chat groups","textPreview":"Chat groups","textChars":11,"textLines":1,"bbox":[523,423,70,42]}
+{"kind":"shape","id":"sh/ehw3m5sv","slide":12,"bbox":[279,257,82,82]}
+{"kind":"textbox","id":"sh/fi54va9g","slide":12,"text":"Admin-only\nsoftware","textPreview":"Admin-only | software","textChars":19,"textLines":2,"bbox":[285,278,70,42]}
+{"kind":"shape","id":"sh/03ylofal","slide":12,"bbox":[577,186,98,98]}
+{"kind":"textbox","id":"sh/147mxkr6","slide":12,"text":"MOHALLA","textPreview":"MOHALLA","textChars":7,"textLines":1,"bbox":[583,215,86,42]}
+{"kind":"shape","id":"sh/yd0ny98z","slide":12,"bbox":[838,211,370,354]}
+{"kind":"textbox","id":"sh/ze947u9k","slide":12,"text":"Mohalla combines","textPreview":"Mohalla combines","textChars":16,"textLines":1,"bbox":[870,244,300,36]}
+{"kind":"shape","id":"sh/v6hs32lk","slide":12,"bbox":[870,305,48,30]}
+{"kind":"textbox","id":"sh/a58rax4f","slide":12,"text":"01","textPreview":"01","textChars":2,"textLines":1,"bbox":[882,309,24,22]}
+{"kind":"textbox","id":"sh/x8ja5c3q","slide":12,"text":"Verified community identity","textPreview":"Verified community identity","textChars":27,"textLines":1,"bbox":[934,308,238,30]}
+{"kind":"shape","id":"sh/w7a9c7m5","slide":12,"bbox":[870,360,48,30]}
+{"kind":"textbox","id":"sh/ja1s72lw","slide":12,"text":"02","textPreview":"02","textChars":2,"textLines":1,"bbox":[882,364,24,22]}
+{"kind":"textbox","id":"sh/i9sbeh4b","slide":12,"text":"Daily resident utility","textPreview":"Daily resident utility","textChars":22,"textLines":1,"bbox":[934,363,238,30]}
+{"kind":"shape","id":"sh/5cja9c32","slide":12,"bbox":[870,415,48,30]}
+{"kind":"textbox","id":"sh/kbatg7mh","slide":12,"text":"03","textPreview":"03","textChars":2,"textLines":1,"bbox":[882,419,24,22]}
+{"kind":"textbox","id":"sh/7ylsbmls","slide":12,"text":"Admin operating controls","textPreview":"Admin operating controls","textChars":24,"textLines":1,"bbox":[934,418,238,30]}
+{"kind":"shape","id":"sh/6dsbih47","slide":12,"bbox":[870,470,48,30]}
+{"kind":"textbox","id":"sh/o3u98ril","slide":12,"text":"04","textPreview":"04","textChars":2,"textLines":1,"bbox":[882,474,24,22]}
+{"kind":"textbox","id":"sh/p43a1wj6","slide":12,"text":"Local commerce + safety loops","textPreview":"Local commerce + safety loops","textChars":29,"textLines":1,"bbox":[934,473,238,30]}
+{"kind":"textbox","id":"sh/21cr6h0f","slide":12,"text":"The category is emerging. The question is who earns local trust and weekly habit first.","textPreview":"The category is emerging. The question is who earns local trust and weekly habit first.","textChars":87,"textLines":1,"bbox":[870,525,304,48]}
+{"kind":"textbox","id":"sh/32lszm10","slide":12,"text":"Illustrative positioning from publicly described category offerings; not a feature-by-feature audit.","textPreview":"Illustrative positioning from publicly described category offerings; not a feature-by-feature audit.","textChars":100,"textLines":1,"bbox":[72,683,1030,18]}
+{"kind":"textbox","id":"sh/gzu947i9","slide":12,"text":"12","textPreview":"12","textChars":2,"textLines":1,"bbox":[1166,681,42,20]}
+{"kind":"notes","id":"nt/tvqf7d","slide":12,"text":"Avoid framing competitors as proof of a crowded market. Their presence validates the category. Mohalla's strategic wedge is combining verified membership, resident engagement, and administrative control in one network.\n\nSources:\n• https://www.manzhil.com/pakistan\n• https://smartgate.pk/\n• https://hsmp.pk/\n• https://www.nizamco.com/\n• https://kunji.pk/\n• https://hamarisociety.pk/\n• https://mysociety.pk/"}
+{"kind":"slide","id":"sl/ru7f6f","slide":13,"title":"BUSINESS MODEL","textShapes":23}
+{"kind":"textbox","id":"sh/ilgjitsf","slide":13,"text":"BUSINESS MODEL","textPreview":"BUSINESS MODEL","textChars":14,"textLines":1,"bbox":[72,42,360,24]}
+{"kind":"textbox","id":"sh/5or2d8rq","slide":13,"text":"Monetization follows trust and density.","textPreview":"Monetization follows trust and density.","textChars":39,"textLines":1,"bbox":[72,101,940,68]}
+{"kind":"textbox","id":"sh/4ni1k3a5","slide":13,"text":"A staged B2B2C model protects the resident experience while expanding revenue per community.","textPreview":"A staged B2B2C model protects the resident experience while expanding revenue per community.","textChars":92,"textLines":1,"bbox":[72,180,980,42]}
+{"kind":"shape","id":"sh/rq9kfy9w","slide":13,"bbox":[72,265,1136,66]}
+{"kind":"shape","id":"sh/6p0jmtsb","slide":13,"bbox":[90,278,40,40]}
+{"kind":"textbox","id":"sh/tsr2h8r2","slide":13,"text":"1","textPreview":"1","textChars":1,"textLines":1,"bbox":[90,285,40,24]}
+{"kind":"textbox","id":"sh/sri1o3ah","slide":13,"text":"Society subscription","textPreview":"Society subscription","textChars":20,"textLines":1,"bbox":[152,281,310,32]}
+{"kind":"textbox","id":"sh/futkji9s","slide":13,"text":"Core administration, communication and premium workflow tiers.","textPreview":"Core administration, communication and premium workflow tiers.","textChars":62,"textLines":1,"bbox":[468,282,565,31]}
+{"kind":"shape","id":"sh/etk3qds7","slide":13,"bbox":[1081,283,98,28]}
+{"kind":"textbox","id":"sh/gj2tg32d","slide":13,"text":"FIRST","textPreview":"FIRST","textChars":5,"textLines":1,"bbox":[1093,287,74,20]}
+{"kind":"shape","id":"sh/hkbup8ji","slide":13,"bbox":[72,347,1136,66]}
+{"kind":"shape","id":"sh/uhkbetk7","slide":13,"bbox":[90,360,40,40]}
+{"kind":"textbox","id":"sh/vitsny1s","slide":13,"text":"2","textPreview":"2","textChars":1,"textLines":1,"bbox":[90,367,40,24]}
+{"kind":"textbox","id":"sh/472tk329","slide":13,"text":"Local business services","textPreview":"Local business services","textChars":23,"textLines":1,"bbox":[152,363,310,32]}
+{"kind":"textbox","id":"sh/58but8ju","slide":13,"text":"Verified listings, promoted inventory and neighborhood discovery.","textPreview":"Verified listings, promoted inventory and neighborhood discovery.","textChars":65,"textLines":1,"bbox":[468,364,565,31]}
+{"kind":"shape","id":"sh/ilkbidk3","slide":13,"bbox":[1081,365,98,28]}
+{"kind":"textbox","id":"sh/3mtcri1o","slide":13,"text":"NEXT","textPreview":"NEXT","textChars":4,"textLines":1,"bbox":[1093,369,74,20]}
+{"kind":"shape","id":"sh/sbmton25","slide":13,"bbox":[72,429,1136,66]}
+{"kind":"shape","id":"sh/dcvuxsjq","slide":13,"bbox":[90,442,40,40]}
+{"kind":"textbox","id":"sh/1g72lo7y","slide":13,"text":"3","textPreview":"3","textChars":1,"textLines":1,"bbox":[90,449,40,24]}
+{"kind":"textbox","id":"sh/0vy1sjqd","slide":13,"text":"Platform services","textPreview":"Platform services","textChars":17,"textLines":1,"bbox":[152,445,310,32]}
+{"kind":"textbox","id":"sh/fupkjeps","slide":13,"text":"Payments and service partnerships when engagement thresholds are proven.","textPreview":"Payments and service partnerships when engagement thresholds are proven.","textChars":72,"textLines":1,"bbox":[468,446,565,31]}
+{"kind":"shape","id":"sh/etgjq987","slide":13,"bbox":[1081,447,98,28]}
+{"kind":"textbox","id":"sh/pkr2p87u","slide":13,"text":"LATER","textPreview":"LATER","textChars":5,"textLines":1,"bbox":[1093,451,74,20]}
+{"kind":"shape","id":"sh/ojilw3q9","slide":13,"bbox":[72,511,1136,66]}
+{"kind":"shape","id":"sh/ni9knypo","slide":13,"bbox":[90,524,40,40]}
+{"kind":"textbox","id":"sh/2hg3ut83","slide":13,"text":"4","textPreview":"4","textChars":1,"textLines":1,"bbox":[90,531,40,24]}
+{"kind":"textbox","id":"sh/5on2d47q","slide":13,"text":"APIs + integrations","textPreview":"APIs + integrations","textChars":19,"textLines":1,"bbox":[152,527,310,32]}
+{"kind":"textbox","id":"sh/4ne1kzq5","slide":13,"text":"Developer, civic, emergency and ecosystem connections.","textPreview":"Developer, civic, emergency and ecosystem connections.","textChars":54,"textLines":1,"bbox":[468,528,565,31]}
+{"kind":"shape","id":"sh/utcze5o3","slide":13,"bbox":[1081,529,98,28]}
+{"kind":"textbox","id":"sh/vul0na58","slide":13,"text":"SCALE","textPreview":"SCALE","textChars":5,"textLines":1,"bbox":[1093,533,74,20]}
+{"kind":"shape","id":"sh/gvuhgf6t","slide":13,"bbox":[72,615,112,34]}
+{"kind":"textbox","id":"sh/hw3ipkne","slide":13,"text":"TRUST RULE","textPreview":"TRUST RULE","textChars":10,"textLines":1,"bbox":[84,619,88,26]}
+{"kind":"textbox","id":"sh/ixczipoz","slide":13,"text":"Private resident data is never the product.","textPreview":"Private resident data is never the product.","textChars":43,"textLines":1,"bbox":[202,617,500,30]}
+{"kind":"textbox","id":"sh/3yl0ra5k","slide":13,"text":"Proposed model. Current core product positioning and pricing require validation.","textPreview":"Proposed model. Current core product positioning and pricing require validation.","textChars":80,"textLines":1,"bbox":[72,683,1030,18]}
+{"kind":"textbox","id":"sh/4zehkf65","slide":13,"text":"13","textPreview":"13","textChars":2,"textLines":1,"bbox":[1166,681,42,20]}
+{"kind":"notes","id":"nt/ru7f6f","slide":13,"text":"Do not monetize too early. First prove resident habit and admin value. Then layer society tiers, local business services, and transaction or integration revenue without compromising private resident data."}
+{"kind":"slide","id":"sl/o9thpi","slide":14,"title":"GO-TO-MARKET","textShapes":24}
+{"kind":"textbox","id":"sh/nalwnq98","slide":14,"text":"GO-TO-MARKET","textPreview":"GO-TO-MARKET","textChars":12,"textLines":1,"bbox":[72,42,360,24]}
+{"kind":"textbox","id":"sh/obudgvqt","slide":14,"text":"Win the neighborhood before winning the city.","textPreview":"Win the neighborhood before winning the city.","textChars":45,"textLines":1,"bbox":[72,78,1136,96]}
+{"kind":"shape","id":"sh/9c3ep07y","slide":14,"bbox":[243,270,55,0]}
+{"kind":"shape","id":"sh/elsva18b","slide":14,"bbox":[72,230,80,80]}
+{"kind":"textbox","id":"sh/zm1wj69w","slide":14,"text":"01","textPreview":"01","textChars":2,"textLines":1,"bbox":[72,248,80,30]}
+{"kind":"textbox","id":"sh/0nadcbqh","slide":14,"text":"Land","textPreview":"Land","textChars":4,"textLines":1,"bbox":[67,329,90,34]}
+{"kind":"textbox","id":"sh/1o3elgr2","slide":14,"text":"Admin champion","textPreview":"Admin champion","textChars":14,"textLines":1,"bbox":[40,369,144,34]}
+{"kind":"shape","id":"sh/yhwfm58v","slide":14,"bbox":[469,270,55,0]}
+{"kind":"shape","id":"sh/ji5wvapg","slide":14,"bbox":[298,230,80,80]}
+{"kind":"textbox","id":"sh/ju1gzup4","slide":14,"text":"02","textPreview":"02","textChars":2,"textLines":1,"bbox":[298,248,80,30]}
+{"kind":"textbox","id":"sh/ytsz6p8j","slide":14,"text":"Verify","textPreview":"Verify","textChars":6,"textLines":1,"bbox":[293,329,90,34]}
+{"kind":"textbox","id":"sh/lg3y1k7u","slide":14,"text":"Households","textPreview":"Households","textChars":10,"textLines":1,"bbox":[266,369,144,34]}
+{"kind":"shape","id":"sh/kfuh8fqp","slide":14,"bbox":[695,270,55,0]}
+{"kind":"shape","id":"sh/7ilg3up0","slide":14,"bbox":[524,230,80,80]}
+{"kind":"textbox","id":"sh/6hczap8f","slide":14,"text":"03","textPreview":"03","textChars":2,"textLines":1,"bbox":[524,248,80,30]}
+{"kind":"textbox","id":"sh/tk3i5476","slide":14,"text":"Seed","textPreview":"Seed","textChars":4,"textLines":1,"bbox":[519,329,90,34]}
+{"kind":"textbox","id":"sh/8juhczql","slide":14,"text":"Essential utility","textPreview":"Essential utility","textChars":17,"textLines":1,"bbox":[492,369,144,34]}
+{"kind":"shape","id":"sh/vm507epc","slide":14,"bbox":[921,270,55,0]}
+{"kind":"shape","id":"sh/ulcze98r","slide":14,"bbox":[750,230,80,80]}
+{"kind":"textbox","id":"sh/qt0bmxwb","slide":14,"text":"04","textPreview":"04","textChars":2,"textLines":1,"bbox":[750,248,80,30]}
+{"kind":"textbox","id":"sh/bu9sv2dg","slide":14,"text":"Prove","textPreview":"Prove","textChars":5,"textLines":1,"bbox":[745,329,90,34]}
+{"kind":"textbox","id":"sh/cvito7e1","slide":14,"text":"Weekly habits","textPreview":"Weekly habits","textChars":13,"textLines":1,"bbox":[718,369,144,34]}
+{"kind":"shape","id":"sh/dgraxcvm","slide":14,"bbox":[976,230,80,80]}
+{"kind":"textbox","id":"sh/2pgbixwz","slide":14,"text":"05","textPreview":"05","textChars":2,"textLines":1,"bbox":[976,248,80,30]}
+{"kind":"textbox","id":"sh/3qpsr2dk","slide":14,"text":"Expand","textPreview":"Expand","textChars":6,"textLines":1,"bbox":[971,329,90,34]}
+{"kind":"textbox","id":"sh/oritkne5","slide":14,"text":"Adjacent societies","textPreview":"Adjacent societies","textChars":18,"textLines":1,"bbox":[944,369,144,34]}
+{"kind":"shape","id":"sh/psratsvq","slide":14,"bbox":[72,462,1136,134]}
+{"kind":"textbox","id":"sh/mlkbuhw3","slide":14,"text":"CITY-CLUSTER PLAYBOOK","textPreview":"CITY-CLUSTER PLAYBOOK","textChars":21,"textLines":1,"bbox":[102,490,260,24]}
+{"kind":"textbox","id":"sh/nmtc3mdo","slide":14,"text":"Islamabad / Rawalpindi","textPreview":"Islamabad / Rawalpindi","textChars":22,"textLines":1,"bbox":[102,526,260,32]}
+{"kind":"textbox","id":"sh/xgvetgf6","slide":14,"text":"Lahore","textPreview":"Lahore","textChars":6,"textLines":1,"bbox":[426,526,150,32]}
+{"kind":"textbox","id":"sh/wfmd0byl","slide":14,"text":"Karachi","textPreview":"Karachi","textChars":7,"textLines":1,"bbox":[664,526,150,32]}
+{"kind":"shape","id":"sh/vedwr6x0","slide":14,"bbox":[377,493,0,70]}
+{"kind":"shape","id":"sh/ad4vylgf","slide":14,"bbox":[608,493,0,70]}
+{"kind":"textbox","id":"sh/9cvepgfu","slide":14,"text":"Sell B2B. Activate B2C. Compound locally.","textPreview":"Sell B2B. Activate B2C. Compound locally.","textChars":41,"textLines":1,"bbox":[850,503,315,64]}
+{"kind":"textbox","id":"sh/8bmdwby9","slide":14,"text":"GTM framework informed by local network-effect expansion principles.","textPreview":"GTM framework informed by local network-effect expansion principles.","textChars":68,"textLines":1,"bbox":[72,683,1030,18]}
+{"kind":"textbox","id":"sh/nadwn6xo","slide":14,"text":"14","textPreview":"14","textChars":2,"textLines":1,"bbox":[1166,681,42,20]}
+{"kind":"notes","id":"nt/o9thpi","slide":14,"text":"Local network effects do not become national by launching everywhere at once. Win dense communities, prove a repeatable onboarding and retention loop, then expand through adjacent societies and city clusters.\n\nSources:\n• https://www.nfx.com/post/marketplace-expansion-framework\n• https://a16z.com/the-dynamics-of-network-effects/"}
+{"kind":"slide","id":"sl/u22cya","slide":15,"title":"GROWTH ENGINE","textShapes":19}
+{"kind":"textbox","id":"sh/4r25kf21","slide":15,"text":"GROWTH ENGINE","textPreview":"GROWTH ENGINE","textChars":13,"textLines":1,"bbox":[72,42,360,24]}
+{"kind":"textbox","id":"sh/3qtoralg","slide":15,"text":"Density turns a useful app into a defensible network.","textPreview":"Density turns a useful app into a defensible network.","textChars":53,"textLines":1,"bbox":[72,101,980,68]}
+{"kind":"shape","id":"sh/2pkni5kb","slide":15,"bbox":[333,306,184,184]}
+{"kind":"textbox","id":"sh/hob6pk3q","slide":15,"text":"TRUST\n+\nDENSITY","textPreview":"TRUST | + | DENSITY","textChars":15,"textLines":3,"bbox":[355,342,140,112]}
+{"kind":"shape","id":"sh/gn25gf25","slide":15,"bbox":[357,216,136,136]}
+{"kind":"textbox","id":"sh/f2tonalk","slide":15,"text":"Verified\nresidents","textPreview":"Verified | residents","textChars":18,"textLines":2,"bbox":[367,257,116,58]}
+{"kind":"shape","id":"sh/u10ne5kz","slide":15,"bbox":[576,343,136,136]}
+{"kind":"textbox","id":"sh/1kf6143u","slide":15,"text":"Relevant content\n+ local supply","textPreview":"Relevant content | + local supply","textChars":31,"textLines":2,"bbox":[586,384,116,58]}
+{"kind":"shape","id":"sh/0jmpsz29","slide":15,"bbox":[355,518,136,136]}
+{"kind":"textbox","id":"sh/e98rapwj","slide":15,"text":"Faster response\n+ retention","textPreview":"Faster response | + retention","textChars":27,"textLines":2,"bbox":[365,559,116,58]}
+{"kind":"shape","id":"sh/fah83ud4","slide":15,"bbox":[141,343,136,136]}
+{"kind":"textbox","id":"sh/0bq9czep","slide":15,"text":"Organic invites\n+ lower CAC","textPreview":"Organic invites | + lower CAC","textChars":27,"textLines":2,"bbox":[151,384,116,58]}
+{"kind":"textbox","id":"sh/1wzq54va","slide":15,"text":"→","textPreview":"→","textChars":1,"textLines":1,"bbox":[494,268,40,40]}
+{"kind":"textbox","id":"sh/q5or6pwn","slide":15,"text":"↓","textPreview":"↓","textChars":1,"textLines":1,"bbox":[562,455,40,40]}
+{"kind":"textbox","id":"sh/r6h8zud8","slide":15,"text":"←","textPreview":"←","textChars":1,"textLines":1,"bbox":[318,558,40,40]}
+{"kind":"textbox","id":"sh/s7q98fet","slide":15,"text":"↑","textPreview":"↑","textChars":1,"textLines":1,"bbox":[263,304,40,40]}
+{"kind":"shape","id":"sh/d8zq1kve","slide":15,"bbox":[793,206,415,399]}
+{"kind":"textbox","id":"sh/a1sri9wr","slide":15,"text":"What should improve\nwith neighborhood density","textPreview":"What should improve | with neighborhood density","textChars":45,"textLines":2,"bbox":[827,238,345,72]}
+{"kind":"shape","id":"sh/b218bedc","slide":15,"bbox":[827,349,9,9]}
+{"kind":"textbox","id":"sh/7atwnmps","slide":15,"text":"Weekly active resident rate","textPreview":"Weekly active resident rate","textChars":27,"textLines":1,"bbox":[849,342,308,34]}
+{"kind":"shape","id":"sh/m9kfeh87","slide":15,"bbox":[827,396,9,9]}
+{"kind":"textbox","id":"sh/9wbepc7i","slide":15,"text":"Response time to local needs","textPreview":"Response time to local needs","textChars":28,"textLines":1,"bbox":[849,389,308,34]}
+{"kind":"shape","id":"sh/8v2xg7qx","slide":15,"bbox":[827,443,9,9]}
+{"kind":"textbox","id":"sh/vytwrmpo","slide":15,"text":"30-day retention","textPreview":"30-day retention","textChars":16,"textLines":1,"bbox":[849,436,308,34]}
+{"kind":"shape","id":"sh/uxkfih83","slide":15,"bbox":[827,490,9,9]}
+{"kind":"textbox","id":"sh/h0betw7u","slide":15,"text":"Organic household invitations","textPreview":"Organic household invitations","textChars":29,"textLines":1,"bbox":[849,483,308,34]}
+{"kind":"shape","id":"sh/wz2xkrq9","slide":15,"bbox":[827,537,9,9]}
+{"kind":"textbox","id":"sh/j2dwv6pk","slide":15,"text":"Community-level unit economics","textPreview":"Community-level unit economics","textChars":30,"textLines":1,"bbox":[849,530,308,34]}
+{"kind":"textbox","id":"sh/i14fm18f","slide":15,"text":"Atomic unit: one verified neighborhood/community.","textPreview":"Atomic unit: one verified neighborhood/community.","textChars":49,"textLines":1,"bbox":[72,683,1030,18]}
+{"kind":"textbox","id":"sh/g7mdcbmd","slide":15,"text":"15","textPreview":"15","textChars":2,"textLines":1,"bbox":[1166,681,42,20]}
+{"kind":"notes","id":"nt/u22cya","slide":15,"text":"For a local network, density—not national download count—is the leading indicator. Measure organic acquisition, retention, response rates and unit economics at the community level.\n\nSources:\n• https://a16z.com/16-ways-to-measure-network-effects/\n• https://a16z.com/13-metrics-for-marketplace-companies/"}
+{"kind":"slide","id":"sl/wbqv3v","slide":16,"title":"PROJECTED GROWTH","textShapes":16}
+{"kind":"textbox","id":"sh/fyd4r69w","slide":16,"text":"PROJECTED GROWTH","textPreview":"PROJECTED GROWTH","textChars":16,"textLines":1,"bbox":[72,42,360,24]}
+{"kind":"textbox","id":"sh/gj650bah","slide":16,"text":"An illustrative path to 2.5m verified residents.","textPreview":"An illustrative path to 2.5m verified residents.","textChars":48,"textLines":1,"bbox":[72,78,1136,96]}
+{"kind":"shape","id":"sh/1kfmtgrm","slide":16,"bbox":[72,182,806,403]}
+{"kind":"textbox","id":"sh/rud4nm9k","slide":16,"text":"VERIFIED RESIDENTS • MILLIONS","textPreview":"VERIFIED RESIDENTS • MILLIONS","textChars":29,"textLines":1,"bbox":[118,538,350,20]}
+{"kind":"shape","id":"sh/svm5wra5","slide":16,"bbox":[906,182,302,403]}
+{"kind":"shape","id":"sh/twvmpwrq","slide":16,"bbox":[934,216,54,28]}
+{"kind":"textbox","id":"sh/qpon6lsj","slide":16,"text":"Y1","textPreview":"Y1","textChars":2,"textLines":1,"bbox":[946,220,30,20]}
+{"kind":"textbox","id":"sh/bqxozq94","slide":16,"text":"30","textPreview":"30","textChars":2,"textLines":1,"bbox":[1004,209,160,43]}
+{"kind":"textbox","id":"sh/vyx43qxs","slide":16,"text":"communities • 10k residents","textPreview":"communities • 10k residents","textChars":27,"textLines":1,"bbox":[934,261,242,30]}
+{"kind":"shape","id":"sh/axonalgn","slide":16,"bbox":[934,309,242,0]}
+{"kind":"shape","id":"sh/hkfm5gfy","slide":16,"bbox":[934,332,54,28]}
+{"kind":"textbox","id":"sh/wj65cbyd","slide":16,"text":"Y3","textPreview":"Y3","textChars":2,"textLines":1,"bbox":[946,336,30,20]}
+{"kind":"textbox","id":"sh/jmho7qx4","slide":16,"text":"600","textPreview":"600","textChars":3,"textLines":1,"bbox":[1004,325,160,43]}
+{"kind":"textbox","id":"sh/ilonelgj","slide":16,"text":"communities • 300k residents","textPreview":"communities • 300k residents","textChars":28,"textLines":1,"bbox":[934,377,242,30]}
+{"kind":"shape","id":"sh/5oz690fa","slide":16,"bbox":[934,425,242,0]}
+{"kind":"shape","id":"sh/4nq5gvyp","slide":16,"bbox":[934,448,54,28]}
+{"kind":"textbox","id":"sh/rqhobax0","slide":16,"text":"Y5","textPreview":"Y5","textChars":2,"textLines":1,"bbox":[946,452,30,20]}
+{"kind":"textbox","id":"sh/6p8ni5gf","slide":16,"text":"4,000","textPreview":"4,000","textChars":5,"textLines":1,"bbox":[1004,441,160,43]}
+{"kind":"textbox","id":"sh/2lc7a90n","slide":16,"text":"communities • 2.5m residents","textPreview":"communities • 2.5m residents","textChars":28,"textLines":1,"bbox":[934,493,242,30]}
+{"kind":"shape","id":"sh/3ml83uh8","slide":16,"bbox":[72,616,270,34]}
+{"kind":"textbox","id":"sh/onupczit","slide":16,"text":"ILLUSTRATIVE OPERATING SCENARIO","textPreview":"ILLUSTRATIVE OPERATING SCENARIO","textChars":31,"textLines":1,"bbox":[84,620,246,26]}
+{"kind":"textbox","id":"sh/p83q54ze","slide":16,"text":"Targets for strategic planning—not current performance, a forecast or financial guidance.","textPreview":"Targets for strategic planning—not current performance, a forecast or financial guidance.","textChars":89,"textLines":1,"bbox":[366,618,792,28]}
+{"kind":"textbox","id":"sh/ehs76p0r","slide":16,"text":"Scenario assumptions: Y1 30 communities / 10k residents → Y5 4,000 / 2.5m.","textPreview":"Scenario assumptions: Y1 30 communities / 10k residents → Y5 4,000 / 2.5m.","textChars":74,"textLines":1,"bbox":[72,683,1030,18]}
+{"kind":"textbox","id":"sh/fi18zuhc","slide":16,"text":"16","textPreview":"16","textChars":2,"textLines":1,"bbox":[1166,681,42,20]}
+{"kind":"chart","id":"ch/y1wri5wf","slide":16,"name":"","chartType":"line","bbox":[102,220,746,300]}
+{"kind":"notes","id":"nt/wbqv3v","slide":16,"text":"This is an operating scenario designed to test capacity, capital needs and milestone logic. It is deliberately not presented as current traction or a guaranteed forecast."}
+{"kind":"slide","id":"sl/n26xwf","slide":17,"title":"NATIONWIDE ROADMAP","textShapes":16}
+{"kind":"shape","id":"sh/o7udc7ut","slide":17,"bbox":[0,0,534,720]}
+{"kind":"textbox","id":"sh/p83elcve","slide":17,"text":"NATIONWIDE ROADMAP","textPreview":"NATIONWIDE ROADMAP","textChars":18,"textLines":1,"bbox":[72,48,360,24]}
+{"kind":"textbox","id":"sh/q9cvehcz","slide":17,"text":"Scale by city cluster,\nnot by national splash.","textPreview":"Scale by city cluster, | not by national splash.","textChars":46,"textLines":2,"bbox":[72,96,400,110]}
+{"kind":"shape","id":"sh/balwnmdk","slide":17,"bbox":[72,246,88,28]}
+{"kind":"textbox","id":"sh/cbudgrup","slide":17,"text":"0–12m","textPreview":"0–12m","textChars":5,"textLines":1,"bbox":[84,250,64,20]}
+{"kind":"textbox","id":"sh/dc3epwva","slide":17,"text":"Prove density","textPreview":"Prove density","textChars":13,"textLines":1,"bbox":[177,243,270,31]}
+{"kind":"textbox","id":"sh/yxwvihcv","slide":17,"text":"Islamabad/Rawalpindi, Lahore, Karachi • 30 communities","textPreview":"Islamabad/Rawalpindi, Lahore, Karachi • 30 communities","textChars":54,"textLines":1,"bbox":[177,279,292,48]}
+{"kind":"shape","id":"sh/zy5wrmdg","slide":17,"bbox":[72,340,88,28]}
+{"kind":"textbox","id":"sh/jel4n61s","slide":17,"text":"12–24m","textPreview":"12–24m","textChars":6,"textLines":1,"bbox":[84,344,64,20]}
+{"kind":"textbox","id":"sh/ydcne107","slide":17,"text":"Replicate","textPreview":"Replicate","textChars":9,"textLines":1,"bbox":[177,337,270,31]}
+{"kind":"textbox","id":"sh/lg3mpgji","slide":17,"text":"Seven-city playbook • 150 communities","textPreview":"Seven-city playbook • 150 communities","textChars":37,"textLines":1,"bbox":[177,373,292,48]}
+{"kind":"shape","id":"sh/kfu5gbix","slide":17,"bbox":[72,434,88,28]}
+{"kind":"textbox","id":"sh/bal4j61g","slide":17,"text":"24–36m","textPreview":"24–36m","textChars":6,"textLines":1,"bbox":[84,438,64,20]}
+{"kind":"textbox","id":"sh/a9s3a10v","slide":17,"text":"Regionalize","textPreview":"Regionalize","textChars":11,"textLines":1,"bbox":[177,431,270,31]}
+{"kind":"textbox","id":"sh/xc3mlwjm","slide":17,"text":"Local operations, Urdu/localization, partner integrations • 600 communities","textPreview":"Local operations, Urdu/localization, partner integrations • 600 communities","textChars":75,"textLines":1,"bbox":[177,467,292,48]}
+{"kind":"shape","id":"sh/wbulcri1","slide":17,"bbox":[72,528,88,28]}
+{"kind":"textbox","id":"sh/v654vqh0","slide":17,"text":"36–60m","textPreview":"36–60m","textChars":6,"textLines":1,"bbox":[84,532,64,20]}
+{"kind":"textbox","id":"sh/u5wnml0f","slide":17,"text":"National platform","textPreview":"National platform","textChars":17,"textLines":1,"bbox":[177,525,270,31]}
+{"kind":"textbox","id":"sh/q107upkn","slide":17,"text":"APIs and ecosystem partnerships • 4,000 communities","textPreview":"APIs and ecosystem partnerships • 4,000 communities","textChars":51,"textLines":1,"bbox":[177,561,292,48]}
+{"kind":"textbox","id":"sh/r298nu18","slide":17,"text":"Roadmap and community counts are illustrative execution targets.","textPreview":"Roadmap and community counts are illustrative execution targets.","textChars":64,"textLines":1,"bbox":[72,683,1030,18]}
+{"kind":"textbox","id":"sh/s3ipwz2d","slide":17,"text":"17","textPreview":"17","textChars":2,"textLines":1,"bbox":[1166,681,42,20]}
+{"kind":"image","id":"im/ipgfmds3","slide":17,"name":"","alt":"Topographic map of Pakistan with connected city nodes","bbox":[480,0,800,720]}
+{"kind":"notes","id":"nt/n26xwf","slide":17,"text":"The nationwide plan is a sequence of proven local markets. Each phase should unlock only after activation, retention and unit-economics gates are met in the previous cluster.\n\nSources:\n• https://www.nfx.com/post/marketplace-expansion-framework"}
+{"kind":"slide","id":"sl/3j56wv","slide":18,"title":"SWOT ANALYSIS","textShapes":18}
+{"kind":"textbox","id":"sh/n254725o","slide":18,"text":"SWOT ANALYSIS","textPreview":"SWOT ANALYSIS","textChars":13,"textLines":1,"bbox":[72,42,360,24]}
+{"kind":"textbox","id":"sh/o3e5g769","slide":18,"text":"A strong wedge—with honest execution constraints.","textPreview":"A strong wedge—with honest execution constraints.","textChars":49,"textLines":1,"bbox":[72,78,1136,96]}
+{"kind":"shape","id":"sh/9o7m9cnu","slide":18,"bbox":[72,182,540,184]}
+{"kind":"textbox","id":"sh/apgnixof","slide":18,"text":"S","textPreview":"S","textChars":1,"textLines":1,"bbox":[96,200,52,60]}
+{"kind":"textbox","id":"sh/bqp4b250","slide":18,"text":"Strengths","textPreview":"Strengths","textChars":9,"textLines":1,"bbox":[164,206,410,38]}
+{"kind":"textbox","id":"sh/wry5k765","slide":18,"text":"• Pakistan-first resident experience\n• Verified community graph\n• Broad working product + installable PWA","textPreview":"• Pakistan-first resident experience | • Verified community graph | • Broad working product + installable PWA","textChars":105,"textLines":3,"bbox":[164,254,410,91]}
+{"kind":"shape","id":"sh/xs7mdcnq","slide":18,"bbox":[640,182,540,184]}
+{"kind":"textbox","id":"sh/ytgnmhob","slide":18,"text":"W","textPreview":"W","textChars":1,"textLines":1,"bbox":[664,200,52,60]}
+{"kind":"textbox","id":"sh/jupofm5w","slide":18,"text":"Weaknesses","textPreview":"Weaknesses","textChars":10,"textLines":1,"bbox":[732,206,410,38]}
+{"kind":"textbox","id":"sh/v2lknql4","slide":18,"text":"• Cold-start in every neighborhood\n• Monetization and CAC/LTV unproven\n• Admin-champion dependence","textPreview":"• Cold-start in every neighborhood | • Monetization and CAC/LTV unproven | • Admin-champion dependence","textChars":98,"textLines":3,"bbox":[732,254,410,91]}
+{"kind":"shape","id":"sh/u1c3ul4j","slide":18,"bbox":[72,392,540,184]}
+{"kind":"textbox","id":"sh/h432p03u","slide":18,"text":"O","textPreview":"O","textChars":1,"textLines":1,"bbox":[96,410,52,60]}
+{"kind":"textbox","id":"sh/w3ulwvm9","slide":18,"text":"Opportunities","textPreview":"Opportunities","textChars":13,"textLines":1,"bbox":[164,416,410,38]}
+{"kind":"textbox","id":"sh/7ylkjqls","slide":18,"text":"• 15.0m urban households\n• Local services and commerce\n• Developer, civic, safety and payment partners","textPreview":"• 15.0m urban households | • Local services and commerce | • Developer, civic, safety and payment partners","textChars":102,"textLines":3,"bbox":[164,464,410,91]}
+{"kind":"shape","id":"sh/mxc3ql47","slide":18,"bbox":[640,392,540,184]}
+{"kind":"textbox","id":"sh/9032l03y","slide":18,"text":"T","textPreview":"T","textChars":1,"textLines":1,"bbox":[664,410,52,60]}
+{"kind":"textbox","id":"sh/8zulsvmd","slide":18,"text":"Threats","textPreview":"Threats","textChars":7,"textLines":1,"bbox":[732,416,410,38]}
+{"kind":"textbox","id":"sh/ru54valc","slide":18,"text":"• Chat-platform inertia\n• Emerging local software category\n• Privacy/security and fragmented procurement","textPreview":"• Chat-platform inertia | • Emerging local software category | • Privacy/security and fragmented procurement","textChars":104,"textLines":3,"bbox":[732,464,410,91]}
+{"kind":"shape","id":"sh/6tw3254r","slide":18,"bbox":[72,614,194,34]}
+{"kind":"textbox","id":"sh/2p0nu9oz","slide":18,"text":"STRATEGIC IMPLICATION","textPreview":"STRATEGIC IMPLICATION","textChars":21,"textLines":1,"bbox":[84,618,170,26]}
+{"kind":"textbox","id":"sh/3q9one5k","slide":18,"text":"Win on trust + weekly utility; scale only after the neighborhood unit is repeatable.","textPreview":"Win on trust + weekly utility; scale only after the neighborhood unit is repeatable.","textChars":84,"textLines":1,"bbox":[290,616,860,29]}
+{"kind":"textbox","id":"sh/ori5wj6p","slide":18,"text":"SWOT combines current product evidence, official market data and explicit planning risks.","textPreview":"SWOT combines current product evidence, official market data and explicit planning risks.","textChars":89,"textLines":1,"bbox":[72,683,1030,18]}
+{"kind":"textbox","id":"sh/psr6pona","slide":18,"text":"18","textPreview":"18","textChars":2,"textLines":1,"bbox":[1166,681,42,20]}
+{"kind":"notes","id":"nt/3j56wv","slide":18,"text":"Investors expect candor. The strengths are product and positioning; the weaknesses are the unproven parts of the business. The strategic answer is disciplined local pilots, trust-and-safety hardening, and staged monetization."}
+{"kind":"slide","id":"sl/cshfee","slide":19,"title":"SCALE GATES","textShapes":31}
+{"kind":"textbox","id":"sh/4zalo7qh","slide":19,"text":"SCALE GATES","textPreview":"SCALE GATES","textChars":11,"textLines":1,"bbox":[72,42,360,24]}
+{"kind":"textbox","id":"sh/3y1kvm9w","slide":19,"text":"Before nationwide scale, prove one repeatable neighborhood unit.","textPreview":"Before nationwide scale, prove one repeatable neighborhood unit.","textChars":64,"textLines":1,"bbox":[72,101,1060,78]}
+{"kind":"shape","id":"sh/ixs3mh8b","slide":19,"bbox":[72,203,590,399]}
+{"kind":"textbox","id":"sh/hwz2tcrq","slide":19,"text":"90-DAY PILOT SCORECARD","textPreview":"90-DAY PILOT SCORECARD","textChars":22,"textLines":1,"bbox":[104,232,300,24]}
+{"kind":"textbox","id":"sh/wvq1k7q5","slide":19,"text":"≥65%","textPreview":"≥65%","textChars":4,"textLines":1,"bbox":[104,287,92,40]}
+{"kind":"textbox","id":"sh/vuhkr290","slide":19,"text":"households activated","textPreview":"households activated","textChars":20,"textLines":1,"bbox":[200,289,150,45]}
+{"kind":"shape","id":"sh/ut8jix8f","slide":19,"bbox":[104,346,232,0]}
+{"kind":"textbox","id":"sh/9sz2psru","slide":19,"text":"≥45%","textPreview":"≥45%","textChars":4,"textLines":1,"bbox":[370,287,92,40]}
+{"kind":"textbox","id":"sh/8rq1gnq9","slide":19,"text":"30-day resident retention","textPreview":"30-day resident retention","textChars":25,"textLines":1,"bbox":[466,289,150,45]}
+{"kind":"shape","id":"sh/i10nahwz","slide":19,"bbox":[370,346,232,0]}
+{"kind":"textbox","id":"sh/j29ojmdk","slide":19,"text":"≥60%","textPreview":"≥60%","textChars":4,"textLines":1,"bbox":[104,373,92,40]}
+{"kind":"textbox","id":"sh/k3i5crep","slide":19,"text":"new invitations organic","textPreview":"new invitations organic","textChars":23,"textLines":1,"bbox":[200,375,150,45]}
+{"kind":"shape","id":"sh/54b6lwva","slide":19,"bbox":[104,432,232,0]}
+{"kind":"textbox","id":"sh/ad0n6hwn","slide":19,"text":"≥70%","textPreview":"≥70%","textChars":4,"textLines":1,"bbox":[370,373,92,40]}
+{"kind":"textbox","id":"sh/ve9ofmd8","slide":19,"text":"weekly admin activity","textPreview":"weekly admin activity","textChars":21,"textLines":1,"bbox":[466,375,150,45]}
+{"kind":"shape","id":"sh/wfi58ret","slide":19,"bbox":[370,432,232,0]}
+{"kind":"textbox","id":"sh/xgr6hwve","slide":19,"text":"<5m","textPreview":"<5m","textChars":3,"textLines":1,"bbox":[104,459,92,40]}
+{"kind":"textbox","id":"sh/m9gn2xwr","slide":19,"text":"safety-alert delivery","textPreview":"safety-alert delivery","textChars":21,"textLines":1,"bbox":[200,461,150,45]}
+{"kind":"shape","id":"sh/nap4b2dc","slide":19,"bbox":[104,518,232,0]}
+{"kind":"textbox","id":"sh/re5kjyt4","slide":19,"text":"<24h","textPreview":"<24h","textChars":4,"textLines":1,"bbox":[370,459,92,40]}
+{"kind":"textbox","id":"sh/qdc3adcj","slide":19,"text":"marketplace first response","textPreview":"marketplace first response","textChars":26,"textLines":1,"bbox":[466,461,150,45]}
+{"kind":"shape","id":"sh/dgn2l8bu","slide":19,"bbox":[370,518,232,0]}
+{"kind":"shape","id":"sh/cfelc3u9","slide":19,"bbox":[690,203,518,399]}
+{"kind":"textbox","id":"sh/zi5knit0","slide":19,"text":"RISK → MITIGATION","textPreview":"RISK → MITIGATION","textChars":17,"textLines":1,"bbox":[722,232,270,24]}
+{"kind":"textbox","id":"sh/ehw3edcf","slide":19,"text":"Cold start","textPreview":"Cold start","textChars":10,"textLines":1,"bbox":[722,285,150,30]}
+{"kind":"textbox","id":"sh/1kn2psb6","slide":19,"text":"→","textPreview":"→","textChars":1,"textLines":1,"bbox":[874,285,32,30]}
+{"kind":"textbox","id":"sh/0jelgnul","slide":19,"text":"Admin-led onboarding + seeded essential utility","textPreview":"Admin-led onboarding + seeded essential utility","textChars":47,"textLines":1,"bbox":[915,283,256,50]}
+{"kind":"shape","id":"sh/fmlkbetw","slide":19,"bbox":[722,342,449,0]}
+{"kind":"textbox","id":"sh/ulsj2tcb","slide":19,"text":"Trust incident","textPreview":"Trust incident","textChars":14,"textLines":1,"bbox":[722,358,150,30]}
+{"kind":"textbox","id":"sh/krqhcfa9","slide":19,"text":"→","textPreview":"→","textChars":1,"textLines":1,"bbox":[874,358,32,30]}
+{"kind":"textbox","id":"sh/5szilkre","slide":19,"text":"Least-privilege roles + moderation + audit","textPreview":"Least-privilege roles + moderation + audit","textChars":42,"textLines":1,"bbox":[915,356,256,50]}
+{"kind":"shape","id":"sh/ip8zaps3","slide":19,"bbox":[722,415,449,0]}
+{"kind":"textbox","id":"sh/jqh0ja9o","slide":19,"text":"Weak monetization","textPreview":"Weak monetization","textChars":17,"textLines":1,"bbox":[722,431,150,30]}
+{"kind":"textbox","id":"sh/wnqh8fax","slide":19,"text":"→","textPreview":"→","textChars":1,"textLines":1,"bbox":[874,431,32,30]}
+{"kind":"textbox","id":"sh/xozihkri","slide":19,"text":"Delay paid layers until engagement gates","textPreview":"Delay paid layers until engagement gates","textChars":40,"textLines":1,"bbox":[915,429,256,50]}
+{"kind":"shape","id":"sh/a1oz65sr","slide":19,"bbox":[722,488,449,0]}
+{"kind":"textbox","id":"sh/vmx0fa9c","slide":19,"text":"Fragmented procurement","textPreview":"Fragmented procurement","textChars":22,"textLines":1,"bbox":[722,504,150,30]}
+{"kind":"textbox","id":"sh/gjahkza1","slide":19,"text":"→","textPreview":"→","textChars":1,"textLines":1,"bbox":[874,504,32,30]}
+{"kind":"textbox","id":"sh/hkjit4rm","slide":19,"text":"Standardized pilot contract + proof pack","textPreview":"Standardized pilot contract + proof pack","textChars":40,"textLines":1,"bbox":[915,502,256,50]}
+{"kind":"shape","id":"sh/dsb6pc32","slide":19,"bbox":[481,626,318,34]}
+{"kind":"textbox","id":"sh/sr25w7mh","slide":19,"text":"GATES, NOT VANITY METRICS","textPreview":"GATES, NOT VANITY METRICS","textChars":25,"textLines":1,"bbox":[493,630,294,26]}
+{"kind":"textbox","id":"sh/rq9on2lw","slide":19,"text":"All pilot metrics are proposed targets for validation, not current performance.","textPreview":"All pilot metrics are proposed targets for validation, not current performance.","textChars":79,"textLines":1,"bbox":[72,683,1030,18]}
+{"kind":"textbox","id":"sh/qp0nux4b","slide":19,"text":"19","textPreview":"19","textChars":2,"textLines":1,"bbox":[1166,681,42,20]}
+{"kind":"notes","id":"nt/cshfee","slide":19,"text":"These are decision gates. The goal of a pilot is not downloads; it is household activation, retention, admin habit, organic invitations, fast safety delivery and useful marketplace response."}
+{"kind":"slide","id":"sl/p10p2z","slide":20,"title":"THE PARTNERSHIP CASE","textShapes":16}
+{"kind":"textbox","id":"sh/7elgje9k","slide":20,"text":"THE PARTNERSHIP CASE","textPreview":"THE PARTNERSHIP CASE","textChars":20,"textLines":1,"bbox":[72,42,360,24]}
+{"kind":"textbox","id":"sh/8fuhsjap","slide":20,"text":"Build the category with us.","textPreview":"Build the category with us.","textChars":27,"textLines":1,"bbox":[72,78,1136,96]}
+{"kind":"textbox","id":"sh/9g3yl4ra","slide":20,"text":"One pilot. One cluster. A national network.","textPreview":"One pilot. One cluster. A national network.","textChars":43,"textLines":1,"bbox":[72,159,760,42]}
+{"kind":"textbox","id":"sh/ypszmpsn","slide":20,"text":"ASK","textPreview":"ASK","textChars":3,"textLines":1,"bbox":[1000,70,210,126]}
+{"kind":"shape","id":"sh/za1gvu98","slide":20,"bbox":[72,244,1136,102]}
+{"kind":"shape","id":"sh/kbahozat","slide":20,"bbox":[72,244,10,102]}
+{"kind":"textbox","id":"sh/lcjyx4re","slide":20,"text":"SOCIETY LEADERS","textPreview":"SOCIETY LEADERS","textChars":15,"textLines":1,"bbox":[108,262,210,20]}
+{"kind":"textbox","id":"sh/al8fipsr","slide":20,"text":"Run a 90-day pilot","textPreview":"Run a 90-day pilot","textChars":18,"textLines":1,"bbox":[108,291,300,34]}
+{"kind":"textbox","id":"sh/bm1gru9c","slide":20,"text":"Nominate an admin champion, verify households, and measure the scorecard.","textPreview":"Nominate an admin champion, verify households, and measure the scorecard.","textChars":73,"textLines":1,"bbox":[462,274,690,52]}
+{"kind":"shape","id":"sh/vetozqto","slide":20,"bbox":[72,367,1136,102]}
+{"kind":"shape","id":"sh/udk76lcj","slide":20,"bbox":[72,367,10,102]}
+{"kind":"textbox","id":"sh/h0v61gbu","slide":20,"text":"STRATEGIC PARTNERS","textPreview":"STRATEGIC PARTNERS","textChars":18,"textLines":1,"bbox":[108,385,210,20]}
+{"kind":"textbox","id":"sh/wz2p8bu9","slide":20,"text":"Connect critical services","textPreview":"Connect critical services","textChars":25,"textLines":1,"bbox":[108,414,300,34]}
+{"kind":"textbox","id":"sh/j2d83qt0","slide":20,"text":"Explore safety, local services, payments, developer or civic integrations.","textPreview":"Explore safety, local services, payments, developer or civic integrations.","textChars":74,"textLines":1,"bbox":[462,397,690,52]}
+{"kind":"shape","id":"sh/i147alcf","slide":20,"bbox":[72,490,1136,102]}
+{"kind":"shape","id":"sh/54vq50b6","slide":20,"bbox":[72,490,10,102]}
+{"kind":"textbox","id":"sh/43mpcval","slide":20,"text":"INVESTORS","textPreview":"INVESTORS","textChars":9,"textLines":1,"bbox":[108,508,210,20]}
+{"kind":"textbox","id":"sh/z69or6tg","slide":20,"text":"Fund the repeatable unit","textPreview":"Fund the repeatable unit","textChars":24,"textLines":1,"bbox":[108,537,300,34]}
+{"kind":"textbox","id":"sh/y507y1cb","slide":20,"text":"Product hardening, trust & safety, city-cluster expansion and monetization experiments.","textPreview":"Product hardening, trust & safety, city-cluster expansion and monetization experiments.","textChars":87,"textLines":1,"bbox":[462,520,690,52]}
+{"kind":"shape","id":"sh/mdsjmt0v","slide":20,"bbox":[402,626,476,34]}
+{"kind":"textbox","id":"sh/ne10vyhg","slide":20,"text":"PRIVATE RESIDENT TRUST REMAINS NON-NEGOTIABLE","textPreview":"PRIVATE RESIDENT TRUST REMAINS NON-NEGOTIABLE","textChars":45,"textLines":1,"bbox":[414,630,452,26]}
+{"kind":"textbox","id":"sh/ofa1o3i1","slide":20,"text":"Specific funding round, team and traction details are intentionally not invented.","textPreview":"Specific funding round, team and traction details are intentionally not invented.","textChars":81,"textLines":1,"bbox":[72,683,1030,18]}
+{"kind":"textbox","id":"sh/90jix8zm","slide":20,"text":"20","textPreview":"20","textChars":2,"textLines":1,"bbox":[1166,681,42,20]}
+{"kind":"notes","id":"nt/p10p2z","slide":20,"text":"Tailor the ask to the room. Customers can sponsor pilots, partners can deepen service utility, and investors can fund the transition from a working product to a repeatable city-cluster model. Insert verified founder, traction, round-size and use-of-funds details before formal fundraising circulation.\n\nSources:\n• Narrative structure informed by https://sequoiacap.com/article/writing-a-business-plan/"}
+{"kind":"slide","id":"sl/8p6qr9","slide":21,"title":"mohalla","textShapes":5}
+{"kind":"shape","id":"sh/x4fml8rq","slide":21,"bbox":[762,0,518,720]}
+{"kind":"shape","id":"sh/c3mlc3q5","slide":21,"bbox":[840.9,85.8,17.25,17.25]}
+{"kind":"shape","id":"sh/z6x4ni9w","slide":21,"bbox":[858.15,85.8,17.25,17.25]}
+{"kind":"shape","id":"sh/y5o3ed8b","slide":21,"bbox":[840.9,85.8,34.5,0]}
+{"kind":"shape","id":"sh/l8fmpsrm","slide":21,"bbox":[834,72,13.8,13.8]}
+{"kind":"shape","id":"sh/k76lgnq1","slide":21,"bbox":[851.25,89.25,13.8,13.8]}
+{"kind":"shape","id":"sh/7ax4r29s","slide":21,"bbox":[868.5,72,13.8,13.8]}
+{"kind":"textbox","id":"sh/m9o3ix87","slide":21,"text":"mohalla","textPreview":"mohalla","textChars":7,"textLines":1,"bbox":[894,66,240,42]}
+{"kind":"textbox","id":"sh/8bq94fqx","slide":21,"text":"The digital front door\nto every neighborhood\nin Pakistan.","textPreview":"The digital front door | to every neighborhood | in Pakistan.","textChars":57,"textLines":3,"bbox":[834,174,370,205]}
+{"kind":"shape","id":"sh/9czaxk7i","slide":21,"bbox":[834,414,98,7]}
+{"kind":"textbox","id":"sh/m98r258r","slide":21,"text":"Pilot  •  Partner  •  Invest","textPreview":"Pilot  •  Partner  •  Invest","textChars":28,"textLines":1,"bbox":[834,452,350,38]}
+{"kind":"shape","id":"sh/nahsvapc","slide":21,"bbox":[834,531,284,42]}
+{"kind":"textbox","id":"sh/wza98zq9","slide":21,"text":"mohallapk.vercel.app","textPreview":"mohallapk.vercel.app","textChars":20,"textLines":1,"bbox":[846,535,260,34]}
+{"kind":"textbox","id":"sh/x0ja147e","slide":21,"text":"Your neighborhood, connected.","textPreview":"Your neighborhood, connected.","textChars":29,"textLines":1,"bbox":[834,616,330,30]}
+{"kind":"image","id":"im/vuxs7alw","slide":21,"name":"","alt":"A connected Pakistani neighborhood street at dusk","bbox":[0,0,1280,720]}
+{"kind":"notes","id":"nt/8p6qr9","slide":21,"text":"Close on the human outcome: a trusted digital front door for daily neighborhood life. Invite the audience to choose the next action—pilot, partner or invest."}
+{"kind":"slide","id":"sl/5fh979","slide":22,"title":"APPENDIX","textShapes":10}
+{"kind":"textbox","id":"sh/6x4bihof","slide":22,"text":"APPENDIX","textPreview":"APPENDIX","textChars":8,"textLines":1,"bbox":[72,42,360,24]}
+{"kind":"textbox","id":"sh/t0vutcn6","slide":22,"text":"Sources, methodology and claim boundary.","textPreview":"Sources, methodology and claim boundary.","textChars":40,"textLines":1,"bbox":[72,78,1136,96]}
+{"kind":"shape","id":"sh/8zmtk76l","slide":22,"bbox":[72,180,540,431]}
+{"kind":"shape","id":"sh/jutcn254","slide":22,"bbox":[640,180,568,431]}
+{"kind":"textbox","id":"sh/ytkbexoj","slide":22,"text":"PRIMARY DATA","textPreview":"PRIMARY DATA","textChars":12,"textLines":1,"bbox":[104,211,220,24]}
+{"kind":"textbox","id":"sh/lwvupcnu","slide":22,"text":"Pakistan Bureau of Statistics\n7th Population & Housing Census 2023\n\nPakistan Economic Survey 2024–25\nInformation Technology & Telecommunication\n\nState Bank of Pakistan\nAnnual Payment Systems Review FY2024–25\n\nUMT / Journal of Applied and Emerging Sciences\nCommunity interaction research in Lahore","textPreview":"Pakistan Bureau of Statistics | 7th Population & Housing Census 2023 |  | Pakistan Economic Survey 2024–25 | Information Technology & Tel...","textChars":296,"textLines":11,"bbox":[104,252,462,300]}
+{"kind":"textbox","id":"sh/kv2tg76p","slide":22,"text":"FRAMEWORKS + CATEGORY","textPreview":"FRAMEWORKS + CATEGORY","textChars":21,"textLines":1,"bbox":[672,211,260,24]}
+{"kind":"textbox","id":"sh/b6tsji5s","slide":22,"text":"Sequoia: company-purpose and pitch narrative\n\na16z: local-network and marketplace metrics\n\nNFX: city-cluster expansion logic\n\nPakistan category references:\nManzhil • SmartGate • HSMP • Nizam • Kunji • Hamari Society • MySociety","textPreview":"Sequoia: company-purpose and pitch narrative |  | a16z: local-network and marketplace metrics |  | NFX: city-cluster expansion logic |  |...","textChars":227,"textLines":8,"bbox":[672,252,474,236]}
+{"kind":"shape","id":"sh/a5kbaxo7","slide":22,"bbox":[672,485,474,2]}
+{"kind":"textbox","id":"sh/cryhofu1","slide":22,"text":"CLAIM BOUNDARY","textPreview":"CLAIM BOUNDARY","textChars":14,"textLines":1,"bbox":[672,507,220,22]}
+{"kind":"textbox","id":"sh/xs7ixkvm","slide":22,"text":"Market census facts are sourced. SAM, SOM, growth and pilot metrics are explicitly illustrative. No users, revenue, funding or team credentials are claimed.","textPreview":"Market census facts are sourced. SAM, SOM, growth and pilot metrics are explicitly illustrative. No users, revenue, funding or team crede...","textChars":156,"textLines":1,"bbox":[672,538,474,58]}
+{"kind":"textbox","id":"sh/qpwzm5cv","slide":22,"text":"Full URLs and slide-specific citations are included in presenter notes.","textPreview":"Full URLs and slide-specific citations are included in presenter notes.","textChars":71,"textLines":1,"bbox":[72,683,1030,18]}
+{"kind":"textbox","id":"sh/bq50vadg","slide":22,"text":"22","textPreview":"22","textChars":2,"textLines":1,"bbox":[1166,681,42,20]}
+{"kind":"notes","id":"nt/5fh979","slide":22,"text":"Full source list and methodology. Before external fundraising circulation, add verified founder biographies, current traction, revenue, burn, runway, round size and detailed use of funds.\n\nSources:\n• https://www.pbs.gov.pk/sites/default/files/population/2023/Pakistan.pdf\n• https://finance.gov.pk/survey/chapter_25/15_Information_Technology.pdf\n• https://www.sbp.org.pk/PS/PDF/Annual-Payment-Systems-Review-FY25.pdf\n• https://journals.umt.edu.pk/index.php/JAABE/article/view/4426\n• https://sequoiacap.com/article/writing-a-business-plan/\n• https://a16z.com/the-dynamics-of-network-effects/\n• https://a16z.com/13-metrics-for-marketplace-companies/\n• https://a16z.com/16-ways-to-measure-network-effects/\n• https://www.nfx.com/post/marketplace-expansion-framework"}

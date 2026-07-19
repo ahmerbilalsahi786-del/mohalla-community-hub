@@ -1,0 +1,838 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Mohalla — Outside Your Gate</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@500;600;700;800;900&family=Poppins:wght@500;600;700;800&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --cream: #F4EEE6;
+      --ink: #172033;
+      --coral: #FF6B5E;
+      --sky: #72CBE8;
+    }
+
+    * { box-sizing: border-box; }
+
+    html, body {
+      margin: 0;
+      width: 1080px;
+      background: #D8D8D8;
+      color: var(--ink);
+      font-family: "Inter Tight", Arial, sans-serif;
+    }
+
+    body.preview-one { height: 1920px; overflow: hidden; }
+
+    .page {
+      position: relative;
+      width: 1080px;
+      height: 1920px;
+      overflow: hidden;
+      background: var(--cream);
+      isolation: isolate;
+    }
+
+    .page + .page { margin-top: 24px; }
+    body.preview-one .page + .page { margin-top: 0; }
+
+    .page::after {
+      content: "";
+      position: absolute;
+      inset: 40px;
+      border: 3px solid var(--ink);
+      pointer-events: none;
+      z-index: 50;
+    }
+
+    .topbar {
+      position: absolute;
+      top: 78px;
+      left: 82px;
+      right: 82px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      z-index: 20;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-family: "Poppins", Arial, sans-serif;
+      font-size: 42px;
+      font-weight: 800;
+      letter-spacing: -2px;
+      line-height: 1;
+    }
+
+    .brand svg { width: 52px; height: 45px; overflow: visible; }
+
+    .counter {
+      display: flex;
+      align-items: center;
+      gap: 11px;
+      font-size: 18px;
+      font-weight: 800;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+    }
+
+    .counter i { display: block; width: 54px; height: 4px; background: var(--coral); }
+
+    .eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 12px;
+      padding: 11px 15px;
+      background: var(--ink);
+      color: var(--cream);
+      font-size: 17px;
+      font-weight: 800;
+      letter-spacing: 1.7px;
+      text-transform: uppercase;
+      line-height: 1;
+    }
+
+    .eyebrow b { width: 10px; height: 10px; background: var(--coral); }
+
+    h1, h2, p { margin: 0; }
+
+    .headline {
+      font-family: "Inter Tight", Arial, sans-serif;
+      font-weight: 900;
+      letter-spacing: -6px;
+      line-height: .91;
+      text-transform: uppercase;
+    }
+
+    .accent { color: var(--coral); }
+    .sky { color: var(--sky); }
+
+    .footline {
+      position: absolute;
+      left: 82px;
+      right: 82px;
+      bottom: 86px;
+      display: flex;
+      justify-content: space-between;
+      border-top: 3px solid currentColor;
+      padding-top: 18px;
+      font-size: 17px;
+      font-weight: 800;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      z-index: 20;
+    }
+
+    .arrow-right {
+      display: inline-block;
+      width: 78px;
+      height: 24px;
+      position: relative;
+    }
+
+    .arrow-right::before {
+      content: "";
+      position: absolute;
+      left: 0;
+      right: 5px;
+      top: 10px;
+      height: 4px;
+      background: currentColor;
+    }
+
+    .arrow-right::after {
+      content: "";
+      position: absolute;
+      right: 0;
+      top: 4px;
+      width: 16px;
+      height: 16px;
+      border-top: 4px solid currentColor;
+      border-right: 4px solid currentColor;
+      transform: rotate(45deg);
+    }
+
+    /* 01 — question hook */
+    .p1 .copy { position: absolute; top: 205px; left: 82px; right: 82px; z-index: 12; }
+    .p1 .headline { margin-top: 32px; font-size: 111px; max-width: 930px; }
+    .p1 .headline .question { color: var(--coral); }
+
+    .gate-stage {
+      position: absolute;
+      left: 82px;
+      right: 82px;
+      top: 915px;
+      height: 690px;
+      overflow: hidden;
+      background: var(--sky);
+      border: 4px solid var(--ink);
+    }
+
+    .gate-sky-copy {
+      position: absolute;
+      left: 50%;
+      top: 350px;
+      transform: translateX(-50%);
+      width: 100px;
+      color: var(--ink);
+      font-size: 14px;
+      font-weight: 800;
+      letter-spacing: 2px;
+      text-align: center;
+      text-transform: uppercase;
+      z-index: 7;
+    }
+
+    .gate-panel {
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      width: 405px;
+      background: var(--ink);
+      z-index: 5;
+    }
+
+    .gate-panel.left { left: 0; }
+    .gate-panel.right { right: 0; }
+
+    .gate-panel::before,
+    .gate-panel::after {
+      content: "";
+      position: absolute;
+      left: 50px;
+      right: 50px;
+      height: 78px;
+      border-top: 4px solid var(--cream);
+      border-bottom: 4px solid var(--cream);
+    }
+
+    .gate-panel::before { top: 150px; }
+    .gate-panel::after { bottom: 160px; }
+
+    .gate-panel.left .gate-cut,
+    .gate-panel.right .gate-cut {
+      position: absolute;
+      top: 310px;
+      width: 170px;
+      height: 170px;
+      border: 4px solid var(--cream);
+    }
+
+    .gate-panel.left .gate-cut { right: 55px; }
+    .gate-panel.right .gate-cut { left: 55px; }
+
+    .gate-handle {
+      position: absolute;
+      top: 260px;
+      width: 22px;
+      height: 110px;
+      background: var(--coral);
+      z-index: 8;
+    }
+
+    .gate-handle.left { left: 376px; }
+    .gate-handle.right { right: 376px; }
+
+    .live-ping {
+      position: absolute;
+      left: 50%;
+      top: 170px;
+      width: 150px;
+      height: 150px;
+      transform: translateX(-50%);
+      border: 4px solid var(--ink);
+      border-radius: 50%;
+      z-index: 7;
+    }
+
+    .live-ping::before {
+      content: "";
+      position: absolute;
+      inset: 26px;
+      border: 4px solid var(--ink);
+      border-radius: 50%;
+    }
+
+    .live-ping::after {
+      content: "";
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      width: 34px;
+      height: 34px;
+      transform: translate(-50%, -50%);
+      background: var(--coral);
+      border: 4px solid var(--ink);
+      border-radius: 50%;
+    }
+
+    /* 02 — safety */
+    .p2 { background: var(--sky); }
+    .p2 .copy { position: absolute; top: 222px; left: 82px; right: 82px; z-index: 15; }
+    .p2 .headline { margin-top: 32px; font-size: 130px; max-width: 850px; }
+    .p2 .subhead { margin-top: 27px; font-size: 37px; font-weight: 700; letter-spacing: -1.2px; }
+
+    .siren {
+      position: absolute;
+      top: 790px;
+      left: 82px;
+      width: 330px;
+      height: 330px;
+      border: 4px solid var(--ink);
+      border-radius: 50%;
+      z-index: 4;
+    }
+
+    .siren::before {
+      content: "";
+      position: absolute;
+      inset: 54px;
+      border: 4px solid var(--ink);
+      border-radius: 50%;
+    }
+
+    .siren-core {
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      width: 110px;
+      height: 126px;
+      transform: translate(-50%, -50%);
+      background: var(--coral);
+      border: 4px solid var(--ink);
+      border-radius: 60px 60px 12px 12px;
+    }
+
+    .siren-core::after {
+      content: "";
+      position: absolute;
+      left: -25px;
+      bottom: -24px;
+      width: 152px;
+      height: 26px;
+      background: var(--ink);
+    }
+
+    .alert-card {
+      position: absolute;
+      top: 820px;
+      left: 356px;
+      width: 642px;
+      min-height: 520px;
+      padding: 50px;
+      background: var(--cream);
+      border: 4px solid var(--ink);
+      z-index: 8;
+    }
+
+    .alert-meta { display: flex; align-items: center; justify-content: space-between; }
+    .alert-label { padding: 10px 14px; background: var(--coral); color: var(--ink); font-size: 18px; font-weight: 900; letter-spacing: 1.5px; text-transform: uppercase; }
+    .alert-time { font-size: 18px; font-weight: 800; letter-spacing: 1px; }
+    .alert-card h2 { margin-top: 46px; font-size: 64px; line-height: .95; letter-spacing: -3px; text-transform: uppercase; }
+    .alert-card p { margin-top: 28px; font-size: 31px; line-height: 1.18; font-weight: 600; }
+    .verified-row { display: flex; align-items: center; gap: 12px; margin-top: 42px; padding-top: 24px; border-top: 3px solid var(--ink); font-size: 18px; font-weight: 800; text-transform: uppercase; letter-spacing: 1px; }
+    .verified-row b { display: grid; place-items: center; width: 32px; height: 32px; background: var(--sky); border: 3px solid var(--ink); border-radius: 50%; }
+
+    /* 03 — event */
+    .p3 .copy { position: absolute; top: 222px; left: 82px; right: 82px; z-index: 15; }
+    .p3 .headline { margin-top: 31px; font-size: 105px; max-width: 920px; }
+    .p3 .subhead { margin-top: 29px; font-size: 35px; font-weight: 700; }
+
+    .event-stage { position: absolute; top: 850px; left: 82px; right: 82px; height: 590px; }
+    .calendar {
+      position: absolute;
+      left: 0;
+      top: 0;
+      width: 410px;
+      height: 505px;
+      background: var(--coral);
+      border: 4px solid var(--ink);
+    }
+    .calendar-top { height: 94px; display: flex; align-items: center; justify-content: space-between; padding: 0 30px; background: var(--ink); color: var(--cream); font-size: 19px; font-weight: 800; letter-spacing: 1.5px; text-transform: uppercase; }
+    .calendar-date { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 315px; }
+    .calendar-date strong { font-size: 190px; line-height: .8; letter-spacing: -13px; }
+    .calendar-date span { margin-top: 26px; font-size: 30px; font-weight: 900; letter-spacing: 3px; text-transform: uppercase; }
+    .calendar-bottom { margin: 0 30px; border-top: 3px solid var(--ink); padding-top: 17px; display: flex; justify-content: space-between; font-size: 16px; font-weight: 900; text-transform: uppercase; letter-spacing: 1px; }
+
+    .event-ticket {
+      position: absolute;
+      right: 0;
+      top: 56px;
+      width: 535px;
+      height: 420px;
+      background: var(--sky);
+      border: 4px solid var(--ink);
+      padding: 42px 46px;
+    }
+    .event-ticket::before,
+    .event-ticket::after {
+      content: "";
+      position: absolute;
+      left: -19px;
+      width: 36px;
+      height: 36px;
+      background: var(--cream);
+      border: 4px solid var(--ink);
+      border-radius: 50%;
+    }
+    .event-ticket::before { top: 110px; }
+    .event-ticket::after { bottom: 110px; }
+    .ticket-kicker { font-size: 18px; font-weight: 900; letter-spacing: 2px; text-transform: uppercase; }
+    .event-ticket h2 { margin-top: 42px; font-size: 70px; line-height: .9; letter-spacing: -3px; text-transform: uppercase; }
+    .ticket-info { margin-top: 38px; padding-top: 24px; border-top: 3px solid var(--ink); display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
+    .ticket-info div { font-size: 16px; font-weight: 900; letter-spacing: 1px; text-transform: uppercase; }
+    .ticket-info strong { display: block; margin-top: 6px; font-size: 25px; letter-spacing: -1px; text-transform: none; }
+    .confetti { position: absolute; width: 18px; height: 70px; background: var(--ink); }
+    .confetti.c1 { right: 120px; top: -18px; transform: rotate(19deg); }
+    .confetti.c2 { right: 15px; top: 510px; height: 18px; width: 70px; background: var(--coral); transform: rotate(-12deg); }
+    .confetti.c3 { left: 448px; top: 490px; width: 28px; height: 28px; border-radius: 50%; background: var(--sky); border: 3px solid var(--ink); }
+
+    /* 04 — nearby help */
+    .p4 { background: var(--sky); }
+    .p4 .copy { position: absolute; top: 222px; left: 82px; right: 82px; z-index: 15; }
+    .p4 .headline { margin-top: 32px; font-size: 125px; max-width: 870px; }
+    .p4 .subhead { margin-top: 28px; font-size: 36px; font-weight: 700; }
+
+    .help-stage { position: absolute; top: 820px; left: 82px; right: 82px; height: 650px; }
+    .pin {
+      position: absolute;
+      left: 0;
+      top: 20px;
+      width: 320px;
+      height: 410px;
+      background: var(--coral);
+      border: 4px solid var(--ink);
+      border-radius: 170px 170px 170px 18px;
+      transform: rotate(-45deg);
+    }
+    .pin::before {
+      content: "";
+      position: absolute;
+      left: 90px;
+      top: 86px;
+      width: 130px;
+      height: 130px;
+      background: var(--cream);
+      border: 4px solid var(--ink);
+      border-radius: 50%;
+    }
+    .wrench {
+      position: absolute;
+      left: 137px;
+      top: 108px;
+      width: 126px;
+      height: 390px;
+      transform: rotate(42deg);
+      z-index: 5;
+    }
+    .helper-card {
+      position: absolute;
+      right: 0;
+      top: 52px;
+      width: 600px;
+      height: 500px;
+      background: var(--cream);
+      border: 4px solid var(--ink);
+      padding: 45px;
+      z-index: 7;
+    }
+    .helper-top { display: flex; align-items: center; gap: 24px; }
+    .avatar { display: grid; place-items: center; width: 102px; height: 102px; background: var(--sky); border: 4px solid var(--ink); border-radius: 50%; font-size: 45px; font-weight: 900; }
+    .helper-top h2 { font-size: 44px; line-height: 1; letter-spacing: -2px; }
+    .helper-top p { margin-top: 10px; font-size: 20px; font-weight: 700; }
+    .check { margin-left: auto; display: grid; place-items: center; width: 48px; height: 48px; background: var(--coral); border: 3px solid var(--ink); border-radius: 50%; font-size: 26px; font-weight: 900; }
+    .helper-tags { display: flex; gap: 12px; margin-top: 38px; }
+    .helper-tags span { padding: 10px 13px; border: 3px solid var(--ink); font-size: 15px; font-weight: 900; letter-spacing: .8px; text-transform: uppercase; }
+    .helper-quote { margin-top: 37px; padding-top: 28px; border-top: 3px solid var(--ink); font-size: 29px; line-height: 1.22; font-weight: 700; }
+    .helper-action { margin-top: 34px; display: flex; align-items: center; justify-content: space-between; padding: 18px 22px; background: var(--ink); color: var(--cream); font-size: 19px; font-weight: 900; letter-spacing: 1.2px; text-transform: uppercase; }
+
+    /* 05 — market */
+    .p5 .copy { position: absolute; top: 222px; left: 82px; right: 82px; z-index: 15; }
+    .p5 .headline { margin-top: 32px; font-size: 115px; max-width: 900px; }
+    .p5 .subhead { margin-top: 28px; font-size: 36px; font-weight: 700; }
+    .market-stage { position: absolute; top: 820px; left: 82px; right: 82px; height: 680px; }
+    .bag {
+      position: absolute;
+      left: 0;
+      top: 90px;
+      width: 360px;
+      height: 430px;
+      background: var(--coral);
+      border: 4px solid var(--ink);
+    }
+    .bag::before {
+      content: "";
+      position: absolute;
+      left: 82px;
+      top: -104px;
+      width: 188px;
+      height: 135px;
+      border: 28px solid var(--ink);
+      border-bottom: 0;
+      border-radius: 100px 100px 0 0;
+    }
+    .bag-mark { position: absolute; left: 50%; top: 190px; transform: translate(-50%, -50%); width: 124px; height: 104px; }
+    .bag-copy { position: absolute; left: 32px; right: 32px; bottom: 30px; border-top: 3px solid var(--ink); padding-top: 17px; font-size: 17px; font-weight: 900; text-align: center; letter-spacing: 1.4px; text-transform: uppercase; }
+
+    .product-card {
+      position: absolute;
+      right: 0;
+      width: 530px;
+      height: 250px;
+      border: 4px solid var(--ink);
+      padding: 30px;
+      display: grid;
+      grid-template-columns: 150px 1fr;
+      gap: 28px;
+    }
+    .product-card.one { top: 0; background: var(--sky); }
+    .product-card.two { top: 288px; right: 90px; background: var(--cream); }
+    .product-thumb { position: relative; width: 150px; height: 184px; background: var(--cream); border: 3px solid var(--ink); overflow: hidden; }
+    .two .product-thumb { background: var(--sky); }
+    .chair { position: absolute; left: 38px; top: 48px; width: 76px; height: 78px; border: 10px solid var(--ink); border-top-width: 24px; }
+    .chair::before, .chair::after { content: ""; position: absolute; bottom: -58px; width: 9px; height: 55px; background: var(--ink); }
+    .chair::before { left: -8px; transform: rotate(8deg); }
+    .chair::after { right: -8px; transform: rotate(-8deg); }
+    .plant { position: absolute; left: 48px; bottom: 24px; width: 58px; height: 55px; background: var(--coral); border: 3px solid var(--ink); }
+    .plant::before, .plant::after { content: ""; position: absolute; bottom: 46px; width: 52px; height: 76px; background: var(--ink); border-radius: 52px 0 52px 0; }
+    .plant::before { left: -24px; transform: rotate(-30deg); }
+    .plant::after { right: -24px; transform: scaleX(-1) rotate(-30deg); }
+    .product-info { display: flex; flex-direction: column; }
+    .product-tag { font-size: 15px; font-weight: 900; letter-spacing: 1.4px; text-transform: uppercase; }
+    .product-info h2 { margin-top: 18px; font-size: 39px; line-height: .98; letter-spacing: -1.8px; }
+    .price { margin-top: auto; display: flex; align-items: flex-end; justify-content: space-between; font-size: 31px; font-weight: 900; }
+    .price small { font-size: 15px; letter-spacing: 1px; text-transform: uppercase; }
+
+    /* 06 — convergence */
+    .p6 { background: var(--sky); }
+    .p6 .copy { position: absolute; top: 215px; left: 82px; right: 82px; z-index: 15; text-align: center; }
+    .p6 .eyebrow { margin: 0 auto; }
+    .p6 .headline { margin: 34px auto 0; font-size: 122px; max-width: 900px; }
+    .p6 .subhead { margin-top: 28px; font-size: 31px; font-weight: 700; }
+    .orbit-stage { position: absolute; left: 82px; right: 82px; top: 760px; height: 780px; }
+    .orbit-ring { position: absolute; left: 50%; top: 50%; width: 710px; height: 710px; transform: translate(-50%, -50%); border: 4px solid var(--ink); border-radius: 50%; }
+    .orbit-ring::before { content: ""; position: absolute; inset: 106px; border: 3px dashed var(--ink); border-radius: 50%; }
+    .mini-phone { position: absolute; left: 50%; top: 50%; width: 290px; height: 560px; transform: translate(-50%, -50%); background: var(--ink); border: 4px solid var(--ink); border-radius: 38px; padding: 24px 18px; z-index: 5; }
+    .mini-phone-screen { width: 100%; height: 100%; background: var(--cream); border-radius: 19px; padding: 28px 20px; }
+    .mini-notch { width: 92px; height: 18px; margin: -14px auto 18px; background: var(--ink); border-radius: 0 0 10px 10px; }
+    .mini-title { font-size: 29px; font-weight: 900; letter-spacing: -1px; }
+    .mini-card { margin-top: 19px; height: 82px; border: 3px solid var(--ink); display: flex; align-items: center; gap: 13px; padding: 12px; }
+    .mini-card b { display: grid; place-items: center; width: 45px; height: 45px; background: var(--coral); border: 2px solid var(--ink); font-size: 20px; }
+    .mini-card span { font-size: 14px; font-weight: 900; text-transform: uppercase; letter-spacing: .8px; }
+    .orbit-icon { position: absolute; display: grid; place-items: center; width: 136px; height: 136px; background: var(--cream); border: 4px solid var(--ink); border-radius: 50%; font-size: 56px; font-weight: 900; z-index: 8; }
+    .orbit-icon.safety { left: 45px; top: 78px; background: var(--coral); }
+    .orbit-icon.event { right: 45px; top: 78px; }
+    .orbit-icon.help { left: 45px; bottom: 78px; }
+    .orbit-icon.market { right: 45px; bottom: 78px; background: var(--coral); }
+    .orbit-label { position: absolute; padding: 8px 12px; background: var(--ink); color: var(--cream); font-size: 15px; font-weight: 900; letter-spacing: 1px; text-transform: uppercase; z-index: 9; }
+    .orbit-label.l1 { left: 46px; top: 218px; }
+    .orbit-label.l2 { right: 48px; top: 218px; }
+    .orbit-label.l3 { left: 51px; bottom: 40px; }
+    .orbit-label.l4 { right: 43px; bottom: 40px; }
+
+    /* 07 — product reveal */
+    .p7 .copy { position: absolute; top: 205px; left: 82px; right: 82px; z-index: 15; text-align: center; }
+    .p7 .headline { margin-top: 31px; font-size: 104px; }
+    .p7 .subhead { margin-top: 25px; font-size: 32px; font-weight: 700; }
+    .phone-reveal {
+      position: absolute;
+      left: 177px;
+      top: 650px;
+      width: 726px;
+      height: 1080px;
+      padding: 35px;
+      background: var(--ink);
+      border: 4px solid var(--ink);
+      border-radius: 78px 78px 0 0;
+      overflow: hidden;
+    }
+    .phone-reveal-screen { position: relative; height: 100%; background: var(--cream); border-radius: 46px 46px 0 0; padding: 72px 38px 42px; }
+    .phone-reveal-notch { position: absolute; left: 50%; top: 20px; width: 180px; height: 28px; transform: translateX(-50%); background: var(--ink); border-radius: 0 0 18px 18px; }
+    .city-feed-top { display: flex; align-items: center; justify-content: space-between; }
+    .city-feed-top h2 { font-size: 48px; letter-spacing: -2px; }
+    .city-feed-plus { display: grid; place-items: center; width: 66px; height: 66px; background: var(--coral); border: 3px solid var(--ink); font-size: 42px; font-weight: 700; }
+    .feed-filter { display: flex; gap: 10px; margin-top: 25px; }
+    .feed-filter span { padding: 9px 12px; border: 2px solid var(--ink); font-size: 13px; font-weight: 900; letter-spacing: .7px; text-transform: uppercase; }
+    .feed-card { margin-top: 22px; border: 3px solid var(--ink); padding: 23px; }
+    .feed-card.coral-card { background: var(--coral); }
+    .feed-card.sky-card { background: var(--sky); }
+    .feed-card-head { display: flex; align-items: center; justify-content: space-between; font-size: 14px; font-weight: 900; letter-spacing: 1px; text-transform: uppercase; }
+    .feed-card h3 { margin: 20px 0 0; font-size: 34px; line-height: 1; letter-spacing: -1.5px; }
+    .feed-card p { margin-top: 12px; font-size: 18px; line-height: 1.25; font-weight: 650; }
+    .feed-card-foot { margin-top: 19px; padding-top: 14px; border-top: 2px solid var(--ink); display: flex; justify-content: space-between; font-size: 13px; font-weight: 900; text-transform: uppercase; letter-spacing: .7px; }
+
+    /* 08 — CTA */
+    .p8 { background: var(--cream); }
+    .p8::before { content: ""; position: absolute; right: 0; top: 0; width: 308px; height: 100%; background: var(--sky); z-index: -1; }
+    .p8 .topbar { color: var(--ink); }
+    .cta-copy { position: absolute; left: 82px; top: 305px; width: 840px; }
+    .cta-kicker { display: flex; align-items: center; gap: 15px; font-size: 18px; font-weight: 900; letter-spacing: 2px; text-transform: uppercase; }
+    .cta-kicker b { width: 68px; height: 5px; background: var(--coral); }
+    .p8 .headline { margin-top: 48px; font-size: 126px; max-width: 850px; }
+    .p8 .headline span { display: inline-block; background: var(--coral); padding: 0 14px 7px; color: var(--ink); }
+    .cta-sub { margin-top: 38px; max-width: 720px; font-size: 35px; line-height: 1.2; font-weight: 700; letter-spacing: -1px; }
+    .cta-button { margin-top: 68px; width: 770px; height: 126px; display: flex; align-items: center; justify-content: space-between; padding: 0 39px; background: var(--ink); color: var(--cream); border: 4px solid var(--ink); font-size: 38px; font-weight: 900; letter-spacing: -1px; text-transform: uppercase; }
+    .cta-button .arrow-right { color: var(--coral); transform: scale(1.15); }
+    .cta-mark {
+      position: absolute;
+      right: 72px;
+      bottom: 250px;
+      width: 218px;
+      height: 185px;
+    }
+    .made-in { position: absolute; left: 82px; bottom: 190px; font-size: 18px; font-weight: 900; letter-spacing: 1.7px; text-transform: uppercase; }
+    .made-in strong { color: var(--coral); }
+
+    @media print {
+      .page + .page { margin-top: 0; }
+    }
+  </style>
+</head>
+<body>
+
+  <section class="page p1" data-document-role="page" data-label="01 — Outside Your Gate" data-speaker-notes="0.0–0.3s: headline snaps up in three lines. 0.2–0.8s: navy gate panels slide 80px outward. 0.4–1.4s: coral signal dot pulses twice. Hold to 1.7s.">
+    <div class="topbar">
+      <div class="brand">
+        <svg viewBox="0 0 58 50" aria-hidden="true"><path d="M29 7 9 40M29 7l20 33M9 40h40" fill="none" stroke="#172033" stroke-width="4"/><circle cx="29" cy="7" r="7" fill="#FF6B5E" stroke="#172033" stroke-width="4"/><circle cx="9" cy="40" r="7" fill="#F4EEE6" stroke="#172033" stroke-width="4"/><circle cx="49" cy="40" r="7" fill="#72CBE8" stroke="#172033" stroke-width="4"/></svg>
+        <span>mohalla</span>
+      </div>
+      <div class="counter"><i></i> 01 / 08</div>
+    </div>
+    <div class="copy">
+      <div class="eyebrow"><b></b> Live from your radius</div>
+      <h1 class="headline">What’s happening <span class="accent">outside</span> your gate right now<span class="question">?</span></h1>
+    </div>
+    <div class="gate-stage">
+      <div class="gate-sky-copy">Live<br />nearby</div>
+      <div class="live-ping"></div>
+      <div class="gate-panel left"><div class="gate-cut"></div></div>
+      <div class="gate-panel right"><div class="gate-cut"></div></div>
+      <div class="gate-handle left"></div><div class="gate-handle right"></div>
+    </div>
+    <div class="footline"><span>Stop scrolling past your own street</span><span class="arrow-right"></span></div>
+  </section>
+
+  <section class="page p2" data-document-role="page" data-label="02 — Safety Update" data-speaker-notes="1.7–2.0s: siren scales from 70% and coral core flashes. 1.9–2.4s: alert card wipes in from right. 2.4–3.2s: verified row rises 16px.">
+    <div class="topbar">
+      <div class="brand">
+        <svg viewBox="0 0 58 50" aria-hidden="true"><path d="M29 7 9 40M29 7l20 33M9 40h40" fill="none" stroke="#172033" stroke-width="4"/><circle cx="29" cy="7" r="7" fill="#FF6B5E" stroke="#172033" stroke-width="4"/><circle cx="9" cy="40" r="7" fill="#F4EEE6" stroke="#172033" stroke-width="4"/><circle cx="49" cy="40" r="7" fill="#F4EEE6" stroke="#172033" stroke-width="4"/></svg>
+        <span>mohalla</span>
+      </div>
+      <div class="counter"><i></i> 02 / 08</div>
+    </div>
+    <div class="copy">
+      <div class="eyebrow"><b></b> First signal</div>
+      <h1 class="headline">A safety <span class="accent">update?</span></h1>
+      <p class="subhead">Know now. Not tomorrow.</p>
+    </div>
+    <div class="siren"><div class="siren-core"></div></div>
+    <article class="alert-card">
+      <div class="alert-meta"><span class="alert-label">Safety alert</span><span class="alert-time">11 min ago</span></div>
+      <h2>Streetlight restored</h2>
+      <p>Block C is bright again. The maintenance team has wrapped up.</p>
+      <div class="verified-row"><b>✓</b> Community confirmed</div>
+    </article>
+    <div class="footline"><span>Clear signal. Less speculation.</span><span>Swipe →</span></div>
+  </section>
+
+  <section class="page p3" data-document-role="page" data-label="03 — Local Event" data-speaker-notes="3.2–3.5s: calendar drops 40px and locks. 3.4–4.0s: event ticket enters from right. 3.7–4.5s: three confetti pieces pop in on beat.">
+    <div class="topbar">
+      <div class="brand">
+        <svg viewBox="0 0 58 50" aria-hidden="true"><path d="M29 7 9 40M29 7l20 33M9 40h40" fill="none" stroke="#172033" stroke-width="4"/><circle cx="29" cy="7" r="7" fill="#FF6B5E" stroke="#172033" stroke-width="4"/><circle cx="9" cy="40" r="7" fill="#F4EEE6" stroke="#172033" stroke-width="4"/><circle cx="49" cy="40" r="7" fill="#72CBE8" stroke="#172033" stroke-width="4"/></svg>
+        <span>mohalla</span>
+      </div>
+      <div class="counter"><i></i> 03 / 08</div>
+    </div>
+    <div class="copy">
+      <div class="eyebrow"><b></b> Second signal</div>
+      <h1 class="headline">Something worth <span class="accent">showing up</span> for?</h1>
+      <p class="subhead">Your weekend should not hide in 200 messages.</p>
+    </div>
+    <div class="event-stage">
+      <div class="calendar">
+        <div class="calendar-top"><span>December</span><span>Local</span></div>
+        <div class="calendar-date"><strong>07</strong><span>Saturday</span></div>
+        <div class="calendar-bottom"><span>Save it</span><span>↗</span></div>
+      </div>
+      <article class="event-ticket">
+        <div class="ticket-kicker">DHA Phase 5 · Neighbors invited</div>
+        <h2>Rooftop BBQ</h2>
+        <div class="ticket-info">
+          <div>Time<strong>7:00 PM</strong></div>
+          <div>Entry<strong>Bring a dish</strong></div>
+        </div>
+      </article>
+      <i class="confetti c1"></i><i class="confetti c2"></i><i class="confetti c3"></i>
+    </div>
+    <div class="footline"><span>See it. Save it. Show up.</span><span>Swipe →</span></div>
+  </section>
+
+  <section class="page p4" data-document-role="page" data-label="04 — Nearby Help" data-speaker-notes="4.5–4.8s: location pin stamps down. 4.7–5.2s: wrench swings 18 degrees into position. 4.9–5.6s: helper card slides up; tags cascade with 80ms stagger.">
+    <div class="topbar">
+      <div class="brand">
+        <svg viewBox="0 0 58 50" aria-hidden="true"><path d="M29 7 9 40M29 7l20 33M9 40h40" fill="none" stroke="#172033" stroke-width="4"/><circle cx="29" cy="7" r="7" fill="#FF6B5E" stroke="#172033" stroke-width="4"/><circle cx="9" cy="40" r="7" fill="#F4EEE6" stroke="#172033" stroke-width="4"/><circle cx="49" cy="40" r="7" fill="#F4EEE6" stroke="#172033" stroke-width="4"/></svg>
+        <span>mohalla</span>
+      </div>
+      <div class="counter"><i></i> 04 / 08</div>
+    </div>
+    <div class="copy">
+      <div class="eyebrow"><b></b> Third signal</div>
+      <h1 class="headline">Need help <span class="accent">nearby?</span></h1>
+      <p class="subhead">Trusted help. Zero message hunt.</p>
+    </div>
+    <div class="help-stage">
+      <div class="pin"></div>
+      <svg class="wrench" viewBox="0 0 140 430" aria-hidden="true"><path d="M84 12c42 9 59 57 33 90l-25 32 43 214a52 52 0 1 1-102 20l-3-225 25-40C27 66 44 18 84 12Z" fill="#F4EEE6" stroke="#172033" stroke-width="10"/><circle cx="82" cy="360" r="22" fill="#72CBE8" stroke="#172033" stroke-width="8"/></svg>
+      <article class="helper-card">
+        <div class="helper-top">
+          <div class="avatar">AA</div>
+          <div><h2>Ali Akbar</h2><p>Plumber · 2 streets away</p></div>
+          <div class="check">✓</div>
+        </div>
+        <div class="helper-tags"><span>Local</span><span>Available</span><span>Recommended</span></div>
+        <p class="helper-quote">“Fixed the leak before the chai got cold.”</p>
+        <div class="helper-action"><span>Call in one tap</span><span>→</span></div>
+      </article>
+    </div>
+    <div class="footline"><span>Good help can live two streets away.</span><span>Swipe →</span></div>
+  </section>
+
+  <section class="page p5" data-document-role="page" data-label="05 — Local Market" data-speaker-notes="5.6–5.9s: bag rises from bottom with a short settle. 5.8–6.4s: product cards enter from alternating sides. 6.2–6.8s: prices pop at 105% then settle.">
+    <div class="topbar">
+      <div class="brand">
+        <svg viewBox="0 0 58 50" aria-hidden="true"><path d="M29 7 9 40M29 7l20 33M9 40h40" fill="none" stroke="#172033" stroke-width="4"/><circle cx="29" cy="7" r="7" fill="#FF6B5E" stroke="#172033" stroke-width="4"/><circle cx="9" cy="40" r="7" fill="#F4EEE6" stroke="#172033" stroke-width="4"/><circle cx="49" cy="40" r="7" fill="#72CBE8" stroke="#172033" stroke-width="4"/></svg>
+        <span>mohalla</span>
+      </div>
+      <div class="counter"><i></i> 05 / 08</div>
+    </div>
+    <div class="copy">
+      <div class="eyebrow"><b></b> Fourth signal</div>
+      <h1 class="headline">Buying or selling <span class="accent">local?</span></h1>
+      <p class="subhead">Keep good finds close to home.</p>
+    </div>
+    <div class="market-stage">
+      <div class="bag">
+        <svg class="bag-mark" viewBox="0 0 58 50" aria-hidden="true"><path d="M29 7 9 40M29 7l20 33M9 40h40" fill="none" stroke="#172033" stroke-width="4"/><circle cx="29" cy="7" r="7" fill="#72CBE8" stroke="#172033" stroke-width="4"/><circle cx="9" cy="40" r="7" fill="#F4EEE6" stroke="#172033" stroke-width="4"/><circle cx="49" cy="40" r="7" fill="#F4EEE6" stroke="#172033" stroke-width="4"/></svg>
+        <div class="bag-copy">The neighborhood market</div>
+      </div>
+      <article class="product-card one">
+        <div class="product-thumb"><div class="chair"></div></div>
+        <div class="product-info"><div class="product-tag">Home · 1.2 km</div><h2>Study chair</h2><div class="price"><span>Rs 3,500</span><small>Open →</small></div></div>
+      </article>
+      <article class="product-card two">
+        <div class="product-thumb"><div class="plant"></div></div>
+        <div class="product-info"><div class="product-tag">Swap · Block B</div><h2>Plants bundle</h2><div class="price"><span>Free</span><small>Open →</small></div></div>
+      </article>
+    </div>
+    <div class="footline"><span>Less distance. More trust.</span><span>Swipe →</span></div>
+  </section>
+
+  <section class="page p6" data-document-role="page" data-label="06 — Four Signals One Feed" data-speaker-notes="6.8–7.1s: four icons enter from corners. 7.0–7.7s: orbit ring rotates 22 degrees while icons travel inward. 7.5–8.2s: icons snap into phone cards with four beat hits.">
+    <div class="topbar">
+      <div class="brand">
+        <svg viewBox="0 0 58 50" aria-hidden="true"><path d="M29 7 9 40M29 7l20 33M9 40h40" fill="none" stroke="#172033" stroke-width="4"/><circle cx="29" cy="7" r="7" fill="#FF6B5E" stroke="#172033" stroke-width="4"/><circle cx="9" cy="40" r="7" fill="#F4EEE6" stroke="#172033" stroke-width="4"/><circle cx="49" cy="40" r="7" fill="#F4EEE6" stroke="#172033" stroke-width="4"/></svg>
+        <span>mohalla</span>
+      </div>
+      <div class="counter"><i></i> 06 / 08</div>
+    </div>
+    <div class="copy">
+      <div class="eyebrow"><b></b> The satisfying part</div>
+      <h1 class="headline">Four signals. <span class="accent">One feed.</span></h1>
+      <p class="subhead">Everything nearby, finally in one rhythm.</p>
+    </div>
+    <div class="orbit-stage">
+      <div class="orbit-ring"></div>
+      <div class="mini-phone">
+        <div class="mini-phone-screen">
+          <div class="mini-notch"></div>
+          <div class="mini-title">City Feed</div>
+          <div class="mini-card"><b>!</b><span>Safety update</span></div>
+          <div class="mini-card"><b>07</b><span>Local event</span></div>
+          <div class="mini-card"><b>↗</b><span>Nearby help</span></div>
+          <div class="mini-card"><b>+</b><span>Local market</span></div>
+        </div>
+      </div>
+      <div class="orbit-icon safety">!</div><div class="orbit-label l1">Safety</div>
+      <div class="orbit-icon event">07</div><div class="orbit-label l2">Events</div>
+      <div class="orbit-icon help">↗</div><div class="orbit-label l3">Help</div>
+      <div class="orbit-icon market">+</div><div class="orbit-label l4">Market</div>
+    </div>
+    <div class="footline"><span>Built for the place you actually live.</span><span>Swipe →</span></div>
+  </section>
+
+  <section class="page p7" data-document-role="page" data-label="07 — Meet Your City Feed" data-speaker-notes="8.2–8.5s: phone zooms from 82% to 100%. 8.4–9.2s: feed cards stack upward with 100ms stagger. 9.0–9.6s: filters sweep left to right.">
+    <div class="topbar">
+      <div class="brand">
+        <svg viewBox="0 0 58 50" aria-hidden="true"><path d="M29 7 9 40M29 7l20 33M9 40h40" fill="none" stroke="#172033" stroke-width="4"/><circle cx="29" cy="7" r="7" fill="#FF6B5E" stroke="#172033" stroke-width="4"/><circle cx="9" cy="40" r="7" fill="#F4EEE6" stroke="#172033" stroke-width="4"/><circle cx="49" cy="40" r="7" fill="#72CBE8" stroke="#172033" stroke-width="4"/></svg>
+        <span>mohalla</span>
+      </div>
+      <div class="counter"><i></i> 07 / 08</div>
+    </div>
+    <div class="copy">
+      <div class="eyebrow"><b></b> Product reveal</div>
+      <h1 class="headline">Meet your <span class="accent">City Feed.</span></h1>
+      <p class="subhead">Alerts. Events. Help. Market.</p>
+    </div>
+    <div class="phone-reveal">
+      <div class="phone-reveal-screen">
+        <div class="phone-reveal-notch"></div>
+        <div class="city-feed-top"><h2>City Feed</h2><div class="city-feed-plus">+</div></div>
+        <div class="feed-filter"><span>All</span><span>Safety</span><span>Events</span><span>Market</span></div>
+        <article class="feed-card coral-card">
+          <div class="feed-card-head"><span>Safety · Block C</span><span>11 min</span></div>
+          <h3>Streetlight restored</h3>
+          <p>A quick update from your side of the neighborhood.</p>
+          <div class="feed-card-foot"><span>Community confirmed</span><span>Open →</span></div>
+        </article>
+        <article class="feed-card sky-card">
+          <div class="feed-card-head"><span>Event · Saturday</span><span>7 PM</span></div>
+          <h3>Rooftop BBQ</h3>
+          <p>Bring a dish. Meet the people behind the house numbers.</p>
+          <div class="feed-card-foot"><span>Save event</span><span>Open →</span></div>
+        </article>
+        <article class="feed-card">
+          <div class="feed-card-head"><span>Market · 1.2 km</span><span>New</span></div>
+          <h3>Study chair</h3>
+          <p>Available nearby for Rs 3,500.</p>
+          <div class="feed-card-foot"><span>Message seller</span><span>Open →</span></div>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <section class="page p8" data-document-role="page" data-label="08 — Be Connected" data-speaker-notes="9.6–10.0s: headline reveals word by word. 9.9–10.4s: coral highlight wipes behind CONNECTED. 10.3–11.2s: CTA button scales from 94%; arrow loops 8px right. Hold brand lockup to 12.0s.">
+    <div class="topbar">
+      <div class="brand">
+        <svg viewBox="0 0 58 50" aria-hidden="true"><path d="M29 7 9 40M29 7l20 33M9 40h40" fill="none" stroke="#172033" stroke-width="4"/><circle cx="29" cy="7" r="7" fill="#FF6B5E" stroke="#172033" stroke-width="4"/><circle cx="9" cy="40" r="7" fill="#F4EEE6" stroke="#172033" stroke-width="4"/><circle cx="49" cy="40" r="7" fill="#F4EEE6" stroke="#172033" stroke-width="4"/></svg>
+        <span>mohalla</span>
+      </div>
+      <div class="counter"><i></i> 08 / 08</div>
+    </div>
+    <div class="cta-copy">
+      <div class="cta-kicker"><b></b> Your neighborhood, connected</div>
+      <h1 class="headline">Don’t just live nearby. <span>Be connected.</span></h1>
+      <p class="cta-sub">Open the app that puts your street back in the conversation.</p>
+      <div class="cta-button"><span>Open Mohalla</span><span class="arrow-right"></span></div>
+    </div>
+    <svg class="cta-mark" viewBox="0 0 58 50" aria-hidden="true"><path d="M29 7 9 40M29 7l20 33M9 40h40" fill="none" stroke="#172033" stroke-width="4"/><circle cx="29" cy="7" r="7" fill="#FF6B5E" stroke="#172033" stroke-width="4"/><circle cx="9" cy="40" r="7" fill="#F4EEE6" stroke="#172033" stroke-width="4"/><circle cx="49" cy="40" r="7" fill="#F4EEE6" stroke="#172033" stroke-width="4"/></svg>
+    <div class="made-in"><strong>Made in Pakistan</strong> · Built for nearby</div>
+    <div class="footline"><span>mohalla</span><span>Link in bio</span></div>
+  </section>
+
+  <script>
+    const selected = Number(new URLSearchParams(location.search).get("page"));
+    if (selected) {
+      document.body.classList.add("preview-one");
+      document.querySelectorAll(".page").forEach((page, index) => {
+        page.style.display = index === selected - 1 ? "block" : "none";
+      });
+    }
+  </script>
+</body>
+</html>

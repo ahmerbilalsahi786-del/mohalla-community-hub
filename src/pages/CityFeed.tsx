@@ -27,6 +27,7 @@ import {
 } from "@/lib/city-publications";
 import { cn } from "@/lib/utils";
 import { useCurrentUser } from "@/hooks/use-current-user";
+import { SmartImageGallery } from "@/components/shared/SmartImageGrid";
 
 const TYPE_OPTIONS: Array<{ value: CityPublicationSourceType | "all"; label: string; icon: ElementType }> = [
   { value: "all", label: "All", icon: Sparkles },
@@ -287,16 +288,16 @@ function PublicationCard({ publication }: { publication: CityPublication }) {
   const meta = TYPE_META[publication.sourceType] ?? TYPE_META.post;
   const Icon = meta.icon;
   const detail = metadataLine(publication);
+  const publicationImages = publication.imageMeta?.length ? publication.imageMeta : publication.imageUrl ? [publication.imageUrl] : [];
 
   return (
     <article className="overflow-hidden rounded-2xl border portal-soft-rule bg-card/88 shadow-sm backdrop-blur transition-shadow hover:shadow-md">
-      {publication.imageUrl && (
-        <img
-          src={publication.imageUrl}
-          alt={publication.title}
-          loading="lazy"
-          decoding="async"
-          className="h-56 w-full bg-muted/40 object-contain sm:h-72"
+      {publicationImages.length > 0 && (
+        <SmartImageGallery
+          images={publicationImages}
+          title={publication.title}
+          rounded={false}
+          className="border-x-0 border-t-0"
         />
       )}
       <div className="p-4 sm:p-5">

@@ -1,0 +1,40 @@
+{
+  "project": "Mohalla — Outside Your Gate | Animated Reel",
+  "version": 1,
+  "format": {
+    "width": 1080,
+    "height": 1920,
+    "aspect_ratio": "9:16",
+    "pages": 8,
+    "runtime_seconds": 12
+  },
+  "palette": {
+    "warm_cream": "#F4EEE6",
+    "midnight_ink": "#172033",
+    "signal_coral": "#FF6B5E",
+    "clear_sky": "#72CBE8"
+  },
+  "canva": {
+    "design_id": "DAHPmBt3UjE",
+    "edit_url": "https://www.canva.com/d/RJijusiZn733DEc",
+    "view_url": "https://www.canva.com/d/CT_-7roJFmXMG8v",
+    "verified_page_count": 8
+  },
+  "slides": [
+    {"page": 1, "file": "slide-01.png", "title": "Outside Your Gate", "sha256": "b13ddbd7032cbece5ff48257c2c6d5a3e3a56a996cf293fe7798a09984641f1a"},
+    {"page": 2, "file": "slide-02.png", "title": "Safety Update", "sha256": "ebf7b5eaa2456ee83b930ed80f501dbd0a8fdf33207e6358a0cd73a9571d68ad"},
+    {"page": 3, "file": "slide-03.png", "title": "Local Event", "sha256": "29e8d43a20a8f2c106d61f0037b0807028890a0c1df6d9b34b5503a9194832c1"},
+    {"page": 4, "file": "slide-04.png", "title": "Nearby Help", "sha256": "12651b26bd0354a5f2fa58b6a9d84d0a1a4e592e4c2bfe06677b32ff1fe32f1f"},
+    {"page": 5, "file": "slide-05.png", "title": "Local Market", "sha256": "8f0bb3ed00fb8d6a6c980196d97a9d4da6be502af83e115ad04ca266963edceb"},
+    {"page": 6, "file": "slide-06.png", "title": "Four Signals, One Feed", "sha256": "50e4c0d6385e717b7720f7eb2417b002eb0ca1bab876cc4a1b662c6f03cb1754"},
+    {"page": 7, "file": "slide-07.png", "title": "Meet Your City Feed", "sha256": "be9601cd0692bc1df54763e45914cec839a794f4a97aac0755ad44567b553d7c"},
+    {"page": 8, "file": "slide-08.png", "title": "Be Connected", "sha256": "0576ff8f5f08faa407c1cb0ca5e5237d2c54f803c596cba09690ba85ecab0b39"}
+  ],
+  "source": {
+    "file": "index.html",
+    "sha256": "65fe342167e5e4346ca2264236ba33edc6d740c7be096e59654224f6ec4369eb"
+  },
+  "preview": "contact-sheet.png",
+  "motion_plan": "MOTION_PLAN.md"
+}
+

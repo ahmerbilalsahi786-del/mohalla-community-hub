@@ -1,0 +1,46 @@
+{
+  "campaign": "Mohalla City/Local",
+  "asset": "The City Is Big. Your World Is Local.",
+  "platform": "Instagram Reel / Story",
+  "canvas": {
+    "width": 1080,
+    "height": 1920,
+    "unit": "px"
+  },
+  "palette": {
+    "powder_blue": "#DDE7F2",
+    "midnight_navy": "#181B2A",
+    "soft_apricot": "#FF9478"
+  },
+  "color_count": 3,
+  "single_minded_proposition": "The city is big. Your world is local.",
+  "files": {
+    "editable_source": "index.html",
+    "preview": "mohalla-city-local.png"
+  },
+  "canva": {
+    "design_id": "DAHPl-ie1ag",
+    "page_count": 1,
+    "edit_url": "https://www.canva.com/d/rAfn79dFVK-OzdU",
+    "view_url": "https://www.canva.com/d/PYDboycS5A8ZJ1D"
+  },
+  "creative_principles": [
+    "strict modernist grid",
+    "one highlighted city-block metaphor",
+    "three-color discipline",
+    "light architectural palette",
+    "product proof reduced to four words",
+    "generous negative space",
+    "single decisive call to action"
+  ],
+  "design_constraints": [
+    "exactly three colors",
+    "flat vector design",
+    "no gradients",
+    "no shadows",
+    "no 3D effects",
+    "no photography",
+    "no decorative clutter",
+    "mobile-readable copy"
+  ]
+}

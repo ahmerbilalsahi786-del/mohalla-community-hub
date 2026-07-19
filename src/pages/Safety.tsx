@@ -1,4 +1,4 @@
-import { useState, useRef } from 'react'
+import { useState } from 'react'
 import {
   useListAlerts, useCreateAlert, useResolveAlert,
   useListAlertComments, useCreateAlertComment,
@@ -19,6 +19,9 @@ import LocationPicker, { type PickedLocation } from '@/components/location-picke
 import { useToast } from '@/hooks/use-toast'
 import { useCurrentUser } from '@/hooks/use-current-user'
 import { UserAvatar } from '@/components/community/user-avatar'
+import { ImageUploader } from '@/components/shared/ImageUploader'
+import { SmartImageGallery } from '@/components/shared/SmartImageGrid'
+import { ImageAsset, imageUrls, normalizeImageAssets } from '@/lib/imageLayout'
 
 type AlertType = 'theft' | 'suspicious' | 'emergency' | 'power_outage' | 'water_shortage' | 'other'
 type Severity = 'low' | 'medium' | 'high'
@@ -66,6 +69,8 @@ interface AlertData {
   latitude?: number | null
   longitude?: number | null
   imageUrl?: string | null
+  imageUrls?: string[]
+  imageMeta?: ImageAsset[]
   severity: string
   isResolved: boolean
   createdAt: string
@@ -141,6 +146,9 @@ function AlertCard({ alert, onResolve }: { alert: AlertData; onResolve: (id: num
   const TypeIcon = typeCfg.icon
   const { data: currentUser } = useCurrentUser()
   const isCurrentUser = alert.userId === currentUser?.userId
+  const alertImages = alert.imageMeta?.length
+    ? alert.imageMeta
+    : normalizeImageAssets(alert.imageUrls?.length ? alert.imageUrls : [alert.imageUrl])
 
   return (
     <div className={cn(
@@ -198,13 +206,16 @@ function AlertCard({ alert, onResolve }: { alert: AlertData; onResolve: (id: num
               </div>
             )}
 
-            {alert.imageUrl && (
-              <img
-                src={alert.imageUrl}
-                alt={alert.title}
-                loading="lazy"
-                decoding="async"
-                className="mt-3 h-48 w-full rounded-xl border border-border bg-muted/40 object-contain"
+            {alertImages.length > 0 && (
+              <SmartImageGallery
+                images={alertImages}
+                title={alert.title}
+                className="mt-3"
+                firstImageOverlay={
+                  <span className={cn('absolute left-2 top-2 rounded-full px-2 py-1 text-xs font-semibold shadow-sm backdrop-blur', sevCfg.bg, sevCfg.text)}>
+                    {sevCfg.label}
+                  </span>
+                }
               />
             )}
 
@@ -268,6 +279,8 @@ function ReportAlertModal({ onClose }: { onClose: () => void }) {
   const [location, setLocation] = useState('')
   const [pickedLocation, setPickedLocation] = useState<PickedLocation | null>(null)
   const [severity, setSeverity] = useState<Severity>('medium')
+  const [evidenceImages, setEvidenceImages] = useState<ImageAsset[]>([])
+  const [uploading, setUploading] = useState(false)
   const queryClient = useQueryClient()
   const { toast } = useToast()
 
@@ -399,6 +412,14 @@ function ReportAlertModal({ onClose }: { onClose: () => void }) {
               }}
             />
           </div>
+
+          <ImageUploader
+            value={evidenceImages}
+            onChange={setEvidenceImages}
+            maxImages={4}
+            label="Add evidence photos (optional)"
+            onUploadingChange={setUploading}
+          />
         </div>
 
         <div className="flex shrink-0 items-center justify-end gap-2 border-t border-border bg-muted/20 px-4 pb-[calc(0.75rem+env(safe-area-inset-bottom))] pt-3 sm:px-5 sm:py-4">
@@ -413,10 +434,13 @@ function ReportAlertModal({ onClose }: { onClose: () => void }) {
                 locationDetail: location.trim(),
                 latitude: pickedLocation?.latitude ?? null,
                 longitude: pickedLocation?.longitude ?? null,
+                imageUrl: evidenceImages[0]?.url ?? null,
+                imageUrls: imageUrls(evidenceImages),
+                imageMeta: evidenceImages,
                 severity,
               } as any,
             })}
-            disabled={!title.trim() || !description.trim() || createAlert.isPending}
+            disabled={!title.trim() || !description.trim() || createAlert.isPending || uploading}
             className={cn(
               'rounded-xl text-white',
               severity === 'high' ? 'bg-red-600 hover:bg-red-700' :

@@ -1,0 +1,37 @@
+{
+  "campaign": "Mohalla social campaign",
+  "asset": "Mohalla Today — Before the Chai Gets Cold",
+  "platform": "Instagram Reel / Story",
+  "canvas": {
+    "width": 1080,
+    "height": 1920,
+    "unit": "px"
+  },
+  "creative_concept": "A culturally familiar POV hook paired with a product-led City Feed mockup showing safety, events, and neighbor help in one view.",
+  "files": {
+    "editable_source": "index.html",
+    "preview": "mohalla-chai-city-feed.png"
+  },
+  "canva": {
+    "design_id": "DAHPlofFGA4",
+    "page_count": 1,
+    "edit_url": "https://www.canva.com/d/yzwvb61DSVaq30H",
+    "view_url": "https://www.canva.com/d/rT6MWCeS1PJIDCS"
+  },
+  "brand_colors": {
+    "primary_green": "#1B5E20",
+    "dark_green": "#0A3D1F",
+    "teal_accent": "#4DB6AC",
+    "light_background": "#F4FAF8",
+    "white": "#FFFFFF"
+  },
+  "copy_verified": true,
+  "design_constraints": [
+    "flat design",
+    "no gradients",
+    "no shadows",
+    "no 3D effects",
+    "mobile-readable typography",
+    "minimum 80 px outer safe zone"
+  ]
+}

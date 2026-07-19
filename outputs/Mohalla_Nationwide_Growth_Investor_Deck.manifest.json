@@ -1,0 +1,47 @@
+{
+  "artifact": {
+    "filename": "Mohalla_Nationwide_Growth_Investor_Deck.pptx",
+    "format": "Microsoft PowerPoint Open XML",
+    "sha256": "98F38E079DD9FA9FB3488397DAC461D408A0DC9F024864F613C612B34AA60EB5",
+    "bytes": 18379180,
+    "slide_count": 22,
+    "slide_size_px": "1280x720",
+    "aspect_ratio": "16:9",
+    "speaker_notes_count": 22
+  },
+  "motion": {
+    "transition_count": 22,
+    "fade_transitions": 17,
+    "push_left_transitions": 5,
+    "approach": "Restrained section-aware slide transitions for professional live presentation"
+  },
+  "content": {
+    "data_visuals": [
+      "Urban-household TAM, planning SAM and five-year SOM",
+      "Illustrative five-year verified-resident growth scenario"
+    ],
+    "assumption_slides": [10, 16, 17, 19],
+    "claim_boundary": "No current users, revenue, funding, founder credentials or historical traction are invented."
+  },
+  "visual_assets": {
+    "creative_production_board_id": "37beb451-4e98-4390-a009-2456b7044e65",
+    "generated_images": [
+      "Pakistan neighborhood at blue hour",
+      "Fragmented neighborhood communication",
+      "Neighborhood participation",
+      "Nationwide Pakistan network vision",
+      "Digital front door at dusk"
+    ],
+    "user_supplied_product_screens": [
+      "Mohalla Events",
+      "Mohalla City Feed"
+    ]
+  },
+  "qa": {
+    "source_slide_renders_inspected_individually": 22,
+    "final_pptx_rendered_slide_count": 22,
+    "post_transition_package_rendered_slide_count": 22,
+    "overflow_test": "passed",
+    "transition_package_validation": "passed"
+  }
+}

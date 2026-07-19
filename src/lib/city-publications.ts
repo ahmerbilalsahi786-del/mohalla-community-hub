@@ -12,6 +12,7 @@ export interface CityPublication {
   title: string;
   summary: string;
   imageUrl?: string | null;
+  imageMeta?: Array<{ url: string; width?: number | null; height?: number | null }>;
   href: string;
   authorId?: string | null;
   authorName: string;

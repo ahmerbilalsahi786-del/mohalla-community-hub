@@ -1,6 +1,12 @@
 const MAX_IMAGE_BYTES = 8 * 1024 * 1024
 const ALLOWED_IMAGE_TYPES = new Set(['image/jpeg', 'image/png', 'image/webp', 'image/gif'])
 
+export interface UploadedImageAsset {
+  url: string
+  width?: number
+  height?: number
+}
+
 export function validateImageFile(file: File) {
   if (!ALLOWED_IMAGE_TYPES.has(file.type)) {
     throw new Error('Use a JPG, PNG, WebP, or GIF image.')
@@ -10,11 +16,29 @@ export function validateImageFile(file: File) {
   }
 }
 
-export async function uploadImage(
-  file: File
-): Promise<string | null> {
+export function readImageDimensions(file: File): Promise<{ width: number; height: number }> {
+  return new Promise((resolve, reject) => {
+    const url = URL.createObjectURL(file)
+    const image = new Image()
+
+    image.onload = () => {
+      URL.revokeObjectURL(url)
+      resolve({ width: image.naturalWidth, height: image.naturalHeight })
+    }
+    image.onerror = () => {
+      URL.revokeObjectURL(url)
+      reject(new Error('Could not read image dimensions.'))
+    }
+    image.src = url
+  })
+}
+
+export async function uploadImageAsset(
+  file: File,
+): Promise<UploadedImageAsset | null> {
   try {
     validateImageFile(file)
+    const dimensions = await readImageDimensions(file)
     const formData = new FormData()
     formData.append('file', file)
     formData.append(
@@ -41,20 +65,38 @@ export async function uploadImage(
     }
 
     const data = await response.json()
-    return data.secure_url
+    return {
+      url: data.secure_url,
+      width: typeof data.width === 'number' ? data.width : dimensions.width,
+      height: typeof data.height === 'number' ? data.height : dimensions.height,
+    }
   } catch (error) {
     console.error('Cloudinary upload error:', error)
     return null
   }
 }
 
+export async function uploadImage(
+  file: File,
+): Promise<string | null> {
+  const asset = await uploadImageAsset(file)
+  return asset?.url ?? null
+}
+
+export async function uploadMultipleImageAssets(
+  files: File[],
+): Promise<UploadedImageAsset[]> {
+  const uploads = await Promise.all(
+    files.map(file => uploadImageAsset(file))
+  )
+  return uploads.filter(
+    (image): image is UploadedImageAsset => image !== null
+  )
+}
+
 export async function uploadMultipleImages(
   files: File[]
 ): Promise<string[]> {
-  const uploads = await Promise.all(
-    files.map(file => uploadImage(file))
-  )
-  return uploads.filter(
-    (url): url is string => url !== null
-  )
+  const uploads = await uploadMultipleImageAssets(files)
+  return uploads.map((image) => image.url)
 }

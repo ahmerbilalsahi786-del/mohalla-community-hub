@@ -8,21 +8,24 @@ import { Sidebar } from '@/components/dashboard/sidebar'
 import { TopNavbar } from '@/components/dashboard/top-navbar'
 import {
   Calendar, Clock, MapPin, Users, Plus, X, ChevronDown,
-  CheckCircle2, HelpCircle, XCircle, ImagePlus, Loader2
+  CheckCircle2, HelpCircle, XCircle, Loader2
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
 import { useToast } from '@/hooks/use-toast'
-import { uploadImage } from '@/lib/cloudinary'
 import LocationPicker, { type PickedLocation } from '@/components/location-picker'
 import { PublicationToggle } from '@/components/city-feed/publication-toggle'
 import { CommunityEmptyState } from '@/components/community/community-empty-state'
 import { EventSkeleton } from '@/components/community/skeleton-states'
 import { UserAvatar } from '@/components/community/user-avatar'
+import { ImageUploader } from '@/components/shared/ImageUploader'
+import { SmartImageGallery } from '@/components/shared/SmartImageGrid'
+import { ImageAsset, imageUrls } from '@/lib/imageLayout'
 
 type EventItem = {
   id: number; title: string; description: string; date: string; time: string;
   location: string; imageUrl?: string | null; rsvpCount: number; createdAt: string;
+  coverImageMeta?: ImageAsset | null; galleryUrls?: string[]; galleryMeta?: ImageAsset[];
   userName: string; unitNumber: string; userId: string;
   avatarUrl?: string | null;
   myStatus?: string | null;
@@ -60,22 +63,23 @@ function EventCard({ event, isPast }: { event: EventItem; isPast?: boolean }) {
   })
 
   const soon = isUpcomingSoon(event.date)
+  const coverImage = event.coverImageMeta?.url ? event.coverImageMeta : event.imageUrl ? { url: event.imageUrl } : null
+  const galleryImages = event.galleryMeta?.length ? event.galleryMeta : event.galleryUrls ?? []
 
   return (
     <div className={cn(
       'delight-hover-lift overflow-hidden rounded-2xl border bg-card shadow-sm transition-all hover:shadow-md',
       isPast ? 'border-border opacity-70' : soon ? 'border-primary/30' : 'border-border'
     )}>
-      {event.imageUrl && (
-        <img
-          src={event.imageUrl}
-          alt={event.title}
-          loading="lazy"
-          decoding="async"
-          className="h-40 w-full bg-muted/40 object-contain"
+      {coverImage && (
+        <SmartImageGallery
+          images={[coverImage]}
+          title={event.title}
+          rounded={false}
+          className="border-x-0 border-t-0"
         />
       )}
-      {!event.imageUrl && !isPast && (
+      {!coverImage && !isPast && (
         <div className={cn('h-2 w-full', soon ? 'bg-primary' : 'bg-accent/60')} />
       )}
 
@@ -89,6 +93,14 @@ function EventCard({ event, isPast }: { event: EventItem; isPast?: boolean }) {
         <h3 className="font-semibold text-foreground text-base leading-snug">{event.title}</h3>
         {event.description && (
           <p className="mt-1 text-sm text-muted-foreground line-clamp-2">{event.description}</p>
+        )}
+
+        {galleryImages.length > 0 && (
+          <SmartImageGallery
+            images={galleryImages}
+            title={`${event.title} gallery`}
+            className="mt-3"
+          />
         )}
 
         <div className="mt-3 space-y-1.5">
@@ -164,9 +176,9 @@ function CreateEventModal({ onClose }: { onClose: () => void }) {
   const [time, setTime]         = useState('')
   const [location, setLocation] = useState('')
   const [pickedLocation, setPickedLocation] = useState<PickedLocation | null>(null)
-  const [imageUrl, setImageUrl] = useState<string | undefined>()
+  const [coverImages, setCoverImages] = useState<ImageAsset[]>([])
+  const [galleryImages, setGalleryImages] = useState<ImageAsset[]>([])
   const [uploading, setUploading] = useState(false)
-  const { toast } = useToast()
 
   const create = useCreateEvent({
     mutation: {
@@ -176,26 +188,6 @@ function CreateEventModal({ onClose }: { onClose: () => void }) {
       },
     },
   })
-
-  const handleImg = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const f = e.target.files?.[0]
-    if (!f) return
-    setUploading(true)
-    try {
-      const url = await uploadImage(f)
-      if (url) {
-        setImageUrl(url)
-      } else {
-        toast({
-          title: 'Image upload failed',
-          description: 'Please try again.',
-          variant: 'destructive',
-        })
-      }
-    } finally {
-      setUploading(false)
-    }
-  }
 
   return (
     <div data-mobile-composer role="dialog" aria-modal="true" aria-label="Create a community event" className="fixed inset-0 z-[80] flex items-stretch justify-center overflow-hidden bg-black/40 p-0 backdrop-blur-sm sm:items-center sm:p-4">
@@ -208,28 +200,21 @@ function CreateEventModal({ onClose }: { onClose: () => void }) {
         </div>
 
         <div className="min-h-0 flex-1 space-y-4 overflow-y-auto p-4 sm:p-5">
-          {/* Image */}
-          <div>
-            <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-1.5 block">Event Photo (optional)</label>
-            {imageUrl ? (
-              <div className="relative">
-                <img
-                  src={imageUrl}
-                  className="h-32 w-full rounded-xl bg-muted/40 object-contain"
-                  alt="Event photo preview"
-                />
-                <button onClick={() => setImageUrl(undefined)} className="absolute top-2 right-2 flex h-6 w-6 items-center justify-center rounded-full bg-black/50 text-white hover:bg-black/70">
-                  <X size={12} />
-                </button>
-              </div>
-            ) : (
-              <label className={cn('flex items-center justify-center gap-2 h-24 rounded-xl border-2 border-dashed border-border cursor-pointer hover:bg-muted/30 transition-colors text-sm text-muted-foreground', uploading && 'opacity-60 pointer-events-none')}>
-                {uploading ? <Loader2 size={16} className="animate-spin" /> : <ImagePlus size={16} />}
-                {uploading ? 'Uploading…' : 'Upload Photo'}
-                <input type="file" accept="image/*" className="hidden" onChange={handleImg} disabled={uploading} />
-              </label>
-            )}
-          </div>
+          <ImageUploader
+            value={coverImages}
+            onChange={setCoverImages}
+            maxImages={1}
+            label="Event Photo (optional)"
+            onUploadingChange={setUploading}
+          />
+
+          <ImageUploader
+            value={galleryImages}
+            onChange={setGalleryImages}
+            maxImages={6}
+            label="Event gallery (optional)"
+            onUploadingChange={setUploading}
+          />
 
           <div>
             <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-1.5 block">Event Title *</label>
@@ -292,7 +277,10 @@ function CreateEventModal({ onClose }: { onClose: () => void }) {
                 location,
                 latitude: pickedLocation?.latitude ?? null,
                 longitude: pickedLocation?.longitude ?? null,
-                imageUrl,
+                imageUrl: coverImages[0]?.url,
+                coverImageMeta: coverImages[0] ?? null,
+                galleryUrls: imageUrls(galleryImages),
+                galleryMeta: galleryImages,
               },
             })}
             disabled={!title.trim() || !date || create.isPending}

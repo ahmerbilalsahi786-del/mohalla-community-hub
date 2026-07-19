@@ -7,6 +7,7 @@ import { CommunityEmptyState } from '@/components/community/community-empty-stat
 import { FeedPostSkeleton } from '@/components/community/skeleton-states'
 import { canManageCommunity, useCurrentUser } from '@/hooks/use-current-user'
 import { UserAvatar } from '@/components/community/user-avatar'
+import { SmartImageGallery } from '@/components/shared/SmartImageGrid'
 
 function timeAgo(dateStr: string) {
   const diff = Math.floor((Date.now() - new Date(dateStr).getTime()) / 1000)
@@ -125,6 +126,7 @@ function AnnouncementCard({
     userName: string
     unitNumber: string
     avatarUrl?: string | null
+    imageUrls?: string[]
     createdAt: string
     isPinned: boolean
   }
@@ -134,6 +136,14 @@ function AnnouncementCard({
 
   return (
     <article className="premium-card overflow-hidden rounded-xl border portal-soft-rule bg-card p-5 shadow-sm">
+      {post.imageUrls?.length ? (
+        <SmartImageGallery
+          images={post.imageUrls.slice(0, 1)}
+          title={post.title}
+          className="-mx-5 -mt-5 mb-5 rounded-none border-x-0 border-t-0"
+        />
+      ) : null}
+
       <div className="mb-4 flex items-start justify-between gap-3">
         <div className="flex min-w-0 items-center gap-3">
           <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-amber-500/10 text-amber-700 dark:text-amber-300">

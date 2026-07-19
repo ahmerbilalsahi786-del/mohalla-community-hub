@@ -9,6 +9,12 @@ export interface HealthStatus {
   status: string;
 }
 
+export interface ImageAsset {
+  url: string;
+  width?: number | null;
+  height?: number | null;
+}
+
 export interface Post {
   id: number;
   communityId: string;
@@ -20,6 +26,7 @@ export interface Post {
   title: string;
   body: string;
   imageUrls: string[];
+  imageMeta?: ImageAsset[];
   isPinned: boolean;
   likesCount: number;
   commentsCount: number;
@@ -43,6 +50,7 @@ export interface PostInput {
   title: string;
   body: string;
   imageUrls?: string[];
+  imageMeta?: ImageAsset[];
   isPinned?: boolean;
 }
 
@@ -76,6 +84,8 @@ export interface Alert {
   description: string;
   locationDetail: string;
   imageUrl?: string | null;
+  imageUrls?: string[];
+  imageMeta?: ImageAsset[];
   severity: string;
   isResolved: boolean;
   createdAt: string;
@@ -91,6 +101,8 @@ export interface AlertInput {
   description: string;
   locationDetail?: string;
   imageUrl?: string | null;
+  imageUrls?: string[];
+  imageMeta?: ImageAsset[];
   severity?: string;
 }
 
@@ -124,6 +136,7 @@ export interface Listing {
   pricePkr?: number | null;
   category: string;
   imageUrls: string[];
+  imageMeta?: ImageAsset[];
   condition: string;
   status: string;
   whatsappNumber: string;
@@ -152,6 +165,7 @@ export interface ListingInput {
   pricePkr?: number | null;
   category?: string;
   imageUrls?: string[];
+  imageMeta?: ImageAsset[];
   condition?: string;
   whatsappNumber: string;
   listingKind?: string;
@@ -179,6 +193,9 @@ export interface Event {
   latitude?: number | null;
   longitude?: number | null;
   imageUrl?: string | null;
+  coverImageMeta?: ImageAsset | null;
+  galleryUrls?: string[];
+  galleryMeta?: ImageAsset[];
   rsvpCount: number;
   createdAt: string;
 }
@@ -196,6 +213,9 @@ export interface EventInput {
   latitude?: number | null;
   longitude?: number | null;
   imageUrl?: string | null;
+  coverImageMeta?: ImageAsset | null;
+  galleryUrls?: string[];
+  galleryMeta?: ImageAsset[];
 }
 
 export interface EventList {

@@ -1,0 +1,35 @@
+MOHALLA NATIONWIDE GROWTH INVESTOR DECK — PROVENANCE
+
+Export date: 17 July 2026
+Creative Production board: 37beb451-4e98-4390-a009-2456b7044e65
+
+Composition
+- Exact copy, numerical claims, chart values, slide dimensions and safe areas were composed deterministically.
+- The presentation contains 22 slides at 1280x720 (16:9), with presenter notes on every slide.
+- Professional slide motion uses 17 fast fades and 5 fast push-left section transitions.
+
+Product evidence
+- Mohalla Events and City Feed visuals were supplied by the user and placed without AI alteration.
+- Implemented product capabilities were grounded in the current Mohalla application audit.
+
+Generated visual treatment
+- Five Pakistan-relevant editorial images were generated for atmosphere and narrative framing only.
+- Generated imagery contains no factual labels, logos, chart data or numerical claims.
+
+Market and framework sources
+- Pakistan Bureau of Statistics, 7th Population & Housing Census 2023.
+- Pakistan Economic Survey 2024–25, Information Technology & Telecommunication.
+- State Bank of Pakistan, Annual Payment Systems Review FY2024–25.
+- UMT / Journal of Applied and Emerging Sciences community research.
+- Sequoia, a16z and NFX venture and network-effect frameworks.
+- Publicly described Pakistan neighborhood-software category references.
+
+Claim boundary
+- Market census facts are sourced.
+- SAM, SOM, growth and pilot metrics are explicitly illustrative planning assumptions.
+- No current users, revenue, funding, founder credentials or historical traction are claimed.
+
+Quality assurance
+- Every source slide render was inspected individually at full size.
+- The exported and transition-enhanced PPTX both rendered all 22 slides successfully.
+- The final overflow test passed with no content beyond the slide canvas.

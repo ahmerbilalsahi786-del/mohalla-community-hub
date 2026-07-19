@@ -1,0 +1,533 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Mohalla — Local Frequency</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&family=Syne:wght@700;800&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --night: #121126;
+      --plum: #24203D;
+      --plum-2: #322A57;
+      --coral: #FF5D73;
+      --saffron: #FFB84D;
+      --blue: #44C7F4;
+      --lavender: #A78BFA;
+      --peach: #FFD6B3;
+      --rose: #F59CB5;
+      --ink: #17142B;
+    }
+
+    * { box-sizing: border-box; }
+
+    html, body {
+      width: 1080px;
+      height: 1920px;
+      margin: 0;
+      overflow: hidden;
+      background: var(--night);
+      font-family: "Poppins", Arial, sans-serif;
+    }
+
+    .page {
+      position: relative;
+      width: 1080px;
+      height: 1920px;
+      overflow: hidden;
+      background: var(--night);
+      color: var(--peach);
+    }
+
+    .frame {
+      position: absolute;
+      inset: 34px;
+      border: 4px solid var(--lavender);
+      pointer-events: none;
+    }
+
+    .frame::before,
+    .frame::after {
+      content: "";
+      position: absolute;
+      width: 70px;
+      height: 70px;
+    }
+
+    .frame::before {
+      top: -4px;
+      left: -4px;
+      border-top: 14px solid var(--coral);
+      border-left: 14px solid var(--coral);
+    }
+
+    .frame::after {
+      right: -4px;
+      bottom: -4px;
+      border-right: 14px solid var(--blue);
+      border-bottom: 14px solid var(--blue);
+    }
+
+    .side-code {
+      position: absolute;
+      top: 720px;
+      right: 22px;
+      color: var(--lavender);
+      font-size: 16px;
+      font-weight: 700;
+      letter-spacing: 3px;
+      writing-mode: vertical-rl;
+      text-transform: uppercase;
+    }
+
+    .header {
+      position: absolute;
+      top: 78px;
+      left: 82px;
+      right: 82px;
+      z-index: 5;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      color: var(--peach);
+      font-size: 52px;
+      font-weight: 800;
+      letter-spacing: -2.5px;
+      line-height: 1;
+    }
+
+    .brand-mark {
+      width: 60px;
+      height: 52px;
+    }
+
+    .frequency-id {
+      padding: 13px 18px;
+      border: 3px solid var(--coral);
+      color: var(--coral);
+      font-family: "Syne", Arial, sans-serif;
+      font-size: 17px;
+      font-weight: 800;
+      letter-spacing: 1.8px;
+      line-height: 1.2;
+      text-align: right;
+      text-transform: uppercase;
+    }
+
+    .intro {
+      position: absolute;
+      top: 195px;
+      left: 82px;
+      right: 82px;
+      z-index: 4;
+    }
+
+    .kicker {
+      display: inline-flex;
+      align-items: center;
+      gap: 12px;
+      padding: 10px 18px;
+      background: var(--saffron);
+      color: var(--ink);
+      font-size: 19px;
+      font-weight: 800;
+      letter-spacing: 1.3px;
+      text-transform: uppercase;
+    }
+
+    .kicker-bars {
+      display: inline-flex;
+      align-items: flex-end;
+      gap: 3px;
+      height: 18px;
+    }
+
+    .kicker-bars span {
+      width: 4px;
+      background: var(--ink);
+    }
+
+    .kicker-bars span:nth-child(1) { height: 7px; }
+    .kicker-bars span:nth-child(2) { height: 12px; }
+    .kicker-bars span:nth-child(3) { height: 18px; }
+
+    h1 {
+      margin: 23px 0 15px;
+      max-width: 900px;
+      font-family: "Syne", Arial, sans-serif;
+      font-size: 66px;
+      font-weight: 800;
+      line-height: .93;
+      letter-spacing: -3.8px;
+      text-transform: uppercase;
+    }
+
+    h1 .line-one { color: var(--peach); }
+    h1 .line-two { color: var(--coral); }
+    h1 .line-three { color: var(--blue); }
+
+    .dek {
+      margin: 0;
+      max-width: 790px;
+      color: var(--rose);
+      font-size: 27px;
+      font-weight: 500;
+      line-height: 1.38;
+    }
+
+    .dek strong {
+      color: var(--peach);
+      font-weight: 700;
+    }
+
+    .signal-stage {
+      position: absolute;
+      top: 575px;
+      left: 72px;
+      right: 72px;
+      height: 775px;
+    }
+
+    .signal-map {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+    }
+
+    .hub {
+      position: absolute;
+      top: 225px;
+      left: 50%;
+      z-index: 5;
+      width: 330px;
+      height: 330px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      transform: translateX(-50%);
+      border: 9px solid var(--peach);
+      border-radius: 50%;
+      background: var(--plum);
+    }
+
+    .hub::before {
+      content: "";
+      position: absolute;
+      inset: 17px;
+      border: 4px solid var(--coral);
+      border-radius: 50%;
+    }
+
+    .hub-mark {
+      position: relative;
+      z-index: 2;
+      width: 134px;
+      height: 112px;
+    }
+
+    .hub-word {
+      position: relative;
+      z-index: 2;
+      margin-top: 8px;
+      color: var(--peach);
+      font-size: 42px;
+      font-weight: 800;
+      letter-spacing: -2px;
+      line-height: 1;
+    }
+
+    .hub-status {
+      position: relative;
+      z-index: 2;
+      margin-top: 13px;
+      padding: 8px 14px;
+      background: var(--blue);
+      color: var(--ink);
+      font-size: 14px;
+      font-weight: 800;
+      letter-spacing: 1.2px;
+      text-transform: uppercase;
+    }
+
+    .signal-node {
+      position: absolute;
+      z-index: 6;
+      min-width: 174px;
+      min-height: 112px;
+      padding: 16px 18px;
+      display: grid;
+      grid-template-columns: 52px 1fr;
+      align-items: center;
+      gap: 12px;
+      border: 4px solid var(--ink);
+      color: var(--ink);
+    }
+
+    .signal-node svg {
+      width: 48px;
+      height: 48px;
+    }
+
+    .signal-node.alerts { top: 204px; left: 0; background: var(--coral); }
+    .signal-node.events { top: 84px; right: 0; background: var(--saffron); }
+    .signal-node.help { top: 526px; right: 12px; background: var(--blue); }
+    .signal-node.market { top: 627px; left: 8px; background: var(--lavender); }
+
+    .node-label {
+      font-family: "Syne", Arial, sans-serif;
+      font-size: 19px;
+      font-weight: 800;
+      letter-spacing: .8px;
+      line-height: 1;
+      text-transform: uppercase;
+    }
+
+    .node-meta {
+      margin-top: 7px;
+      font-size: 14px;
+      font-weight: 700;
+      letter-spacing: .6px;
+      text-transform: uppercase;
+    }
+
+    .orbit-word {
+      position: absolute;
+      z-index: 3;
+      color: var(--peach);
+      font-size: 15px;
+      font-weight: 800;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+    }
+
+    .orbit-word.now { top: 88px; left: 240px; color: var(--coral); }
+    .orbit-word.tonight { top: 220px; right: 210px; color: var(--saffron); }
+    .orbit-word.nearby { bottom: 116px; right: 220px; color: var(--blue); }
+    .orbit-word.local { bottom: 70px; left: 248px; color: var(--lavender); }
+
+    .ticker {
+      position: absolute;
+      top: 1360px;
+      left: 72px;
+      right: 72px;
+      height: 62px;
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      border: 3px solid var(--peach);
+      background: var(--plum);
+    }
+
+    .ticker-item {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--peach);
+      font-size: 15px;
+      font-weight: 800;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+    }
+
+    .ticker-item:nth-child(1) { color: var(--coral); }
+    .ticker-item:nth-child(2) { color: var(--saffron); }
+    .ticker-item:nth-child(3) { color: var(--blue); }
+    .ticker-item:nth-child(4) { color: var(--lavender); }
+    .ticker-item + .ticker-item { border-left: 2px solid var(--peach); }
+
+    .closing {
+      position: absolute;
+      top: 1460px;
+      left: 82px;
+      right: 82px;
+      text-align: center;
+    }
+
+    .closing-line {
+      margin: 0;
+      font-family: "Syne", Arial, sans-serif;
+      font-size: 53px;
+      font-weight: 800;
+      line-height: .98;
+      letter-spacing: -2px;
+      text-transform: uppercase;
+    }
+
+    .closing-line .first { color: var(--peach); }
+    .closing-line .second { color: var(--coral); }
+
+    .cta {
+      height: 112px;
+      margin-top: 25px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 19px;
+      border: 5px solid var(--peach);
+      background: var(--coral);
+      color: var(--ink);
+      font-family: "Syne", Arial, sans-serif;
+      font-size: 36px;
+      font-weight: 800;
+      letter-spacing: -.7px;
+      text-transform: uppercase;
+    }
+
+    .cta-arrow {
+      font-family: "Poppins", Arial, sans-serif;
+      font-size: 57px;
+      font-weight: 500;
+      line-height: 1;
+    }
+
+    .footer {
+      margin-top: 25px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 14px;
+      color: var(--peach);
+      font-size: 19px;
+      font-weight: 700;
+      letter-spacing: 1.2px;
+      text-transform: uppercase;
+    }
+
+    .footer-pulse {
+      display: inline-flex;
+      align-items: flex-end;
+      gap: 4px;
+      height: 22px;
+    }
+
+    .footer-pulse span { width: 5px; }
+    .footer-pulse span:nth-child(1) { height: 8px; background: var(--coral); }
+    .footer-pulse span:nth-child(2) { height: 15px; background: var(--saffron); }
+    .footer-pulse span:nth-child(3) { height: 22px; background: var(--blue); }
+    .footer-pulse span:nth-child(4) { height: 12px; background: var(--lavender); }
+  </style>
+</head>
+<body>
+  <section class="page" data-document-role="page" data-label="Mohalla — Local Frequency">
+    <div class="frame" aria-hidden="true"></div>
+    <div class="side-code">Local signal · Mohalla PK · 001</div>
+
+    <header class="header">
+      <div class="brand">
+        <svg class="brand-mark" viewBox="0 0 60 52" aria-hidden="true">
+          <path d="M30 7 L10 42 H50 Z" fill="none" stroke="#FFD6B3" stroke-width="5" stroke-linejoin="round" />
+          <circle cx="30" cy="7" r="8" fill="#FF5D73" stroke="#17142B" stroke-width="3" />
+          <circle cx="10" cy="42" r="8" fill="#FFB84D" stroke="#17142B" stroke-width="3" />
+          <circle cx="50" cy="42" r="8" fill="#44C7F4" stroke="#17142B" stroke-width="3" />
+        </svg>
+        <span>mohalla</span>
+      </div>
+      <div class="frequency-id">Local frequency<br />001</div>
+    </header>
+
+    <div class="intro">
+      <div class="kicker">
+        <span class="kicker-bars"><span></span><span></span><span></span></span>
+        Live local signals
+      </div>
+      <h1>
+        <span class="line-one">Your</span><br />
+        <span class="line-one">neighborhood</span><br />
+        <span class="line-two">has a</span> <span class="line-three">frequency.</span>
+      </h1>
+      <p class="dek"><strong>Mohalla</strong> turns local signals into what matters.</p>
+    </div>
+
+    <div class="signal-stage">
+      <svg class="signal-map" viewBox="0 0 936 775" aria-hidden="true">
+        <circle cx="468" cy="390" r="330" fill="none" stroke="#322A57" stroke-width="22" />
+        <circle cx="468" cy="390" r="280" fill="none" stroke="#A78BFA" stroke-width="4" />
+        <circle cx="468" cy="390" r="220" fill="none" stroke="#44C7F4" stroke-width="4" stroke-dasharray="18 15" />
+        <path d="M468 390 L123 260 M468 390 L812 145 M468 390 L820 575 M468 390 L130 690" fill="none" stroke="#FFD6B3" stroke-width="5" stroke-linecap="round" />
+        <path d="M74 390 H190 M746 390 H862 M468 0 V92 M468 682 V775" fill="none" stroke="#FF5D73" stroke-width="6" stroke-linecap="round" />
+        <path d="M197 114 L247 164 M739 118 L689 168 M194 658 L244 608 M742 657 L692 607" fill="none" stroke="#FFB84D" stroke-width="5" stroke-linecap="round" />
+        <circle cx="123" cy="260" r="12" fill="#FF5D73" stroke="#17142B" stroke-width="4" />
+        <circle cx="812" cy="145" r="12" fill="#FFB84D" stroke="#17142B" stroke-width="4" />
+        <circle cx="820" cy="575" r="12" fill="#44C7F4" stroke="#17142B" stroke-width="4" />
+        <circle cx="130" cy="690" r="12" fill="#A78BFA" stroke="#17142B" stroke-width="4" />
+        <circle cx="468" cy="60" r="8" fill="#FF5D73" /><circle cx="776" cy="286" r="8" fill="#FFB84D" /><circle cx="660" cy="645" r="8" fill="#44C7F4" /><circle cx="258" cy="622" r="8" fill="#A78BFA" />
+      </svg>
+
+      <span class="orbit-word now">Now</span>
+      <span class="orbit-word tonight">Tonight</span>
+      <span class="orbit-word nearby">Nearby</span>
+      <span class="orbit-word local">Local</span>
+
+      <div class="signal-node alerts">
+        <svg viewBox="0 0 48 48" aria-hidden="true">
+          <path d="M24 4 L41 11 V24 C41 35 34 42 24 46 C14 42 7 35 7 24 V11 Z" fill="none" stroke="#17142B" stroke-width="4" stroke-linejoin="round" />
+          <path d="M24 14 V29" stroke="#17142B" stroke-width="4" stroke-linecap="round" /><circle cx="24" cy="36" r="3" fill="#17142B" />
+        </svg>
+        <div><div class="node-label">Alerts</div><div class="node-meta">Know now</div></div>
+      </div>
+
+      <div class="signal-node events">
+        <svg viewBox="0 0 48 48" aria-hidden="true">
+          <rect x="6" y="10" width="36" height="32" rx="5" fill="none" stroke="#17142B" stroke-width="4" />
+          <path d="M6 19 H42 M16 6 V14 M32 6 V14" fill="none" stroke="#17142B" stroke-width="4" stroke-linecap="round" />
+          <circle cx="17" cy="28" r="3" fill="#17142B" /><circle cx="28" cy="28" r="3" fill="#17142B" />
+        </svg>
+        <div><div class="node-label">Events</div><div class="node-meta">Show up</div></div>
+      </div>
+
+      <div class="signal-node help">
+        <svg viewBox="0 0 48 48" aria-hidden="true">
+          <path d="M30 6 A12 12 0 0 0 17 21 L7 31 A6 6 0 0 0 16 40 L26 30 A12 12 0 0 0 41 17 L34 24 L26 16 Z" fill="none" stroke="#17142B" stroke-width="4" stroke-linejoin="round" />
+        </svg>
+        <div><div class="node-label">Help</div><div class="node-meta">Find nearby</div></div>
+      </div>
+
+      <div class="signal-node market">
+        <svg viewBox="0 0 48 48" aria-hidden="true">
+          <path d="M8 20 H40 L37 44 H11 Z" fill="none" stroke="#17142B" stroke-width="4" stroke-linejoin="round" />
+          <path d="M17 21 V15 A7 7 0 0 1 31 15 V21" fill="none" stroke="#17142B" stroke-width="4" stroke-linecap="round" />
+        </svg>
+        <div><div class="node-label">Market</div><div class="node-meta">Trade local</div></div>
+      </div>
+
+      <div class="hub">
+        <svg class="hub-mark" viewBox="0 0 134 112" aria-hidden="true">
+          <path d="M67 12 L20 93 H114 Z" fill="none" stroke="#FFD6B3" stroke-width="8" stroke-linejoin="round" />
+          <circle cx="67" cy="12" r="16" fill="#FF5D73" stroke="#17142B" stroke-width="5" />
+          <circle cx="20" cy="93" r="16" fill="#FFB84D" stroke="#17142B" stroke-width="5" />
+          <circle cx="114" cy="93" r="16" fill="#44C7F4" stroke="#17142B" stroke-width="5" />
+          <path d="M48 94 V67 L67 51 L86 67 V94" fill="#A78BFA" stroke="#17142B" stroke-width="5" stroke-linejoin="round" />
+          <circle cx="67" cy="75" r="7" fill="#17142B" />
+        </svg>
+        <div class="hub-word">mohalla</div>
+        <div class="hub-status">Signal organized</div>
+      </div>
+    </div>
+
+    <div class="ticker">
+      <div class="ticker-item">Now</div>
+      <div class="ticker-item">Tonight</div>
+      <div class="ticker-item">Nearby</div>
+      <div class="ticker-item">This weekend</div>
+    </div>
+
+    <div class="closing">
+      <p class="closing-line"><span class="first">No noise.</span> <span class="second">Just nearby.</span></p>
+      <div class="cta">Tune in to your Mohalla <span class="cta-arrow">→</span></div>
+      <div class="footer">
+        <span class="footer-pulse"><span></span><span></span><span></span><span></span></span>
+        Made in Pakistan · Your neighborhood, connected
+      </div>
+    </div>
+  </section>
+</body>
+</html>

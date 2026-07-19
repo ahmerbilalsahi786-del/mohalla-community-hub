@@ -6,7 +6,7 @@ import { Sidebar } from '@/components/dashboard/sidebar'
 import { TopNavbar } from '@/components/dashboard/top-navbar'
 import {
   ArrowLeft, MessageCircle, CheckCircle2, Clock, Package,
-  ChevronLeft, ChevronRight, Loader2, MapPin, Share2, Trash2, Store
+  Loader2, MapPin, Share2, Trash2, Store
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
@@ -14,6 +14,7 @@ import { canManageCommunity, useCurrentUser } from '@/hooks/use-current-user'
 import { useToast } from '@/hooks/use-toast'
 import { customFetch } from '@/lib/custom-fetch'
 import { UserAvatar } from '@/components/community/user-avatar'
+import { SmartImageGallery } from '@/components/shared/SmartImageGrid'
 
 const CONDITION_BADGE: Record<string, { label: string; bg: string; text: string }> = {
   new: { label: 'New', bg: 'bg-emerald-500/10', text: 'text-emerald-700' },
@@ -84,7 +85,6 @@ export default function MarketplaceListing({ params }: Props) {
   const [, navigate] = useLocation()
   const { data: user } = useCurrentUser()
   const { toast } = useToast()
-  const [activeImg, setActiveImg] = useState(0)
   const [statusLoading, setStatusLoading] = useState(false)
   const [deleteLoading, setDeleteLoading] = useState(false)
 
@@ -219,78 +219,31 @@ export default function MarketplaceListing({ params }: Props) {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
               {/* Left: images */}
               <div className="space-y-3">
-                {/* Main image */}
-                <div className="relative aspect-square bg-muted/50 rounded-2xl overflow-hidden border border-border">
-                  {images.length > 0 ? (
-                    <>
-                      <img
-                        src={images[activeImg]}
-                        alt={listing.title}
-                        className="h-full w-full bg-muted/40 object-contain"
-                      />
-                      {images.length > 1 && (
-                        <>
-                          <button
-                            onClick={() => setActiveImg((i) => (i - 1 + images.length) % images.length)}
-                            className="absolute left-2 top-1/2 -translate-y-1/2 flex h-8 w-8 items-center justify-center rounded-full bg-black/40 text-white hover:bg-black/60 transition-colors"
-                          >
-                            <ChevronLeft size={18} />
-                          </button>
-                          <button
-                            onClick={() => setActiveImg((i) => (i + 1) % images.length)}
-                            className="absolute right-2 top-1/2 -translate-y-1/2 flex h-8 w-8 items-center justify-center rounded-full bg-black/40 text-white hover:bg-black/60 transition-colors"
-                          >
-                            <ChevronRight size={18} />
-                          </button>
-                          <div className="absolute bottom-2 left-1/2 -translate-x-1/2 flex gap-1">
-                            {images.map((_, i) => (
-                              <button
-                                key={i}
-                                onClick={() => setActiveImg(i)}
-                                className={cn(
-                                  'h-1.5 rounded-full transition-all',
-                                  i === activeImg ? 'w-4 bg-white' : 'w-1.5 bg-white/50'
-                                )}
-                              />
-                            ))}
-                          </div>
-                        </>
-                      )}
-                    </>
-                  ) : (
+                {images.length > 0 ? (
+                  <div className="relative">
+                    <SmartImageGallery
+                      images={images}
+                      title={listing.title}
+                      maxVisible={5}
+                      className="rounded-2xl"
+                    />
+                    {isSold && (
+                      <div className="pointer-events-none absolute inset-0 flex items-center justify-center rounded-2xl bg-black/50">
+                        <span className="rounded-xl bg-black/70 px-4 py-2 text-lg font-bold text-white">SOLD</span>
+                      </div>
+                    )}
+                  </div>
+                ) : (
+                  <div className="relative aspect-square overflow-hidden rounded-2xl border border-border bg-muted/50">
                     <div className="w-full h-full flex items-center justify-center">
                       {isShop ? <Store size={64} className="text-muted-foreground/20" /> : <Package size={64} className="text-muted-foreground/20" />}
                     </div>
-                  )}
 
-                  {isSold && (
-                    <div className="absolute inset-0 bg-black/50 flex items-center justify-center">
-                      <span className="rounded-xl bg-black/70 px-4 py-2 text-lg font-bold text-white">SOLD</span>
-                    </div>
-                  )}
-                </div>
-
-                {/* Thumbnail strip */}
-                {images.length > 1 && (
-                  <div className="flex gap-2 overflow-x-auto no-scrollbar">
-                    {images.map((url, i) => (
-                      <button
-                        key={i}
-                        onClick={() => setActiveImg(i)}
-                        className={cn(
-                          'h-16 w-16 shrink-0 rounded-lg overflow-hidden border-2 transition-colors',
-                          i === activeImg ? 'border-primary' : 'border-border hover:border-primary/50'
-                        )}
-                      >
-                        <img
-                          src={url}
-                          alt={`${listing.title} photo ${i + 1}`}
-                          loading="lazy"
-                          decoding="async"
-                          className="h-full w-full bg-muted/40 object-contain"
-                        />
-                      </button>
-                    ))}
+                    {isSold && (
+                      <div className="absolute inset-0 bg-black/50 flex items-center justify-center">
+                        <span className="rounded-xl bg-black/70 px-4 py-2 text-lg font-bold text-white">SOLD</span>
+                      </div>
+                    )}
                   </div>
                 )}
               </div>

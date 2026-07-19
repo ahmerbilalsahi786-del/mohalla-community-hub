@@ -1,0 +1,36 @@
+{
+  "campaign": "Mohalla social campaign",
+  "asset": "Post 6 — The Comparison",
+  "platform": "Instagram Reel / Story",
+  "canvas": {
+    "width": 1080,
+    "height": 1920,
+    "unit": "px"
+  },
+  "files": {
+    "editable_source": "index.html",
+    "preview": "post-6-comparison.png"
+  },
+  "canva": {
+    "design_id": "DAHPlkeFKqc",
+    "page_count": 1,
+    "edit_url": "https://www.canva.com/d/6c0AfIRfCuPL6_8",
+    "view_url": "https://www.canva.com/d/V04gzoHAVk5-6jV"
+  },
+  "brand_colors": {
+    "primary_green": "#1B5E20",
+    "dark_green": "#0A3D1F",
+    "teal_accent": "#4DB6AC",
+    "light_background": "#F4FAF8",
+    "white": "#FFFFFF"
+  },
+  "copy_verified": true,
+  "design_constraints": [
+    "flat design",
+    "no gradients",
+    "no shadows",
+    "no 3D effects",
+    "mobile-readable typography",
+    "minimum 80 px outer safe zone"
+  ]
+}

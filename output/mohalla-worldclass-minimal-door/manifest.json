@@ -1,0 +1,46 @@
+{
+  "campaign": "Mohalla Outside/Inside",
+  "asset": "Outside Your Door. Inside One App.",
+  "platform": "Instagram Reel / Story",
+  "canvas": {
+    "width": 1080,
+    "height": 1920,
+    "unit": "px"
+  },
+  "palette": {
+    "ink_black": "#0B0B0F",
+    "warm_bone": "#EFE3D3",
+    "vermilion": "#FF4F3D"
+  },
+  "color_count": 3,
+  "single_minded_proposition": "Outside your door. Inside one app.",
+  "files": {
+    "editable_source": "index.html",
+    "preview": "mohalla-outside-inside.png"
+  },
+  "canva": {
+    "design_id": "DAHPl3ZrDQo",
+    "page_count": 1,
+    "edit_url": "https://www.canva.com/d/N83KcVePl-aOfQU",
+    "view_url": "https://www.canva.com/d/nR2DH9UkpSvT1Oj"
+  },
+  "creative_principles": [
+    "strict Swiss editorial grid",
+    "one doorway and phone metaphor",
+    "three-color discipline",
+    "sharp corners and architectural geometry",
+    "product proof reduced to four words",
+    "generous negative space",
+    "single decisive call to action"
+  ],
+  "design_constraints": [
+    "exactly three colors",
+    "flat vector design",
+    "no gradients",
+    "no shadows",
+    "no 3D effects",
+    "no photography",
+    "no decorative clutter",
+    "mobile-readable copy"
+  ]
+}

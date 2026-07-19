@@ -1,0 +1,41 @@
+{
+  "campaign": "Mohalla flagship brand campaign",
+  "asset": "Pakistan Runs on Neighbors",
+  "platform": "Instagram Reel / Story",
+  "canvas": {
+    "width": 1080,
+    "height": 1920,
+    "unit": "px"
+  },
+  "single_minded_proposition": "Pakistan runs on neighbors. Mohalla gives that network a home.",
+  "files": {
+    "editable_source": "index.html",
+    "preview": "pakistan-runs-on-neighbors.png"
+  },
+  "canva": {
+    "design_id": "DAHPllInYQE",
+    "page_count": 1,
+    "edit_url": "https://www.canva.com/d/E9JDwX751kt69_c",
+    "view_url": "https://www.canva.com/d/IKC9mF2aidBicPS"
+  },
+  "creative_principles": [
+    "brand appears immediately",
+    "one memorable cultural truth",
+    "9:16 vertical composition with protected safe zones",
+    "structured design complexity with low feature clutter",
+    "central product hub supported by four feature proofs",
+    "single decisive call to action"
+  ],
+  "research_basis": [
+    "https://www.facebook.com/business/ads/facebook-instagram-reels-ads",
+    "https://journals.sagepub.com/doi/10.1509/jmkg.74.5.048"
+  ],
+  "design_constraints": [
+    "flat vector design",
+    "no gradients",
+    "no shadows",
+    "no 3D effects",
+    "Poppins typography",
+    "mobile-readable copy"
+  ]
+}

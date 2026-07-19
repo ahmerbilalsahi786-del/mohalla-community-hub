@@ -1,4 +1,4 @@
-import { useState, useCallback, useRef, useEffect } from 'react'
+import { useState, useCallback, useEffect } from 'react'
 import { useListPosts, useCreatePost, useToggleLike, useListComments, useCreateComment, useListEvents, useListPolls } from '@/lib/generated/api'
 import { useQueryClient } from '@tanstack/react-query'
 import { getListPostsQueryKey, getListCommentsQueryKey } from '@/lib/generated/api'
@@ -7,12 +7,11 @@ import { Sidebar } from '@/components/dashboard/sidebar'
 import { TopNavbar } from '@/components/dashboard/top-navbar'
 import {
   Pin, Heart, MessageSquare, Plus, X, ChevronDown, ChevronUp,
-  Megaphone, Shield, Search, ShoppingBag, Calendar, Users, ImagePlus, Send, Loader2,
+  Megaphone, Shield, Search, ShoppingBag, Calendar, Users, Send, Loader2,
   MapPin, BarChart2, ChevronRight, AlertTriangle, Flag, Trash2, UserX, MessageCircle,
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { useToast } from '@/hooks/use-toast'
-import { uploadImage } from '@/lib/cloudinary'
 import { cn } from '@/lib/utils'
 import { Link, useLocation, useSearch } from 'wouter'
 import { useCurrentUser } from '@/hooks/use-current-user'
@@ -23,6 +22,8 @@ import { FeedPostSkeleton } from '@/components/community/skeleton-states'
 import { PostTypeSelector } from '@/components/feed/post-type-selector'
 import { UserAvatar } from '@/components/community/user-avatar'
 import { PostImageGallery } from '@/components/feed/post-image-gallery'
+import { ImageUploader } from '@/components/shared/ImageUploader'
+import { ImageAsset, imageUrls } from '@/lib/imageLayout'
 
 type PostType = 'general' | 'announcement' | 'safety' | 'lost_found' | 'buy_sell' | 'event' | 'complaint'
 
@@ -442,42 +443,12 @@ function CreatePostModal({ onClose, initialType = 'general' }: { onClose: () => 
   const [type, setType] = useState<PostType>(initialType)
   const [title, setTitle] = useState('')
   const [body, setBody] = useState('')
-  const [imageUrls, setImageUrls] = useState<string[]>([])
-  const [uploadError, setUploadError] = useState<string | null>(null)
-  const fileInputRef = useRef<HTMLInputElement>(null)
+  const [images, setImages] = useState<ImageAsset[]>([])
   const queryClient = useQueryClient()
   const { toast } = useToast()
   const { data: currentUser } = useCurrentUser()
 
   const [isUploading, setIsUploading] = useState(false)
-
-  const uploadFile = async (file: File) => {
-    setIsUploading(true)
-    try {
-      const url = await uploadImage(file)
-      if (!url) {
-        setUploadError('Could not add this image.')
-        toast({
-          title: 'Image upload failed',
-          description: 'Please try again.',
-          variant: 'destructive',
-        })
-        return null
-      }
-
-      return { objectPath: url }
-    } catch {
-      setUploadError('Could not add this image.')
-      toast({
-        title: 'Image upload failed',
-        description: 'Please try again.',
-        variant: 'destructive',
-      })
-      return null
-    } finally {
-      setIsUploading(false)
-    }
-  }
 
   const createPost = useCreatePost({
     mutation: {
@@ -495,35 +466,16 @@ function CreatePostModal({ onClose, initialType = 'general' }: { onClose: () => 
     },
   })
 
-  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const files = Array.from(e.target.files ?? [])
-    if (files.length === 0) return
-
-    setUploadError(null)
-    const remaining = 4 - imageUrls.length
-    const toUpload = files.slice(0, remaining)
-
-    for (const file of toUpload) {
-      const result = await uploadFile(file)
-      if (result) {
-        const servingUrl = result.objectPath
-        setImageUrls((prev) => [...prev, servingUrl])
-      }
-    }
-
-    if (fileInputRef.current) {
-      fileInputRef.current.value = ''
-    }
-  }
-
   const handleSubmit = () => {
     if (!title.trim() || !body.trim()) return
+    const uploadedUrls = imageUrls(images)
     createPost.mutate({
-      data: { type, title: title.trim(), body: body.trim(), imageUrls, isPinned: false },
+      data: { type, title: title.trim(), body: body.trim(), imageUrls: uploadedUrls, imageMeta: images, isPinned: false },
     })
   }
 
   const isComplaint = type === 'complaint'
+  const maxImages = type === 'announcement' ? 1 : 4
 
   return (
     <div data-mobile-composer role="dialog" aria-modal="true" aria-label={isComplaint ? 'File a community report' : 'Create a community post'} className="fixed inset-0 z-[80] flex items-stretch justify-center overflow-hidden bg-black/40 p-0 backdrop-blur-sm sm:items-center sm:p-4">
@@ -578,69 +530,13 @@ function CreatePostModal({ onClose, initialType = 'general' }: { onClose: () => 
             />
           </div>
 
-          <div>
-            <label className="mb-1.5 block text-xs font-bold uppercase text-muted-foreground">
-              Photos ({imageUrls.length}/4)
-            </label>
-
-            <input
-              ref={fileInputRef}
-              type="file"
-              accept="image/*"
-              multiple
-              className="hidden"
-              onChange={handleFileChange}
-              disabled={isUploading || imageUrls.length >= 4}
-            />
-
-            {imageUrls.length < 4 && (
-              <button
-                type="button"
-                onClick={() => fileInputRef.current?.click()}
-                disabled={isUploading}
-                className={cn(
-                  'flex w-full items-center justify-center gap-2 rounded-lg border-2 border-dashed py-3 text-sm font-semibold transition-colors',
-                  isUploading
-                    ? 'border-primary/40 bg-primary/5 text-primary cursor-not-allowed'
-                    : 'border-border text-muted-foreground hover:border-primary/50 hover:bg-primary/5 hover:text-primary'
-                )}
-              >
-                {isUploading ? (
-                  <>
-                    <Loader2 size={16} className="animate-spin" />
-                    Uploading...
-                  </>
-                ) : (
-                  <>
-                    <ImagePlus size={16} />
-                    Add photos from device
-                  </>
-                )}
-              </button>
-            )}
-
-            {uploadError && (
-              <p className="mt-1.5 text-xs text-destructive">{uploadError}</p>
-            )}
-
-            {imageUrls.length > 0 && (
-              <div className="mt-2 grid grid-cols-2 gap-2 sm:grid-cols-4">
-                {imageUrls.map((url, i) => (
-                  <div key={`${url}-${i}`} className="group relative flex aspect-square min-w-0 items-center justify-center overflow-hidden rounded-lg border border-border bg-muted/45">
-                    <img src={url} alt={`Selected photo ${i + 1}`} className="h-full w-full object-contain" />
-                    <button
-                      type="button"
-                      onClick={() => setImageUrls(imageUrls.filter((_, j) => j !== i))}
-                      aria-label={`Remove selected photo ${i + 1}`}
-                      className="absolute right-1 top-1 flex h-8 w-8 items-center justify-center rounded-full bg-destructive text-white shadow-sm sm:opacity-0 sm:transition-opacity sm:group-hover:opacity-100 sm:focus-visible:opacity-100"
-                    >
-                      <X size={14} />
-                    </button>
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
+          <ImageUploader
+            value={images}
+            onChange={setImages}
+            maxImages={maxImages}
+            label={isComplaint ? 'Attach proof (optional)' : 'Photos'}
+            onUploadingChange={setIsUploading}
+          />
         </div>
 
         <div className="flex shrink-0 items-center justify-end gap-2 border-t border-border bg-muted/20 px-4 pb-[calc(0.75rem+env(safe-area-inset-bottom))] pt-3 sm:px-5 sm:py-4">

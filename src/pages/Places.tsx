@@ -10,6 +10,9 @@ import { canManageCommunity, useCurrentUser } from '@/hooks/use-current-user'
 import { useToast } from '@/hooks/use-toast'
 import { cn } from '@/lib/utils'
 import LocationPicker, { type PickedLocation } from '@/components/location-picker'
+import { ImageUploader } from '@/components/shared/ImageUploader'
+import { SmartImageGallery } from '@/components/shared/SmartImageGrid'
+import { ImageAsset, imageUrls, normalizeImageAssets } from '@/lib/imageLayout'
 
 type PlaceRow = {
   id: string
@@ -21,6 +24,8 @@ type PlaceRow = {
   phone: string | null
   latitude: number | null
   longitude: number | null
+  image_urls?: string[] | null
+  image_meta?: ImageAsset[] | null
   is_active: boolean
   created_by: string | null
   created_at: string
@@ -35,6 +40,7 @@ type PlaceForm = {
   phone: string
   latitude: number | null
   longitude: number | null
+  images: ImageAsset[]
 }
 
 const PLACE_CATEGORIES = ['Essentials', 'Green Spaces', 'Shopping & Food', 'Health & Education', 'Other']
@@ -48,6 +54,7 @@ const EMPTY_FORM: PlaceForm = {
   phone: '',
   latitude: null,
   longitude: null,
+  images: [],
 }
 
 const DEMO_PLACES = [
@@ -127,6 +134,7 @@ function toForm(place: PlaceRow): PlaceForm {
     phone: place.phone || '',
     latitude: place.latitude ?? null,
     longitude: place.longitude ?? null,
+    images: normalizeImageAssets(place.image_meta?.length ? place.image_meta : place.image_urls),
   }
 }
 
@@ -244,6 +252,13 @@ function PlaceModal({
               })}
             />
           </div>
+
+          <ImageUploader
+            value={form.images}
+            onChange={(images) => update({ images })}
+            maxImages={6}
+            label="Location photos (optional)"
+          />
         </div>
 
         <div className="flex shrink-0 justify-end gap-2 border-t border-border bg-muted/20 px-4 pb-[calc(0.75rem+env(safe-area-inset-bottom))] pt-3 sm:px-5 sm:py-4">
@@ -300,6 +315,8 @@ export default function Places() {
         phone: form.phone.trim() || null,
         latitude: form.latitude,
         longitude: form.longitude,
+        image_urls: imageUrls(form.images),
+        image_meta: form.images,
         created_by: user.userId,
         updated_at: new Date().toISOString(),
       }
@@ -337,6 +354,7 @@ export default function Places() {
           tag: place.category,
           icon: placeIcon(place.category),
           category: place.category,
+          images: normalizeImageAssets(place.image_meta?.length ? place.image_meta : place.image_urls),
           record: place,
         }))
 
@@ -411,8 +429,17 @@ export default function Places() {
                         {items.map((place: any) => {
                           const IconItem = place.icon ?? placeIcon(category)
                           const tagCls = TAG_COLORS[place.tag] ?? 'bg-muted text-muted-foreground dark:bg-muted/70 dark:text-muted-foreground'
+                          const placeImages = normalizeImageAssets(place.images)
                           const cardBody = (
                             <>
+                              {placeImages.length > 0 && (
+                                <SmartImageGallery
+                                  images={placeImages.slice(0, 1)}
+                                  title={place.name}
+                                  className="-mx-4 -mt-4 mb-4 rounded-t-2xl rounded-b-none border-x-0 border-t-0"
+                                  maxVisible={1}
+                                />
+                              )}
                               <div className="flex items-start gap-3">
                                 <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-primary/10">
                                   <IconItem size={18} className="text-primary" />

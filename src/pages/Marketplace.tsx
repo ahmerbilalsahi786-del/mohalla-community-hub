@@ -7,11 +7,10 @@ import { TopNavbar } from '@/components/dashboard/top-navbar'
 import {
   Plus, X, Search, Loader2, ChevronDown, ChevronUp, ArrowDownUp,
   Armchair, Tv2, Shirt, Car, Wrench, Gift, Package,
-  Tag, Image as ImageIcon, Store, MapPin, Trash2, Clock
+  Tag, Store, MapPin, Trash2, Clock
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { useToast } from '@/hooks/use-toast'
-import { uploadMultipleImages } from '@/lib/cloudinary'
 import { cn } from '@/lib/utils'
 import { PublicationToggle } from '@/components/city-feed/publication-toggle'
 import { CommunityEmptyState } from '@/components/community/community-empty-state'
@@ -19,6 +18,9 @@ import { MarketplaceListingSkeleton } from '@/components/community/skeleton-stat
 import LocationPicker, { type PickedLocation } from '@/components/location-picker'
 import { canManageCommunity, useCurrentUser } from '@/hooks/use-current-user'
 import { customFetch } from '@/lib/custom-fetch'
+import { ImageUploader } from '@/components/shared/ImageUploader'
+import { ImageAsset, imageUrls } from '@/lib/imageLayout'
+import { getResponsiveImageUrl } from '@/lib/cloudinaryUrl'
 
 type Category = 'all' | 'shop' | 'furniture' | 'electronics' | 'clothes' | 'vehicles' | 'services' | 'free' | 'other'
 type Condition = 'new' | 'good' | 'fair'
@@ -133,7 +135,7 @@ function ListingCard({
         <div className="relative aspect-[4/3] bg-muted/50 overflow-hidden">
           {listing.imageUrls.length > 0 ? (
             <img
-              src={listing.imageUrls[0]}
+              src={getResponsiveImageUrl(listing.imageUrls[0], 900)}
               alt={listing.title}
               loading="lazy"
               decoding="async"
@@ -226,9 +228,8 @@ function CreateListingModal({ onClose, initialMode = 'listing' }: { onClose: () 
   const [whatsapp, setWhatsapp] = useState('')
   const [location, setLocation] = useState('')
   const [pickedLocation, setPickedLocation] = useState<PickedLocation | null>(null)
-  const [imageUrls, setImageUrls] = useState<string[]>([])
+  const [images, setImages] = useState<ImageAsset[]>([])
   const [isUploading, setIsUploading] = useState(false)
-  const fileRef = useRef<HTMLInputElement>(null)
   const queryClient = useQueryClient()
   const { toast } = useToast()
 
@@ -249,30 +250,6 @@ function CreateListingModal({ onClose, initialMode = 'listing' }: { onClose: () 
     },
   })
 
-  const handleFiles = async (files: FileList | null) => {
-    if (!files) return
-    const remaining = 4 - imageUrls.length
-    const toUpload = Array.from(files).slice(0, remaining)
-    if (toUpload.length === 0) return
-
-    setIsUploading(true)
-    try {
-      const urls = await uploadMultipleImages(toUpload)
-      if (urls.length > 0) {
-        setImageUrls((prev) => [...prev, ...urls])
-      }
-      if (urls.length !== toUpload.length) {
-        toast({
-          title: 'Image upload failed',
-          description: 'Some photos could not be uploaded. Please try again.',
-          variant: 'destructive',
-        })
-      }
-    } finally {
-      setIsUploading(false)
-    }
-  }
-
   const handleSubmit = () => {
     if (!title.trim() || !description.trim() || !whatsapp.trim()) {
       toast({
@@ -289,7 +266,8 @@ function CreateListingModal({ onClose, initialMode = 'listing' }: { onClose: () 
         pricePkr: pricePkr ? parseInt(pricePkr, 10) : undefined,
         category: mode === 'shop' ? 'shop' : category,
         condition: mode === 'shop' ? 'new' : condition,
-        imageUrls,
+        imageUrls: imageUrls(images),
+        imageMeta: images,
         whatsappNumber: whatsapp.trim(),
         listingKind: mode,
         location: location.trim(),
@@ -462,52 +440,14 @@ function CreateListingModal({ onClose, initialMode = 'listing' }: { onClose: () 
             />
           </div>
 
-          {/* Images */}
-          <div>
-            <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-1.5 block">
-              Photos ({imageUrls.length}/4)
-            </label>
-            <input
-              ref={fileRef}
-              type="file"
-              accept="image/*"
-              multiple
-              className="hidden"
-              onChange={(e) => handleFiles(e.target.files)}
-            />
-            {imageUrls.length < 4 && (
-              <button
-                onClick={() => fileRef.current?.click()}
-                disabled={isUploading}
-                className="flex w-full items-center justify-center gap-2 rounded-xl border-2 border-dashed border-border py-3 text-sm text-muted-foreground hover:border-primary/50 hover:text-primary transition-colors disabled:opacity-50"
-              >
-                {isUploading ? (
-                  <><Loader2 size={16} className="animate-spin" /> Uploading...</>
-                ) : (
-                  <><ImageIcon size={16} /> Add photos from device</>
-                )}
-              </button>
-            )}
-            {imageUrls.length > 0 && (
-              <div className="mt-2 flex flex-wrap gap-2">
-                {imageUrls.map((url, i) => (
-                  <div key={i} className="relative group">
-                    <img
-                      src={url}
-                      alt={`Selected listing photo ${i + 1}`}
-                      className="h-20 w-20 rounded-lg border border-border bg-muted/40 object-contain"
-                    />
-                    <button
-                      onClick={() => setImageUrls(imageUrls.filter((_, j) => j !== i))}
-                      className="absolute -right-1.5 -top-1.5 flex h-7 w-7 items-center justify-center rounded-full bg-destructive text-white sm:hidden sm:group-hover:flex"
-                    >
-                      <X size={10} />
-                    </button>
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
+          <ImageUploader
+            value={images}
+            onChange={setImages}
+            maxImages={8}
+            label="Add product photos"
+            primaryBadgeLabel="Main photo"
+            onUploadingChange={setIsUploading}
+          />
         </div>
 
         <div className="flex shrink-0 items-center justify-end gap-2 border-t border-border bg-muted/20 px-4 pb-[calc(0.75rem+env(safe-area-inset-bottom))] pt-3 sm:px-5 sm:py-4">
